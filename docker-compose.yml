@@ -1,0 +1,38 @@
+version: '3.8'
+name: 'milutin-jewelry'
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: jewelry
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+
+  pg_admin:
+    image: dpage/pgadmin4
+    container_name: pg_admin
+    restart: unless-stopped
+    ports:
+      - '5050:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'admin@admin.com'
+      PGADMIN_DEFAULT_PASSWORD: 'admin'
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
