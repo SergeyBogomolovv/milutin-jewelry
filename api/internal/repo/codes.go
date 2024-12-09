@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"time"
 
@@ -18,7 +19,7 @@ func NewCodesRepo(redis *redis.Client) *codesRepo {
 }
 
 func (r *codesRepo) CheckCode(ctx context.Context, code string) error {
-	return r.redis.Get(ctx, code).Err()
+	return r.redis.Get(ctx, codeString(code)).Err()
 }
 
 func (r *codesRepo) CreateCode(ctx context.Context) (string, error) {
@@ -26,11 +27,11 @@ func (r *codesRepo) CreateCode(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return code, r.redis.Set(ctx, code, true, time.Minute*5).Err()
+	return code, r.redis.Set(ctx, codeString(code), true, time.Minute*5).Err()
 }
 
 func (r *codesRepo) DeleteCode(ctx context.Context, code string) error {
-	return r.redis.Del(ctx, code).Err()
+	return r.redis.Del(ctx, codeString(code)).Err()
 }
 
 func generateCode() (string, error) {
@@ -46,4 +47,8 @@ func generateCode() (string, error) {
 	}
 
 	return string(otp), nil
+}
+
+func codeString(code string) string {
+	return fmt.Sprintf("code:%s", code)
 }

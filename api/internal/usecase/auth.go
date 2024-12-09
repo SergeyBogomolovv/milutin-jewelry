@@ -15,14 +15,19 @@ type CodesRepo interface {
 	DeleteCode(ctx context.Context, code string) error
 }
 
+type EmailSender interface {
+	SendCodeToAdmin(ctx context.Context, code string) error
+}
+
 type authUsecase struct {
 	log       *slog.Logger
 	cr        CodesRepo
+	es        EmailSender
 	jwtSecret []byte
 }
 
-func NewAuthUsecase(log *slog.Logger, cr CodesRepo, jwtSecret string) *authUsecase {
-	return &authUsecase{log: log, cr: cr, jwtSecret: []byte(jwtSecret)}
+func NewAuthUsecase(log *slog.Logger, cr CodesRepo, es EmailSender, jwtSecret string) *authUsecase {
+	return &authUsecase{log: log, cr: cr, es: es, jwtSecret: []byte(jwtSecret)}
 }
 
 func (u *authUsecase) SendCode(ctx context.Context) error {
@@ -36,9 +41,12 @@ func (u *authUsecase) SendCode(ctx context.Context) error {
 		return err
 	}
 
-	//TODO: send code
+	if err := u.es.SendCodeToAdmin(ctx, code); err != nil {
+		log.Error("failed to send email", "err", err)
+		return err
+	}
 
-	log.Info("login code sent", "code", code)
+	log.Info("login code sent")
 	return nil
 }
 

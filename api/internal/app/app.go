@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/repo"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
 	"github.com/jmoiron/sqlx"
@@ -18,15 +20,16 @@ type application struct {
 	log *slog.Logger
 }
 
-func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, addr string, jwtSecret string) *application {
+func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
 
+	emailSender := infra.NewEmailSender(cfg.Mail, cfg.AdminEmail)
 	codesRepo := repo.NewCodesRepo(redis)
-	authUsecase := usecase.NewAuthUsecase(log, codesRepo, jwtSecret)
+	authUsecase := usecase.NewAuthUsecase(log, codesRepo, emailSender, cfg.JWTSecret)
 	controller.RegisterAuthController(router, authUsecase)
 
 	return &application{
-		srv: &http.Server{Addr: addr, Handler: router},
+		srv: &http.Server{Addr: cfg.Addr, Handler: router},
 		log: log,
 	}
 }

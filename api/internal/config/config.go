@@ -17,7 +17,7 @@ type Config struct {
 
 type MailConfig struct {
 	Host string
-	Port int
+	Port string
 	User string
 	Pass string
 }
@@ -41,7 +41,7 @@ func New() *Config {
 		AdminEmail:  utils.GetEnvString("ADMIN_EMAIL", "email@email.com"),
 		Mail: MailConfig{
 			Host: utils.GetEnvString("MAIL_HOST", "smtp.gmail.com"),
-			Port: utils.GetEnvInt("MAIL_PORT", 587),
+			Port: utils.GetEnvString("MAIL_PORT", "587"),
 			User: utils.GetEnvString("MAIL_USER", "example@example.com"),
 			Pass: utils.GetEnvString("MAIL_PASS", "password"),
 		},
