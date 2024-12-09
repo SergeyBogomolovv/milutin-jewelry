@@ -18,17 +18,17 @@ type AuthUsecase interface {
 }
 
 type authController struct {
-	validate validator.Validate
+	validate *validator.Validate
 	uc       AuthUsecase
 }
 
 func RegisterAuthController(router *http.ServeMux, uc AuthUsecase) {
 	controller := &authController{
 		uc:       uc,
-		validate: *validator.New(validator.WithRequiredStructEnabled()),
+		validate: validator.New(validator.WithRequiredStructEnabled()),
 	}
 	router.HandleFunc("POST /login", controller.Login)
-	router.HandleFunc("POST /send_login_code", controller.SendCode)
+	router.HandleFunc("POST /send-verification-code", controller.SendVerificationCode)
 }
 
 func (c *authController) Login(w http.ResponseWriter, r *http.Request) {
@@ -63,10 +63,10 @@ func (c *authController) Login(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(24 * time.Hour),
 	})
 
-	utils.WriteMessage(w, "login successful", http.StatusOK)
+	utils.WriteMessage(w, "login successfull", http.StatusOK)
 }
 
-func (c *authController) SendCode(w http.ResponseWriter, r *http.Request) {
+func (c *authController) SendVerificationCode(w http.ResponseWriter, r *http.Request) {
 	if err := c.uc.SendCode(r.Context()); err != nil {
 		utils.WriteError(w, "failed to send code", http.StatusInternalServerError)
 		return

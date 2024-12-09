@@ -27,7 +27,10 @@ func (r *codesRepo) CreateCode(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return code, r.redis.Set(ctx, codeString(code), true, time.Minute*5).Err()
+	if err := r.redis.Set(ctx, codeString(code), true, time.Minute*5).Err(); err != nil {
+		return "", err
+	}
+	return code, nil
 }
 
 func (r *codesRepo) DeleteCode(ctx context.Context, code string) error {
