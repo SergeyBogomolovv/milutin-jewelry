@@ -10,6 +10,7 @@ type Config struct {
 	PostgresUrl   string
 	RedisUrl      string
 	JWTSecret     string
+	AdminEmail    string
 	Mail          MailConfig
 	ObjectStorage ObjectStorageConfig
 }
@@ -37,6 +38,7 @@ func New() *Config {
 		PostgresUrl: utils.GetEnvString("POSTGRES_URL", "postgres://admin:admin@localhost:5432/jewelry?sslmode=disable"),
 		RedisUrl:    utils.GetEnvString("REDIS_URL", "redis://localhost:6379/0"),
 		JWTSecret:   utils.GetEnvString("JWT_SECRET", "secret"),
+		AdminEmail:  utils.GetEnvString("ADMIN_EMAIL", "email@email.com"),
 		Mail: MailConfig{
 			Host: utils.GetEnvString("MAIL_HOST", "smtp.gmail.com"),
 			Port: utils.GetEnvInt("MAIL_PORT", 587),
