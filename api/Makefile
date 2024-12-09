@@ -1,6 +1,10 @@
 include .env
 MIGRATIONS_PATH = cmd/migrations
 
+.PHONY run:
+run:
+	@go run cmd/main.go
+
 .PHONY: migrate-create
 migrate-create:
 	@name=$(name);

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 )
@@ -17,6 +18,8 @@ type application struct {
 
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, addr string) *application {
 	router := http.NewServeMux()
+
+	controller.RegisterAuthController(router, nil)
 
 	return &application{
 		srv: &http.Server{Addr: addr, Handler: router},
