@@ -63,7 +63,7 @@ func (c *authController) Login(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(24 * time.Hour),
 	})
 
-	utils.WriteJSON(w, "login successful", http.StatusOK)
+	utils.WriteMessage(w, "login successful", http.StatusOK)
 }
 
 func (c *authController) SendCode(w http.ResponseWriter, r *http.Request) {

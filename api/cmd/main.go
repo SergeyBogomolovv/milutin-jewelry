@@ -23,7 +23,7 @@ func main() {
 
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	app := app.New(log, db, redis, cfg.Addr)
+	app := app.New(log, db, redis, cfg.Addr, cfg.JWTSecret)
 
 	go app.Start()
 

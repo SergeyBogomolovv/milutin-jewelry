@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/repo"
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 )
@@ -16,10 +18,12 @@ type application struct {
 	log *slog.Logger
 }
 
-func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, addr string) *application {
+func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, addr string, jwtSecret string) *application {
 	router := http.NewServeMux()
 
-	controller.RegisterAuthController(router, nil)
+	codesRepo := repo.NewCodesRepo(redis)
+	authUsecase := usecase.NewAuthUsecase(log, codesRepo, jwtSecret)
+	controller.RegisterAuthController(router, authUsecase)
 
 	return &application{
 		srv: &http.Server{Addr: addr, Handler: router},
