@@ -1,6 +1,10 @@
 include .env
 MIGRATIONS_PATH = cmd/migrations
 
+.PHONY test:
+test:
+	@go test ./...
+
 .PHONY run:
 run:
 	@go run cmd/main.go

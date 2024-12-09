@@ -10,9 +10,9 @@ import (
 )
 
 type CodesRepo interface {
-	CheckCode(ctx context.Context, code string) error
-	CreateCode(ctx context.Context) (string, error)
-	DeleteCode(ctx context.Context, code string) error
+	Check(ctx context.Context, code string) error
+	Create(ctx context.Context) (string, error)
+	Delete(ctx context.Context, code string) error
 }
 
 type EmailSender interface {
@@ -35,7 +35,7 @@ func (u *authUsecase) SendCode(ctx context.Context) error {
 
 	log.Info("sending login code")
 
-	code, err := u.cr.CreateCode(ctx)
+	code, err := u.cr.Create(ctx)
 	if err != nil {
 		log.Error("failed to create login code", "err", err)
 		return err
@@ -55,12 +55,12 @@ func (u *authUsecase) Login(ctx context.Context, code string) (string, error) {
 
 	log.Info("logging in")
 
-	if err := u.cr.CheckCode(ctx, code); err != nil {
+	if err := u.cr.Check(ctx, code); err != nil {
 		log.Info("invalid login code")
 		return "", errs.ErrInvalidLoginCode
 	}
 
-	if err := u.cr.DeleteCode(ctx, code); err != nil {
+	if err := u.cr.Delete(ctx, code); err != nil {
 		log.Error("failed to delete login code", "err", err)
 		return "", err
 	}

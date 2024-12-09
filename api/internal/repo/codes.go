@@ -18,11 +18,11 @@ func NewCodesRepo(redis *redis.Client) *codesRepo {
 	return &codesRepo{redis: redis}
 }
 
-func (r *codesRepo) CheckCode(ctx context.Context, code string) error {
+func (r *codesRepo) Check(ctx context.Context, code string) error {
 	return r.redis.Get(ctx, codeString(code)).Err()
 }
 
-func (r *codesRepo) CreateCode(ctx context.Context) (string, error) {
+func (r *codesRepo) Create(ctx context.Context) (string, error) {
 	code, err := generateCode()
 	if err != nil {
 		return "", err
@@ -33,7 +33,7 @@ func (r *codesRepo) CreateCode(ctx context.Context) (string, error) {
 	return code, nil
 }
 
-func (r *codesRepo) DeleteCode(ctx context.Context, code string) error {
+func (r *codesRepo) Delete(ctx context.Context, code string) error {
 	return r.redis.Del(ctx, codeString(code)).Err()
 }
 
