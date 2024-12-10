@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/smtp"
+	"time"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 )
@@ -34,53 +35,76 @@ func NewMailService(log *slog.Logger, cfg config.MailConfig, to string) *mailSer
 }
 
 func (s *mailService) SendCodeToAdmin(ctx context.Context, code string) error {
-	conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%s", s.host, s.port), s.tls)
-	if err != nil {
-		s.log.Error("failed to establish tls connection", "err", err)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	errChan := make(chan error, 1)
+
+	go func() {
+		defer close(errChan)
+		conn, err := tls.Dial("tcp", fmt.Sprintf("%s:%s", s.host, s.port), s.tls)
+		if err != nil {
+			s.log.Error("failed to establish tls connection", "err", err)
+			errChan <- err
+			return
+		}
+		defer conn.Close()
+
+		client, err := smtp.NewClient(conn, s.host)
+		if err != nil {
+			s.log.Error("failed to connect to smtp server", "err", err)
+			errChan <- err
+			return
+		}
+		defer client.Close()
+
+		if err := client.Auth(smtp.PlainAuth("", s.user, s.pass, s.host)); err != nil {
+			s.log.Error("failed to authenticate", "err", err)
+			errChan <- err
+			return
+		}
+
+		if err := client.Mail(s.user); err != nil {
+			s.log.Error("failed to add sender", "err", err)
+			errChan <- err
+			return
+		}
+
+		if err := client.Rcpt(s.to); err != nil {
+			s.log.Error("failed to add recipient", "err", err)
+			errChan <- err
+			return
+		}
+
+		wc, err := client.Data()
+		if err != nil {
+			s.log.Error("failed to open data stream", "err", err)
+			errChan <- err
+			return
+		}
+
+		_, err = wc.Write(createCodeEmail(code))
+		if err != nil {
+			s.log.Error("failed to write data", "err", err)
+			errChan <- err
+			return
+		}
+
+		if err := wc.Close(); err != nil {
+			s.log.Error("failed to close data stream", "err", err)
+			errChan <- err
+			return
+		}
+
+		errChan <- client.Quit()
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-errChan:
 		return err
 	}
-	defer conn.Close()
-
-	client, err := smtp.NewClient(conn, s.host)
-	if err != nil {
-		s.log.Error("failed to connect to smtp server", "err", err)
-		return err
-	}
-	defer client.Close()
-
-	if err := client.Auth(smtp.PlainAuth("", s.user, s.pass, s.host)); err != nil {
-		s.log.Error("failed to authenticate", "err", err)
-		return err
-	}
-
-	if err := client.Mail(s.user); err != nil {
-		s.log.Error("failed to add sender", "err", err)
-		return err
-	}
-
-	if err := client.Rcpt(s.to); err != nil {
-		s.log.Error("failed to add recipient", "err", err)
-		return err
-	}
-
-	wc, err := client.Data()
-	if err != nil {
-		s.log.Error("failed to open data stream", "err", err)
-		return err
-	}
-
-	_, err = wc.Write(createCodeEmail(code))
-	if err != nil {
-		s.log.Error("failed to write data", "err", err)
-		return err
-	}
-
-	if err := wc.Close(); err != nil {
-		s.log.Error("failed to close data stream", "err", err)
-		return err
-	}
-
-	return client.Quit()
 }
 
 func createCodeEmail(code string) []byte {
