@@ -69,33 +69,17 @@ func (s *filesService) UploadImage(ctx context.Context, header *multipart.FileHe
 
 	results := compressImage(ctx, img)
 
-	var wg sync.WaitGroup
-	errCh := make(chan error, 1)
 	for res := range results {
 		if res.Err != nil {
 			cancel()
 			s.log.Error("failed to compress image", "err", res.Err, "quality", res.Quality)
 			return "", res.Err
 		}
-		select {
-		case <-ctx.Done():
-			return "", ctx.Err()
-		case err := <-errCh:
+		if err := s.Upload(ctx, fmt.Sprintf("%s/%s_%s.jpg", key, imageID, res.Quality), res.Data); err != nil {
 			cancel()
-			s.log.Error("failed to upload image", "err", err, "quality", res.Quality)
 			return "", err
-		default:
-			wg.Add(1)
-			go func(res result) {
-				defer wg.Done()
-				if err := s.Upload(ctx, fmt.Sprintf("%s/%s_%s.jpg", key, imageID, res.Quality), res.Data); err != nil {
-					errCh <- err
-					return
-				}
-			}(res)
 		}
 	}
-	wg.Wait()
 	return imageID, nil
 }
 
@@ -117,12 +101,17 @@ func compressImage(ctx context.Context, img image.Image) <-chan result {
 		wg.Add(1)
 		go func(lvl string, quality int) {
 			defer wg.Done()
-			compressed, err := compressJPEG(img, quality)
-			if err != nil {
-				results <- result{Quality: lvl, Err: err}
+			select {
+			case <-ctx.Done():
 				return
+			default:
+				compressed, err := compressJPEG(img, quality)
+				if err != nil {
+					results <- result{Quality: lvl, Err: err}
+					return
+				}
+				results <- result{Quality: lvl, Data: compressed}
 			}
-			results <- result{Quality: lvl, Data: compressed}
 		}(lvl, quality)
 	}
 
