@@ -60,13 +60,13 @@ func TestAuthUsecase_Login(t *testing.T) {
 func TestAuthUsecase_SendCode(t *testing.T) {
 	ctx := context.Background()
 	mockCodesRepo := new(mockCodesRepo)
-	mockEmailSender := new(mockEmailSender)
+	mockMailService := new(mockMailService)
 
-	usecase := usecase.NewAuthUsecase(NewTestLogger(), mockCodesRepo, mockEmailSender, "secret")
+	usecase := usecase.NewAuthUsecase(NewTestLogger(), mockCodesRepo, mockMailService, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockCodesRepo.On("Create", ctx).Return("code", nil).Once()
-		mockEmailSender.On("SendCodeToAdmin", ctx, "code").Return(nil).Once()
+		mockMailService.On("SendCodeToAdmin", ctx, "code").Return(nil).Once()
 		err := usecase.SendCode(ctx)
 		assert.NoError(t, err)
 
@@ -83,7 +83,7 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 
 	t.Run("failed to send email", func(t *testing.T) {
 		mockCodesRepo.On("Create", ctx).Return("code", nil).Once()
-		mockEmailSender.On("SendCodeToAdmin", ctx, "code").Return(assert.AnError).Once()
+		mockMailService.On("SendCodeToAdmin", ctx, "code").Return(assert.AnError).Once()
 		err := usecase.SendCode(ctx)
 		assert.Error(t, err)
 
@@ -114,11 +114,11 @@ func (m *mockCodesRepo) Delete(ctx context.Context, code string) error {
 	return args.Error(0)
 }
 
-type mockEmailSender struct {
+type mockMailService struct {
 	mock.Mock
 }
 
-func (m *mockEmailSender) SendCodeToAdmin(ctx context.Context, code string) error {
+func (m *mockMailService) SendCodeToAdmin(ctx context.Context, code string) error {
 	args := m.Called(ctx, code)
 	return args.Error(0)
 }

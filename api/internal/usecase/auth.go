@@ -15,19 +15,19 @@ type CodesRepo interface {
 	Delete(ctx context.Context, code string) error
 }
 
-type EmailSender interface {
+type MailService interface {
 	SendCodeToAdmin(ctx context.Context, code string) error
 }
 
 type authUsecase struct {
 	log       *slog.Logger
 	cr        CodesRepo
-	es        EmailSender
+	ms        MailService
 	jwtSecret []byte
 }
 
-func NewAuthUsecase(log *slog.Logger, cr CodesRepo, es EmailSender, jwtSecret string) *authUsecase {
-	return &authUsecase{log: log, cr: cr, es: es, jwtSecret: []byte(jwtSecret)}
+func NewAuthUsecase(log *slog.Logger, cr CodesRepo, ms MailService, jwtSecret string) *authUsecase {
+	return &authUsecase{log: log, cr: cr, ms: ms, jwtSecret: []byte(jwtSecret)}
 }
 
 func (u *authUsecase) SendCode(ctx context.Context) error {
@@ -41,7 +41,7 @@ func (u *authUsecase) SendCode(ctx context.Context) error {
 		return err
 	}
 
-	if err := u.es.SendCodeToAdmin(ctx, code); err != nil {
+	if err := u.ms.SendCodeToAdmin(ctx, code); err != nil {
 		log.Error("failed to send email", "err", err)
 		return err
 	}

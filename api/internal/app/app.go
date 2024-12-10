@@ -23,9 +23,9 @@ type application struct {
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
 
-	emailSender := infra.NewEmailSender(cfg.Mail, cfg.AdminEmail)
+	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codesRepo := repo.NewCodesRepo(redis)
-	authUsecase := usecase.NewAuthUsecase(log, codesRepo, emailSender, cfg.JWTSecret)
+	authUsecase := usecase.NewAuthUsecase(log, codesRepo, mailService, cfg.JWTSecret)
 	controller.RegisterAuthController(router, authUsecase)
 
 	return &application{
