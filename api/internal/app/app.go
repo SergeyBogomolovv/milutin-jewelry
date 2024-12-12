@@ -9,6 +9,7 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra"
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/repo"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
 	"github.com/jmoiron/sqlx"
@@ -22,6 +23,9 @@ type application struct {
 
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
+	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
+
+	controller.RegisterCollectionsController(log, router, nil, authMiddleware)
 
 	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codesRepo := repo.NewCodesRepo(redis)

@@ -6,7 +6,9 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 )
 
-func NewAuthMiddleware(secret string) func(http.Handler) http.Handler {
+type Middleware func(http.Handler) http.Handler
+
+func NewAuthMiddleware(secret string) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("auth_token")
