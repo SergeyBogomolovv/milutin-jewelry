@@ -110,3 +110,21 @@ func (u *collectionsUsecase) GetAllCollections(ctx context.Context) ([]*dto.Coll
 	}
 	return res, nil
 }
+
+func (u *collectionsUsecase) GetCollectionByID(ctx context.Context, id int) (*dto.CollectionResponse, error) {
+	collection, err := u.cr.GetCollectionByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, errs.ErrCollectionNotFound) {
+			u.log.Info("collection not found", "err", err)
+			return nil, err
+		}
+		u.log.Error("failed to get collection", "err", err)
+		return nil, err
+	}
+	return &dto.CollectionResponse{
+		ID:          collection.ID,
+		Title:       collection.Title,
+		Description: collection.Description,
+		ImageID:     collection.ImageID,
+	}, nil
+}

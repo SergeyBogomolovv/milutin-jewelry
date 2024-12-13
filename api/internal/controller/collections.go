@@ -17,7 +17,8 @@ import (
 type CollectionsUsecase interface {
 	CreateCollection(context.Context, *dto.CreateCollectionRequest) (int, error)
 	UpdateCollection(context.Context, *dto.UpdateCollectionRequest) error
-	GetAllCollections(ctx context.Context) ([]*dto.CollectionResponse, error)
+	GetAllCollections(context.Context) ([]*dto.CollectionResponse, error)
+	GetCollectionByID(context.Context, int) (*dto.CollectionResponse, error)
 }
 
 type collectionsController struct {
@@ -129,4 +130,23 @@ func (c *collectionsController) GetAllCollections(w http.ResponseWriter, r *http
 	utils.WriteJSON(w, collections, http.StatusOK)
 }
 
-func (c *collectionsController) GetOneCollection(w http.ResponseWriter, r *http.Request) {}
+func (c *collectionsController) GetOneCollection(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		c.log.Error("failed to parse id", "err", err)
+		utils.WriteError(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	collection, err := c.uc.GetCollectionByID(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, errs.ErrCollectionNotFound) {
+			c.log.Info("collection not found", "err", err)
+			utils.WriteError(w, "collection not found", http.StatusNotFound)
+			return
+		}
+		c.log.Error("failed to get collection", "err", err)
+		utils.WriteError(w, "failed to get collection", http.StatusInternalServerError)
+		return
+	}
+	utils.WriteJSON(w, collection, http.StatusOK)
+}
