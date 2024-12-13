@@ -2,11 +2,13 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/dto"
+	errs "github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/errors"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 	"github.com/go-playground/validator/v10"
@@ -14,7 +16,7 @@ import (
 
 type CollectionsUsecase interface {
 	CreateCollection(context.Context, *dto.CreateCollectionRequest) (int, error)
-	UpdateCollection(ctx context.Context, dto *dto.UpdateCollectionRequest, id int) error
+	UpdateCollection(context.Context, *dto.UpdateCollectionRequest) error
 	GetAllCollections(ctx context.Context) ([]*dto.CollectionResponse, error)
 }
 
@@ -82,8 +84,9 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 	}
-	if _, fh, err := r.FormFile("image"); err == nil {
-		dto.ImageHeader = fh
+	if file, _, err := r.FormFile("image"); err == nil {
+		dto.Image = file
+		defer file.Close()
 	}
 
 	if err := c.validate.Struct(dto); err != nil {
@@ -98,9 +101,14 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 		utils.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
+	dto.ID = id
 
-	if err := c.uc.UpdateCollection(r.Context(), dto, id); err != nil {
-		// TODO: add error handling
+	if err := c.uc.UpdateCollection(r.Context(), dto); err != nil {
+		if errors.Is(err, errs.ErrCollectionNotFound) {
+			c.log.Info("collection not found", "err", err)
+			utils.WriteError(w, "collection not found", http.StatusNotFound)
+			return
+		}
 		c.log.Error("failed to update collection", "err", err)
 		utils.WriteError(w, "failed to update collection", http.StatusInternalServerError)
 		return

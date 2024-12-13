@@ -21,10 +21,12 @@ type CreateCollectionInput struct {
 type UpdateCollectionRequest struct {
 	Title       string
 	Description string
-	ImageHeader *multipart.FileHeader
+	Image       multipart.File
+	ID          int
 }
 
 type UpdateCollectionInput struct {
+	ID          int
 	Title       string
 	Description string
 	ImageID     string
