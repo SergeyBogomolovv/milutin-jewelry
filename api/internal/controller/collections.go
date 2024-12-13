@@ -19,6 +19,7 @@ type CollectionsUsecase interface {
 	UpdateCollection(context.Context, *dto.UpdateCollectionRequest) error
 	GetAllCollections(context.Context) ([]*dto.CollectionResponse, error)
 	GetCollectionByID(context.Context, int) (*dto.CollectionResponse, error)
+	DeleteCollection(context.Context, int) error
 }
 
 type collectionsController struct {
@@ -118,7 +119,25 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 	utils.WriteMessage(w, "collection updated", http.StatusCreated)
 }
 
-func (c *collectionsController) DeleteCollection(w http.ResponseWriter, r *http.Request) {}
+func (c *collectionsController) DeleteCollection(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		c.log.Error("failed to parse id", "err", err)
+		utils.WriteError(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	if err := c.uc.DeleteCollection(r.Context(), id); err != nil {
+		if errors.Is(err, errs.ErrCollectionNotFound) {
+			c.log.Info("collection not found", "err", err)
+			utils.WriteError(w, "collection not found", http.StatusNotFound)
+			return
+		}
+		c.log.Error("failed to delete collection", "err", err)
+		utils.WriteError(w, "failed to delete collection", http.StatusInternalServerError)
+		return
+	}
+	utils.WriteMessage(w, "collection deleted", http.StatusOK)
+}
 
 func (c *collectionsController) GetAllCollections(w http.ResponseWriter, r *http.Request) {
 	collections, err := c.uc.GetAllCollections(r.Context())

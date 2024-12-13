@@ -22,6 +22,7 @@ type CollectionsRepo interface {
 	UpdateCollection(context.Context, *dto.UpdateCollectionInput) error
 	GetCollectionByID(context.Context, int) (*entities.Collection, error)
 	GetAllCollections(context.Context) ([]*entities.Collection, error)
+	DeleteCollection(context.Context, int) error
 }
 
 type collectionsUsecase struct {
@@ -127,4 +128,25 @@ func (u *collectionsUsecase) GetCollectionByID(ctx context.Context, id int) (*dt
 		Description: collection.Description,
 		ImageID:     collection.ImageID,
 	}, nil
+}
+
+func (u *collectionsUsecase) DeleteCollection(ctx context.Context, id int) error {
+	collection, err := u.cr.GetCollectionByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, errs.ErrCollectionNotFound) {
+			u.log.Info("collection not found", "err", err)
+			return err
+		}
+		u.log.Error("failed to get collection", "err", err)
+		return err
+	}
+	if err := u.fs.DeleteImage(ctx, collection.ImageID); err != nil {
+		u.log.Error("failed to delete image", "err", err)
+		return err
+	}
+	if err := u.cr.DeleteCollection(ctx, id); err != nil {
+		u.log.Error("failed to delete collection", "err", err)
+		return err
+	}
+	return nil
 }

@@ -56,3 +56,14 @@ func (r *collectionsRepo) GetAllCollections(ctx context.Context) ([]*entities.Co
 	}
 	return collections, nil
 }
+
+func (r *collectionsRepo) DeleteCollection(ctx context.Context, id int) error {
+	query := `DELETE FROM collections WHERE collection_id = $1`
+	if res, err := r.db.ExecContext(ctx, query, id); err != nil {
+		if aff, err := res.RowsAffected(); err == nil && aff == 0 {
+			return errs.ErrCollectionNotFound
+		}
+		return err
+	}
+	return nil
+}
