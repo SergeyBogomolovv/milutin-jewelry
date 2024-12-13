@@ -6,24 +6,33 @@ type LoginDTO struct {
 	Code string `json:"code" validate:"len=6"`
 }
 
-type CreateCollectionDTO struct {
-	Title       string                `json:"title" validate:"required"`
-	Description string                `json:"description"`
-	Image       *multipart.FileHeader `json:"image"`
+type CreateCollectionRequest struct {
+	Title       string `validate:"required"`
+	Description string
+	Image       multipart.File `validate:"required"`
 }
 
-type UpdateCollectionDTO struct {
-	Title       string                `json:"title"`
-	Description string                `json:"description"`
-	Image       *multipart.FileHeader `json:"image"`
+type CreateCollectionInput struct {
+	Title       string
+	Description string
+	ImageID     string
 }
 
-// TODO: update
-type CollectionDTO struct {
+type UpdateCollectionRequest struct {
+	Title       string
+	Description string
+	ImageHeader *multipart.FileHeader
+}
+
+type UpdateCollectionInput struct {
+	Title       string
+	Description string
+	ImageID     string
+}
+
+type CollectionResponse struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	Image       string `json:"image"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	ImageID     string `json:"image_id"`
 }

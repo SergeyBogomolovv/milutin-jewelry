@@ -48,17 +48,11 @@ func (f *filesService) Upload(ctx context.Context, key string, data []byte) erro
 	return err
 }
 
-func (s *filesService) UploadImage(ctx context.Context, header *multipart.FileHeader, key string) (string, error) {
+func (s *filesService) UploadImage(ctx context.Context, file multipart.File, key string) (string, error) {
 	s.log.Info("uploading image", "key", key)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	file, err := header.Open()
-	if err != nil {
-		s.log.Error("failed to open file", "err", err)
-		return "", err
-	}
-	defer file.Close()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
@@ -80,7 +74,7 @@ func (s *filesService) UploadImage(ctx context.Context, header *multipart.FileHe
 			return "", err
 		}
 	}
-	return imageID, nil
+	return fmt.Sprintf("%s/%s", key, imageID), nil
 }
 
 type result struct {

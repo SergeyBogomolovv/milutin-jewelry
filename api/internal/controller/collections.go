@@ -13,9 +13,9 @@ import (
 )
 
 type CollectionsUsecase interface {
-	CreateCollection(ctx context.Context, dto *dto.CreateCollectionDTO) error
-	UpdateCollection(ctx context.Context, dto *dto.UpdateCollectionDTO, id int) error
-	GetAllCollections(ctx context.Context) ([]*dto.CollectionDTO, error)
+	CreateCollection(context.Context, *dto.CreateCollectionRequest) (int, error)
+	UpdateCollection(ctx context.Context, dto *dto.UpdateCollectionRequest, id int) error
+	GetAllCollections(ctx context.Context) ([]*dto.CollectionResponse, error)
 }
 
 type collectionsController struct {
@@ -26,15 +26,13 @@ type collectionsController struct {
 
 func RegisterCollectionsController(log *slog.Logger, router *http.ServeMux, uc CollectionsUsecase, authMw middleware.Middleware) {
 	controller := &collectionsController{
-		log:      log.With(slog.String("controller", "collections")),
+		log:      log.With(slog.String("op", "collectionsController")),
 		uc:       uc,
 		validate: validator.New(validator.WithRequiredStructEnabled()),
 	}
 
-	public := http.NewServeMux()
-	public.HandleFunc("GET /all", controller.GetAllCollections)
-	public.HandleFunc("GET /{id}", controller.GetOneCollection)
-	router.Handle("/collections/", http.StripPrefix("/collections", public))
+	router.HandleFunc("GET /collections/all", controller.GetAllCollections)
+	router.HandleFunc("GET /collections/{id}", controller.GetOneCollection)
 
 	admin := http.NewServeMux()
 	admin.HandleFunc("POST /create", controller.CreateCollection)
@@ -49,28 +47,29 @@ func (c *collectionsController) CreateCollection(w http.ResponseWriter, r *http.
 		utils.WriteError(w, "invalid form", http.StatusBadRequest)
 		return
 	}
-
-	_, fh, err := r.FormFile("image")
+	file, _, err := r.FormFile("image")
 	if err != nil {
 		c.log.Error("failed to get image", "err", err)
 		utils.WriteError(w, "no image provided", http.StatusBadRequest)
 		return
 	}
-	dto := &dto.CreateCollectionDTO{Title: r.FormValue("title"), Description: r.FormValue("description"), Image: fh}
+	defer file.Close()
+
+	dto := &dto.CreateCollectionRequest{Title: r.FormValue("title"), Description: r.FormValue("description"), Image: file}
 	if err := c.validate.Struct(dto); err != nil {
 		c.log.Error("failed to validate payload", "err", err)
 		utils.WriteError(w, "invalid payload", http.StatusBadRequest)
 		return
 	}
+	c.log.Info("creating collection", "title", dto.Title)
 
-	if err := c.uc.CreateCollection(r.Context(), dto); err != nil {
-		// TODO: add error handling
+	id, err := c.uc.CreateCollection(r.Context(), dto)
+	if err != nil {
 		c.log.Error("failed to create collection", "err", err)
 		utils.WriteError(w, "failed to create collection", http.StatusInternalServerError)
 		return
 	}
-
-	utils.WriteMessage(w, "collection created", http.StatusCreated)
+	utils.WriteJSON(w, map[string]int{"collection_id": id}, http.StatusCreated)
 }
 
 func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.Request) {
@@ -79,12 +78,12 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 		utils.WriteError(w, "invalid form", http.StatusBadRequest)
 		return
 	}
-	dto := &dto.UpdateCollectionDTO{
+	dto := &dto.UpdateCollectionRequest{
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 	}
 	if _, fh, err := r.FormFile("image"); err == nil {
-		dto.Image = fh
+		dto.ImageHeader = fh
 	}
 
 	if err := c.validate.Struct(dto); err != nil {

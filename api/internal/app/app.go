@@ -24,8 +24,11 @@ type application struct {
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
+	filesService := infra.NewFilesService(log, cfg.ObjectStorage)
 
-	controller.RegisterCollectionsController(log, router, nil, authMiddleware)
+	collectionsRepo := repo.NewCollectionsRepo(db)
+	collectionsUsecase := usecase.NewCollectionsUsecase(log, filesService, collectionsRepo)
+	controller.RegisterCollectionsController(log, router, collectionsUsecase, authMiddleware)
 
 	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codesRepo := repo.NewCodesRepo(redis)
