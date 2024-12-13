@@ -49,5 +49,10 @@ func (r *collectionsRepo) GetCollectionByID(ctx context.Context, id int) (*entit
 }
 
 func (r *collectionsRepo) GetAllCollections(ctx context.Context) ([]*entities.Collection, error) {
-	return nil, nil
+	collections := make([]*entities.Collection, 0)
+	query := `SELECT collection_id, title, description, image_id FROM collections ORDER BY collection_id`
+	if err := r.db.SelectContext(ctx, &collections, query); err != nil {
+		return nil, err
+	}
+	return collections, nil
 }

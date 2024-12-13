@@ -21,6 +21,7 @@ type CollectionsRepo interface {
 	CreateCollection(context.Context, *dto.CreateCollectionInput) (int, error)
 	UpdateCollection(context.Context, *dto.UpdateCollectionInput) error
 	GetCollectionByID(context.Context, int) (*entities.Collection, error)
+	GetAllCollections(context.Context) ([]*entities.Collection, error)
 }
 
 type collectionsUsecase struct {
@@ -93,5 +94,19 @@ func (u *collectionsUsecase) UpdateCollection(ctx context.Context, payload *dto.
 }
 
 func (u *collectionsUsecase) GetAllCollections(ctx context.Context) ([]*dto.CollectionResponse, error) {
-	return nil, nil
+	collections, err := u.cr.GetAllCollections(ctx)
+	if err != nil {
+		u.log.Error("failed to get collections", "err", err)
+		return nil, err
+	}
+	res := make([]*dto.CollectionResponse, len(collections))
+	for i, collection := range collections {
+		res[i] = &dto.CollectionResponse{
+			ID:          collection.ID,
+			Title:       collection.Title,
+			Description: collection.Description,
+			ImageID:     collection.ImageID,
+		}
+	}
+	return res, nil
 }
