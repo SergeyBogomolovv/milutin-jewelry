@@ -46,6 +46,7 @@ func TestCollectionItemsUsecase_Create(t *testing.T) {
 	t.Run("failed to create collection-item", func(t *testing.T) {
 		mockRepo.On("CollectionExists", ctx, mock.Anything).Return(nil).Once()
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("image_url", nil).Once()
+		mockFS.On("DeleteImage", ctx, mock.Anything).Return(nil).Once()
 		mockRepo.On("Create", ctx, mock.Anything).Return(0, assert.AnError).Once()
 		_, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: testutils.NewTestFile("image")})
 		assert.Error(t, err)
@@ -73,7 +74,6 @@ func TestCollectionItemsUsecase_Update(t *testing.T) {
 	})
 	t.Run("failed to upload image", func(t *testing.T) {
 		mockRepo.On("GetOne", ctx, mock.Anything).Return(&entities.CollectionItem{ImageID: "old_image_id"}, nil).Once()
-		mockFS.On("DeleteImage", ctx, "old_image_id").Return(nil).Once()
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("", assert.AnError).Once()
 		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: testutils.NewTestFile("image")})
 		assert.Error(t, err)
@@ -88,7 +88,6 @@ func TestCollectionItemsUsecase_Update(t *testing.T) {
 	t.Run("failed to update collection-item", func(t *testing.T) {
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("image_url", nil).Once()
 		mockRepo.On("GetOne", ctx, mock.Anything).Return(&entities.CollectionItem{ImageID: "old_image_id"}, nil).Once()
-		mockFS.On("DeleteImage", ctx, "old_image_id").Return(nil).Once()
 		mockRepo.On("Update", ctx, mock.Anything).Return(assert.AnError).Once()
 		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: testutils.NewTestFile("image")})
 		assert.Error(t, err)
@@ -122,21 +121,11 @@ func TestCollectionItemsUsecase_Delete(t *testing.T) {
 		mockRepo.AssertExpectations(t)
 	})
 	t.Run("failed to delete collection-item", func(t *testing.T) {
-		mockFS.On("DeleteImage", ctx, mock.Anything).Return(nil).Once()
 		mockRepo.On("GetOne", ctx, 1).Return(&entities.CollectionItem{ImageID: "image_id", ID: 1}, nil).Once()
 		mockRepo.On("Delete", ctx, 1).Return(assert.AnError).Once()
 		err := usecase.Delete(ctx, 1)
 		assert.Error(t, err)
 		mockRepo.AssertExpectations(t)
-		mockFS.AssertExpectations(t)
-	})
-	t.Run("failed to delete image", func(t *testing.T) {
-		mockFS.On("DeleteImage", ctx, mock.Anything).Return(assert.AnError).Once()
-		mockRepo.On("GetOne", ctx, 1).Return(&entities.CollectionItem{ImageID: "image_id", ID: 1}, nil).Once()
-		err := usecase.Delete(ctx, 1)
-		assert.Error(t, err)
-		mockRepo.AssertExpectations(t)
-		mockFS.AssertExpectations(t)
 	})
 }
 

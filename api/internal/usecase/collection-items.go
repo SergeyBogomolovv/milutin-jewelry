@@ -52,6 +52,9 @@ func (u *collectionItemsUsecase) Create(ctx context.Context, payload *dto.Create
 		ImageID:      imageID,
 	})
 	if err != nil {
+		if err := u.fs.DeleteImage(ctx, imageID); err != nil {
+			u.log.Error("failed to delete image", "err", err)
+		}
 		u.log.Error("failed to create collection item", "err", err)
 		return 0, err
 	}
@@ -82,10 +85,6 @@ func (u *collectionItemsUsecase) Update(ctx context.Context, payload *dto.Update
 		input.Description = payload.Description
 	}
 	if payload.Image != nil {
-		if err := u.fs.DeleteImage(ctx, collection.ImageID); err != nil {
-			u.log.Error("failed to delete image", "err", err)
-			return err
-		}
 		imageID, err := u.fs.UploadImage(ctx, payload.Image, "collection-items")
 		if err != nil {
 			u.log.Error("failed to upload image", "err", err)
@@ -96,6 +95,11 @@ func (u *collectionItemsUsecase) Update(ctx context.Context, payload *dto.Update
 	if err := u.repo.Update(ctx, input); err != nil {
 		u.log.Error("failed to update collection item", "err", err)
 		return err
+	}
+	if payload.Image != nil {
+		if err := u.fs.DeleteImage(ctx, collection.ImageID); err != nil {
+			u.log.Error("failed to delete image", "err", err)
+		}
 	}
 	return nil
 }
@@ -111,13 +115,12 @@ func (u *collectionItemsUsecase) Delete(ctx context.Context, id int) error {
 		return err
 	}
 
-	if err := u.fs.DeleteImage(ctx, collection.ImageID); err != nil {
-		u.log.Error("failed to delete image", "err", err)
-		return err
-	}
 	if err := u.repo.Delete(ctx, id); err != nil {
 		u.log.Error("failed to delete collection item", "err", err)
 		return err
+	}
+	if err := u.fs.DeleteImage(ctx, collection.ImageID); err != nil {
+		u.log.Error("failed to delete image", "err", err)
 	}
 	return nil
 }
