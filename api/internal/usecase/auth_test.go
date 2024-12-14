@@ -2,12 +2,11 @@ package usecase_test
 
 import (
 	"context"
-	"io"
-	"log/slog"
 	"testing"
 
 	errs "github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/errors"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
+	testutils "github.com/SergeyBogomolovv/milutin-jewelry/pkg/test-utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -16,7 +15,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 	ctx := context.Background()
 	mockCodesRepo := new(mockCodesRepo)
 
-	usecase := usecase.NewAuthUsecase(NewTestLogger(), mockCodesRepo, nil, "secret")
+	usecase := usecase.NewAuthUsecase(testutils.NewTestLogger(), mockCodesRepo, nil, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockCodesRepo.On("Check", ctx, "code").Return(nil).Once()
@@ -62,7 +61,7 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 	mockCodesRepo := new(mockCodesRepo)
 	mockMailService := new(mockMailService)
 
-	usecase := usecase.NewAuthUsecase(NewTestLogger(), mockCodesRepo, mockMailService, "secret")
+	usecase := usecase.NewAuthUsecase(testutils.NewTestLogger(), mockCodesRepo, mockMailService, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockCodesRepo.On("Create", ctx).Return("code", nil).Once()
@@ -89,10 +88,6 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 
 		mockCodesRepo.AssertExpectations(t)
 	})
-}
-
-func NewTestLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }
 
 type mockCodesRepo struct {
