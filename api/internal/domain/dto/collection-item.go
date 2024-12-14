@@ -9,10 +9,24 @@ type CreateCollectionItemRequest struct {
 	CollectionID int            `validate:"required"`
 }
 
+type CreateCollectionItemInput struct {
+	Title        string
+	Description  string
+	ImageID      string
+	CollectionID int
+}
+
 type UpdateCollectionItemRequest struct {
 	Title       string
 	Description string
 	Image       multipart.File
+	ID          int
+}
+
+type UpdateCollectionItemInput struct {
+	Title       string
+	Description string
+	ImageID     string
 	ID          int
 }
 
