@@ -18,11 +18,11 @@ type FilesService interface {
 }
 
 type CollectionsRepo interface {
-	CreateCollection(context.Context, *dto.CreateCollectionInput) (int, error)
-	UpdateCollection(context.Context, *dto.UpdateCollectionInput) error
-	GetCollectionByID(context.Context, int) (*entities.Collection, error)
-	GetAllCollections(context.Context) ([]*entities.Collection, error)
-	DeleteCollection(context.Context, int) error
+	Create(context.Context, *dto.CreateCollectionInput) (int, error)
+	Update(context.Context, *dto.UpdateCollectionInput) error
+	Delete(context.Context, int) error
+	GetByID(context.Context, int) (*entities.Collection, error)
+	GetAll(context.Context) ([]*entities.Collection, error)
 }
 
 type collectionsUsecase struct {
@@ -35,13 +35,13 @@ func NewCollectionsUsecase(log *slog.Logger, fs FilesService, cr CollectionsRepo
 	return &collectionsUsecase{log: log.With(slog.String("op", "collectionsUsecase")), fs: fs, cr: cr}
 }
 
-func (u *collectionsUsecase) CreateCollection(ctx context.Context, payload *dto.CreateCollectionRequest) (int, error) {
+func (u *collectionsUsecase) Create(ctx context.Context, payload *dto.CreateCollectionRequest) (int, error) {
 	imageID, err := u.fs.UploadImage(ctx, payload.Image, "collections")
 	if err != nil {
 		u.log.Error("failed to upload image", "err", err)
 		return 0, fmt.Errorf("failed to upload image: %w", err)
 	}
-	id, err := u.cr.CreateCollection(ctx, &dto.CreateCollectionInput{
+	id, err := u.cr.Create(ctx, &dto.CreateCollectionInput{
 		Title:       payload.Title,
 		Description: payload.Description,
 		ImageID:     imageID,
@@ -53,8 +53,8 @@ func (u *collectionsUsecase) CreateCollection(ctx context.Context, payload *dto.
 	return id, nil
 }
 
-func (u *collectionsUsecase) UpdateCollection(ctx context.Context, payload *dto.UpdateCollectionRequest) error {
-	collection, err := u.cr.GetCollectionByID(ctx, payload.ID)
+func (u *collectionsUsecase) Update(ctx context.Context, payload *dto.UpdateCollectionRequest) error {
+	collection, err := u.cr.GetByID(ctx, payload.ID)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			u.log.Info("collection not found", "err", err)
@@ -87,15 +87,15 @@ func (u *collectionsUsecase) UpdateCollection(ctx context.Context, payload *dto.
 		}
 		input.ImageID = imageID
 	}
-	if err := u.cr.UpdateCollection(ctx, input); err != nil {
+	if err := u.cr.Update(ctx, input); err != nil {
 		u.log.Error("failed to update collection", "err", err)
 		return err
 	}
 	return nil
 }
 
-func (u *collectionsUsecase) GetAllCollections(ctx context.Context) ([]*dto.CollectionResponse, error) {
-	collections, err := u.cr.GetAllCollections(ctx)
+func (u *collectionsUsecase) GetAll(ctx context.Context) ([]*dto.CollectionResponse, error) {
+	collections, err := u.cr.GetAll(ctx)
 	if err != nil {
 		u.log.Error("failed to get collections", "err", err)
 		return nil, err
@@ -112,8 +112,8 @@ func (u *collectionsUsecase) GetAllCollections(ctx context.Context) ([]*dto.Coll
 	return res, nil
 }
 
-func (u *collectionsUsecase) GetCollectionByID(ctx context.Context, id int) (*dto.CollectionResponse, error) {
-	collection, err := u.cr.GetCollectionByID(ctx, id)
+func (u *collectionsUsecase) GetByID(ctx context.Context, id int) (*dto.CollectionResponse, error) {
+	collection, err := u.cr.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			u.log.Info("collection not found", "err", err)
@@ -130,8 +130,8 @@ func (u *collectionsUsecase) GetCollectionByID(ctx context.Context, id int) (*dt
 	}, nil
 }
 
-func (u *collectionsUsecase) DeleteCollection(ctx context.Context, id int) error {
-	collection, err := u.cr.GetCollectionByID(ctx, id)
+func (u *collectionsUsecase) Delete(ctx context.Context, id int) error {
+	collection, err := u.cr.GetByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			u.log.Info("collection not found", "err", err)
@@ -144,7 +144,7 @@ func (u *collectionsUsecase) DeleteCollection(ctx context.Context, id int) error
 		u.log.Error("failed to delete image", "err", err)
 		return err
 	}
-	if err := u.cr.DeleteCollection(ctx, id); err != nil {
+	if err := u.cr.Delete(ctx, id); err != nil {
 		u.log.Error("failed to delete collection", "err", err)
 		return err
 	}

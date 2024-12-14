@@ -15,11 +15,11 @@ import (
 )
 
 type CollectionsUsecase interface {
-	CreateCollection(context.Context, *dto.CreateCollectionRequest) (int, error)
-	UpdateCollection(context.Context, *dto.UpdateCollectionRequest) error
-	GetAllCollections(context.Context) ([]*dto.CollectionResponse, error)
-	GetCollectionByID(context.Context, int) (*dto.CollectionResponse, error)
-	DeleteCollection(context.Context, int) error
+	Create(context.Context, *dto.CreateCollectionRequest) (int, error)
+	Update(context.Context, *dto.UpdateCollectionRequest) error
+	Delete(context.Context, int) error
+	GetAll(context.Context) ([]*dto.CollectionResponse, error)
+	GetByID(context.Context, int) (*dto.CollectionResponse, error)
 }
 
 type collectionsController struct {
@@ -68,7 +68,7 @@ func (c *collectionsController) CreateCollection(w http.ResponseWriter, r *http.
 	}
 	c.log.Info("creating collection", "title", dto.Title)
 
-	id, err := c.uc.CreateCollection(r.Context(), dto)
+	id, err := c.uc.Create(r.Context(), dto)
 	if err != nil {
 		utils.WriteError(w, "failed to create collection", http.StatusInternalServerError)
 		return
@@ -104,7 +104,7 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 	}
 	dto.ID = id
 
-	if err := c.uc.UpdateCollection(r.Context(), dto); err != nil {
+	if err := c.uc.Update(r.Context(), dto); err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			utils.WriteError(w, "collection not found", http.StatusNotFound)
 			return
@@ -122,7 +122,7 @@ func (c *collectionsController) DeleteCollection(w http.ResponseWriter, r *http.
 		utils.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	if err := c.uc.DeleteCollection(r.Context(), id); err != nil {
+	if err := c.uc.Delete(r.Context(), id); err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			utils.WriteError(w, "collection not found", http.StatusNotFound)
 			return
@@ -134,7 +134,7 @@ func (c *collectionsController) DeleteCollection(w http.ResponseWriter, r *http.
 }
 
 func (c *collectionsController) GetAllCollections(w http.ResponseWriter, r *http.Request) {
-	collections, err := c.uc.GetAllCollections(r.Context())
+	collections, err := c.uc.GetAll(r.Context())
 	if err != nil {
 		utils.WriteError(w, "failed to get collections", http.StatusInternalServerError)
 		return
@@ -148,7 +148,7 @@ func (c *collectionsController) GetOneCollection(w http.ResponseWriter, r *http.
 		utils.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	collection, err := c.uc.GetCollectionByID(r.Context(), id)
+	collection, err := c.uc.GetByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			utils.WriteError(w, "collection not found", http.StatusNotFound)
