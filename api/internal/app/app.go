@@ -33,7 +33,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codesRepo := repo.NewCodesRepo(redis)
 	authUsecase := usecase.NewAuthUsecase(log, codesRepo, mailService, cfg.JWTSecret)
-	controller.RegisterAuthController(router, authUsecase)
+	controller.RegisterAuthController(log, router, authUsecase)
 
 	return &application{
 		srv: &http.Server{Addr: cfg.Addr, Handler: router},

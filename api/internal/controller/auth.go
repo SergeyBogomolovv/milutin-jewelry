@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -20,20 +21,26 @@ type AuthUsecase interface {
 type authController struct {
 	validate *validator.Validate
 	uc       AuthUsecase
+	log      *slog.Logger
 }
 
-func RegisterAuthController(router *http.ServeMux, uc AuthUsecase) {
+func RegisterAuthController(log *slog.Logger, router *http.ServeMux, uc AuthUsecase) {
 	controller := &authController{
 		uc:       uc,
 		validate: validator.New(validator.WithRequiredStructEnabled()),
+		log:      log.With(slog.String("op", "authController")),
 	}
-	router.HandleFunc("POST /login", controller.Login)
-	router.HandleFunc("POST /send-verification-code", controller.SendVerificationCode)
+	r := http.NewServeMux()
+	r.HandleFunc("POST /login", controller.Login)
+	r.HandleFunc("POST /send-code", controller.SendVerificationCode)
+
+	router.Handle("/auth/", http.StripPrefix("/auth", r))
 }
 
 func (c *authController) Login(w http.ResponseWriter, r *http.Request) {
 	var payload dto.LoginDTO
 	if err := utils.DecodeBody(r, &payload); err != nil {
+		c.log.Error("failed to decode payload", "err", err)
 		utils.WriteError(w, "failed to decode payload", http.StatusBadRequest)
 		return
 	}

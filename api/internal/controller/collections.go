@@ -28,21 +28,23 @@ type collectionsController struct {
 	log      *slog.Logger
 }
 
-func RegisterCollectionsController(log *slog.Logger, router *http.ServeMux, uc CollectionsUsecase, authMw middleware.Middleware) {
-	controller := &collectionsController{
+func RegisterCollectionsController(log *slog.Logger, router *http.ServeMux, uc CollectionsUsecase, auth middleware.Middleware) {
+	c := &collectionsController{
 		log:      log.With(slog.String("op", "collectionsController")),
 		uc:       uc,
 		validate: validator.New(validator.WithRequiredStructEnabled()),
 	}
+	r := http.NewServeMux()
+	r.HandleFunc("GET /all", c.GetAllCollections)
+	r.HandleFunc("GET /{id}", c.GetOneCollection)
 
-	router.HandleFunc("GET /collections/all", controller.GetAllCollections)
-	router.HandleFunc("GET /collections/{id}", controller.GetOneCollection)
+	pr := http.NewServeMux()
+	pr.HandleFunc("POST /create", c.CreateCollection)
+	pr.HandleFunc("PUT /update/{id}", c.UpdateCollection)
+	pr.HandleFunc("DELETE /delete/{id}", c.DeleteCollection)
+	r.Handle("/", auth(pr))
 
-	admin := http.NewServeMux()
-	admin.HandleFunc("POST /create", controller.CreateCollection)
-	admin.HandleFunc("PUT /update/{id}", controller.UpdateCollection)
-	admin.HandleFunc("DELETE /delete/{id}", controller.DeleteCollection)
-	router.Handle("/collections/", http.StripPrefix("/collections", authMw(admin)))
+	router.Handle("/collections/", http.StripPrefix("/collections", r))
 }
 
 func (c *collectionsController) CreateCollection(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +55,6 @@ func (c *collectionsController) CreateCollection(w http.ResponseWriter, r *http.
 	}
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		c.log.Error("failed to get image", "err", err)
 		utils.WriteError(w, "no image provided", http.StatusBadRequest)
 		return
 	}
@@ -69,7 +70,6 @@ func (c *collectionsController) CreateCollection(w http.ResponseWriter, r *http.
 
 	id, err := c.uc.CreateCollection(r.Context(), dto)
 	if err != nil {
-		c.log.Error("failed to create collection", "err", err)
 		utils.WriteError(w, "failed to create collection", http.StatusInternalServerError)
 		return
 	}
@@ -99,7 +99,6 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		c.log.Error("failed to parse id", "err", err)
 		utils.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
@@ -107,11 +106,9 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 
 	if err := c.uc.UpdateCollection(r.Context(), dto); err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
-			c.log.Info("collection not found", "err", err)
 			utils.WriteError(w, "collection not found", http.StatusNotFound)
 			return
 		}
-		c.log.Error("failed to update collection", "err", err)
 		utils.WriteError(w, "failed to update collection", http.StatusInternalServerError)
 		return
 	}
@@ -122,17 +119,14 @@ func (c *collectionsController) UpdateCollection(w http.ResponseWriter, r *http.
 func (c *collectionsController) DeleteCollection(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		c.log.Error("failed to parse id", "err", err)
 		utils.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 	if err := c.uc.DeleteCollection(r.Context(), id); err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
-			c.log.Info("collection not found", "err", err)
 			utils.WriteError(w, "collection not found", http.StatusNotFound)
 			return
 		}
-		c.log.Error("failed to delete collection", "err", err)
 		utils.WriteError(w, "failed to delete collection", http.StatusInternalServerError)
 		return
 	}
@@ -142,7 +136,6 @@ func (c *collectionsController) DeleteCollection(w http.ResponseWriter, r *http.
 func (c *collectionsController) GetAllCollections(w http.ResponseWriter, r *http.Request) {
 	collections, err := c.uc.GetAllCollections(r.Context())
 	if err != nil {
-		c.log.Error("failed to get collections", "err", err)
 		utils.WriteError(w, "failed to get collections", http.StatusInternalServerError)
 		return
 	}
@@ -152,18 +145,15 @@ func (c *collectionsController) GetAllCollections(w http.ResponseWriter, r *http
 func (c *collectionsController) GetOneCollection(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		c.log.Error("failed to parse id", "err", err)
 		utils.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
 	collection, err := c.uc.GetCollectionByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
-			c.log.Info("collection not found", "err", err)
 			utils.WriteError(w, "collection not found", http.StatusNotFound)
 			return
 		}
-		c.log.Error("failed to get collection", "err", err)
 		utils.WriteError(w, "failed to get collection", http.StatusInternalServerError)
 		return
 	}
