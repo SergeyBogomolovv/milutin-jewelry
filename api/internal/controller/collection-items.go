@@ -2,11 +2,15 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/dto"
+	errs "github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/errors"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
+	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -44,6 +48,42 @@ func RegisterCollectionItemsController(log *slog.Logger, router *http.ServeMux, 
 }
 
 func (c *collectionItemsController) CreateCollectionItem(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		c.log.Error("failed to parse multipart form", "err", err)
+		utils.WriteError(w, "invalid form", http.StatusBadRequest)
+		return
+	}
+	collectionID, err := strconv.Atoi(r.FormValue("collection_id"))
+	if err != nil {
+		utils.WriteError(w, "invalid collection id", http.StatusBadRequest)
+		return
+	}
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		utils.WriteError(w, "no image provided", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+	dto := &dto.CreateCollectionItemRequest{
+		CollectionID: collectionID,
+		Title:        r.FormValue("title"),
+		Description:  r.FormValue("description"),
+		Image:        file,
+	}
+	if err := c.validate.Struct(dto); err != nil {
+		utils.WriteError(w, "invalid payload", http.StatusBadRequest)
+		return
+	}
+	id, err := c.uc.Create(r.Context(), dto)
+	if err != nil {
+		if errors.Is(err, errs.ErrCollectionNotFound) {
+			utils.WriteError(w, "collection not found", http.StatusNotFound)
+			return
+		}
+		utils.WriteError(w, "failed to create collection item", http.StatusInternalServerError)
+		return
+	}
+	utils.WriteJSON(w, map[string]int{"collection_item_id": id}, http.StatusCreated)
 }
 
 func (c *collectionItemsController) UpdateCollectionItem(w http.ResponseWriter, r *http.Request) {}

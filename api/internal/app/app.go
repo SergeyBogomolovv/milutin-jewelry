@@ -31,6 +31,10 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	collectionsUsecase := usecase.NewCollectionsUsecase(log, filesService, collectionsRepo)
 	controller.RegisterCollectionsController(log, router, collectionsUsecase, authMiddleware)
 
+	collectionItemsRepo := repo.NewCollectionItemsRepo(db)
+	collectionItemsUsecase := usecase.NewCollectionItemsUsecase(log, filesService, collectionItemsRepo)
+	controller.RegisterCollectionItemsController(log, router, collectionItemsUsecase, authMiddleware)
+
 	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codesRepo := repo.NewCodesRepo(redis)
 	authUsecase := usecase.NewAuthUsecase(log, codesRepo, mailService, cfg.JWTSecret)
