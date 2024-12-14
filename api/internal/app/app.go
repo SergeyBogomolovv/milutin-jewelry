@@ -24,6 +24,7 @@ type application struct {
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
+	loggerMiddleware := middleware.NewLoggerMiddleware(log)
 	filesService := infra.NewFilesService(log, cfg.ObjectStorage)
 
 	collectionsRepo := repo.NewCollectionsRepo(db)
@@ -36,7 +37,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	controller.RegisterAuthController(log, router, authUsecase)
 
 	return &application{
-		srv: &http.Server{Addr: cfg.Addr, Handler: router},
+		srv: &http.Server{Addr: cfg.Addr, Handler: loggerMiddleware(router)},
 		log: log,
 	}
 }
