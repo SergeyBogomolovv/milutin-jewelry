@@ -8,7 +8,7 @@ type Collection struct {
 }
 
 type CollectionItem struct {
-	ID           int    `db:"collection_item_id"`
+	ID           int    `db:"item_id"`
 	CollectionID int    `db:"collection_id"`
 	Title        string `db:"title"`
 	Description  string `db:"description"`

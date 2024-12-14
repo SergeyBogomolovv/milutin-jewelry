@@ -134,7 +134,7 @@ func (u *collectionItemsUsecase) GetByCollection(ctx context.Context, id int) ([
 		u.log.Error("failed to check collection exists", "err", err)
 		return nil, err
 	}
-	collections, err := u.repo.GetByCollection(ctx, id)
+	items, err := u.repo.GetByCollection(ctx, id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionNotFound) {
 			u.log.Info("collection not found", "err", err)
@@ -144,20 +144,21 @@ func (u *collectionItemsUsecase) GetByCollection(ctx context.Context, id int) ([
 		return nil, err
 	}
 
-	var res []*dto.CollectionItemResponse
-	for _, collection := range collections {
-		res = append(res, &dto.CollectionItemResponse{
-			ID:          collection.ID,
-			Title:       collection.Title,
-			Description: collection.Description,
-			ImageID:     collection.ImageID,
-		})
+	res := make([]*dto.CollectionItemResponse, len(items))
+	for i, item := range items {
+		res[i] = &dto.CollectionItemResponse{
+			ID:           item.ID,
+			Title:        item.Title,
+			Description:  item.Description,
+			ImageID:      item.ImageID,
+			CollectionID: item.CollectionID,
+		}
 	}
 	return res, nil
 }
 
 func (u *collectionItemsUsecase) GetOne(ctx context.Context, id int) (*dto.CollectionItemResponse, error) {
-	collection, err := u.repo.GetOne(ctx, id)
+	item, err := u.repo.GetOne(ctx, id)
 	if err != nil {
 		if errors.Is(err, errs.ErrCollectionItemNotFound) {
 			u.log.Info("collection item not found", "err", err)
@@ -167,9 +168,10 @@ func (u *collectionItemsUsecase) GetOne(ctx context.Context, id int) (*dto.Colle
 		return nil, err
 	}
 	return &dto.CollectionItemResponse{
-		ID:          collection.ID,
-		Title:       collection.Title,
-		Description: collection.Description,
-		ImageID:     collection.ImageID,
+		ID:           item.ID,
+		Title:        item.Title,
+		Description:  item.Description,
+		ImageID:      item.ImageID,
+		CollectionID: item.CollectionID,
 	}, nil
 }
