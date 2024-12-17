@@ -1,19 +1,19 @@
 import { Schema } from 'zod'
+import { API_URL } from '../constants'
 
 export async function fetcher<T>(
-  url: string,
+  path: string,
   schema: Schema<T>,
   options: RequestInit = {},
 ): Promise<T> {
-  const { credentials = 'include', body, headers } = options
+  const { credentials = 'include', headers } = options
 
-  const res = await fetch(url, {
+  const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
     credentials,
   })
 

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
-import { Poiret_One } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
+import { Toaster } from '@/shared/ui/sonner'
 
-const poiret = Poiret_One({
-  variable: '--poiter-one',
+const poiret = Inter({
+  variable: '--inter',
   subsets: ['latin'],
   weight: ['400'],
 })
@@ -20,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ru'>
-      <body className={`${poiret.className} antialiased`}>{children}</body>
+      <body className={`${poiret.className} antialiased`}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }

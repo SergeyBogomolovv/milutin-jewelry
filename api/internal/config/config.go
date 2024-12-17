@@ -13,6 +13,7 @@ type Config struct {
 	AdminEmail    string
 	Mail          MailConfig
 	ObjectStorage ObjectStorageConfig
+	CORSOrigin    string
 }
 
 type MailConfig struct {
@@ -39,6 +40,7 @@ func New() *Config {
 		RedisUrl:    utils.GetEnvString("REDIS_URL", "redis://localhost:6379/0"),
 		JWTSecret:   utils.GetEnvString("JWT_SECRET", "secret"),
 		AdminEmail:  utils.GetEnvString("ADMIN_EMAIL", "email@email.com"),
+		CORSOrigin:  utils.GetEnvString("CORS_ORIGIN", "http://localhost:3000"),
 		Mail: MailConfig{
 			Host: utils.GetEnvString("MAIL_HOST", "smtp.gmail.com"),
 			Port: utils.GetEnvInt("MAIL_PORT", 587),
