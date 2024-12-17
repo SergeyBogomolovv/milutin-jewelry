@@ -3,10 +3,10 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/shared/ui/sonner'
 
-const poiret = Inter({
+const inter = Inter({
   variable: '--inter',
   subsets: ['latin'],
-  weight: ['400'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ru'>
-      <body className={`${poiret.className} antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         {children}
         <Toaster />
       </body>
