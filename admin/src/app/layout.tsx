@@ -3,7 +3,7 @@ import { Poiret_One } from 'next/font/google'
 import './globals.css'
 
 const poiret = Poiret_One({
-  variable: '--monsterrat',
+  variable: '--poiter-one',
   subsets: ['latin'],
   weight: ['400'],
 })
