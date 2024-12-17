@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
-import { Montserrat } from 'next/font/google'
+import { Poiret_One } from 'next/font/google'
 import './globals.css'
 
-const monsterrat = Montserrat({
+const poiret = Poiret_One({
   variable: '--monsterrat',
   subsets: ['latin'],
+  weight: ['400'],
 })
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ru'>
-      <body className={`${monsterrat.className} antialiased`}>{children}</body>
+      <body className={`${poiret.className} antialiased`}>{children}</body>
     </html>
   )
 }
