@@ -1,0 +1,140 @@
+'use client'
+import { useForm } from 'react-hook-form'
+import { NewCollectionFields, newCollectionSchema } from '../model/schema'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRef, useState } from 'react'
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/shared/ui/form'
+import { Button } from '@/shared/ui/button'
+import { Paperclip } from 'lucide-react'
+import { Input } from '@/shared/ui/input'
+import Image from 'next/image'
+import { createCollection } from '../api/create-collection'
+import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/ui/dialog'
+
+export function CollectionForm({ children }: { children: React.ReactNode }) {
+  const form = useForm<NewCollectionFields>({
+    resolver: zodResolver(newCollectionSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+    },
+  })
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const imageUrl = URL.createObjectURL(file)
+      setImagePreview(imageUrl)
+      form.setValue('image', file)
+    }
+  }
+
+  const onSubmit = async (data: NewCollectionFields) => {
+    const ok = await createCollection(data)
+    if (!ok) {
+      toast.error('Ошибка создания коллекции')
+      return
+    }
+    setImagePreview(null)
+    form.reset()
+  }
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className='max-h-[90vh] overflow-scroll'>
+        <DialogHeader>
+          <DialogTitle>Новая коллекция</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form className='flex flex-col gap-4' onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name='title'
+              render={({ field }) => (
+                <FormItem className='w-full'>
+                  <FormLabel>Название</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Название' {...field} />
+                  </FormControl>
+                  <FormDescription>Название новой коллекции.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='description'
+              render={({ field }) => (
+                <FormItem className='w-full'>
+                  <FormLabel>Описание</FormLabel>
+                  <FormControl>
+                    <Input placeholder='Описание' {...field} />
+                  </FormControl>
+                  <FormDescription>Необязательное поле.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormItem className='w-full flex flex-col gap-2'>
+              <FormLabel>Изображение</FormLabel>
+              {imagePreview && (
+                <Image
+                  className='w-[70%] mx-auto rounded-md'
+                  width={500}
+                  height={500}
+                  src={imagePreview}
+                  alt='Uploaded Image'
+                />
+              )}
+              <FormControl>
+                <input
+                  type='file'
+                  accept='image/*'
+                  ref={fileInputRef}
+                  hidden
+                  onChange={handleImageChange}
+                  aria-hidden='true'
+                  tabIndex={-1}
+                />
+              </FormControl>
+              <Button type='button' variant='outline' onClick={() => fileInputRef.current?.click()}>
+                <Paperclip />
+                {imagePreview ? 'Изменить изображение' : 'Прикрепить изображение'}
+              </Button>
+            </FormItem>
+            <DialogFooter className='flex items-center gap-2'>
+              <Button className='w-full' disabled={form.formState.isSubmitting} type='submit'>
+                Создать
+              </Button>
+              <DialogClose asChild>
+                <Button className='w-full' type='button' variant='secondary'>
+                  Отмена
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  )
+}

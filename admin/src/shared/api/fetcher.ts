@@ -8,7 +8,6 @@ export async function fetcher(path: string, options: RequestInit = {}) {
     ...options,
     headers: {
       Authorization: `Bearer ${c.get('auth_token')?.value}`,
-      'Content-Type': 'application/json',
       ...options.headers,
     },
     credentials: 'include',
