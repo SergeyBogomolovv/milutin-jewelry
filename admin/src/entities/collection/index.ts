@@ -1,2 +1,5 @@
 export { collectionSchema } from './model/collection'
 export type { Collection } from './model/collection'
+export { CollectionCard } from './ui/collection-card'
+export { getCollections } from './api/get-collections'
+export { getCollection } from './api/get-collection'

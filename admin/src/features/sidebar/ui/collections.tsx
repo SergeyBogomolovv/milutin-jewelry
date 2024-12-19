@@ -1,8 +1,8 @@
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/shared/ui/sidebar'
-import Link from 'next/link'
 import { use } from 'react'
-import { getCollections } from '../api/get-collections'
 import { NotepadText } from 'lucide-react'
+import { getCollections } from '@/entities/collection'
+import Link from 'next/link'
 
 export default function CollectionsGroup() {
   const collections = use(getCollections())

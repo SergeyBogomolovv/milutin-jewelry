@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 export function AppHeader() {
   const pathname = usePathname()
   return (
-    <header className='p-2 items-center flex'>
+    <header className='p-2 items-center flex pt-4'>
       <SidebarTrigger />
       <h2 className='font-bold text-lg'>{getHeader(pathname)}</h2>
     </header>
