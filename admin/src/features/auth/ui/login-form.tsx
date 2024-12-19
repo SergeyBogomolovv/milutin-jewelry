@@ -13,30 +13,42 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/ui/card'
-import { useSendCode } from '../api/send-code'
+import { sendCode } from '../api/send-code'
 import { login } from '../api/login'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { useTransition } from 'react'
 
 export function LoginForm() {
+  const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const form = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
-    defaultValues: {
-      code: '',
-    },
+    defaultValues: { code: '' },
   })
+  const onSubmit = async (data: LoginFields) => {
+    const success = await login(data)
+    if (!success) {
+      toast.error('Неверный код')
+      return
+    }
+    toast.success('Вы успешно вошли в админ панель')
+    router.refresh()
+  }
 
-  const { handleSendCode, isPending } = useSendCode()
+  const handleSendCode = async () => {
+    const success = await sendCode()
+    if (!success) {
+      toast.error('Ошибка отправки кода')
+      return
+    }
+    toast.success('Код отправлен')
+  }
 
   return (
     <Card className='w-[400px] max-w-[95%]'>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(async (data) => {
-            await login(data)
-            router.refresh()
-          })}
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className='items-center'>
             <CardTitle className='text-2xl'>Вход в админ панель</CardTitle>
             <CardDescription>Код придет на почту администратора</CardDescription>
@@ -60,7 +72,7 @@ export function LoginForm() {
               Подтвердить
             </Button>
             <Button
-              onClick={handleSendCode}
+              onClick={() => startTransition(handleSendCode)}
               variant='outline'
               type='button'
               className='w-full'

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/dto"
 	errs "github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/errors"
@@ -60,17 +59,7 @@ func (c *authController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    token,
-		HttpOnly: true,
-		Secure:   true,
-		Path:     "/",
-		SameSite: http.SameSiteStrictMode,
-		Expires:  time.Now().Add(24 * time.Hour),
-	})
-
-	utils.WriteMessage(w, "login successfull", http.StatusOK)
+	utils.WriteJSON(w, map[string]string{"token": token}, http.StatusOK)
 }
 
 func (c *authController) SendVerificationCode(w http.ResponseWriter, r *http.Request) {

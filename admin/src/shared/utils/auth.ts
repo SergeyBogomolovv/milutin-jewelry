@@ -9,7 +9,6 @@ export async function checkAuth(token: string): Promise<boolean> {
     const decoded = await jwtVerify(token, secret)
     return !!decoded
   } catch (error) {
-    console.log(error)
     return false
   }
 }

@@ -1,3 +1,4 @@
+'use server'
 import { collectionSchema } from '@/entities/collection'
 import { fetcher } from '@/shared/api/fetcher'
 import { z } from 'zod'

@@ -9,6 +9,8 @@ import {
 } from '@/shared/ui/card'
 import { Collection } from '../model/collection'
 import { CustomImage } from '@/shared/ui/image'
+import Link from 'next/link'
+import DeleteButton from './delete-button'
 
 interface Props {
   collection: Collection
@@ -20,9 +22,7 @@ export function CollectionCard({ collection }: Props) {
       <CardHeader>
         <CardTitle>{collection.title}</CardTitle>
         <CardDescription>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Id consectetur a suscipit quod
-          impedit architecto nihil molestias, explicabo dolorum, vel ipsam dignissimos temporibus
-          dolor tempora corporis assumenda quidem necessitatibus laudantium.
+          {collection.description ? collection.description : 'Описание отсутствует'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -35,8 +35,10 @@ export function CollectionCard({ collection }: Props) {
         />
       </CardContent>
       <CardFooter className='flex items-center gap-2'>
-        <Button variant={'outline'}>Перейти</Button>
-        <Button variant={'destructive'}>Удалить</Button>
+        <Button asChild variant={'outline'}>
+          <Link href={`/collections/${collection.id}`}>Перейти</Link>
+        </Button>
+        <DeleteButton id={collection.id} />
       </CardFooter>
     </Card>
   )

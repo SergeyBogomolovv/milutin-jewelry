@@ -1,3 +1,4 @@
+'use server'
 import { fetcher } from '@/shared/api/fetcher'
 import { collectionSchema } from '../model/collection'
 
