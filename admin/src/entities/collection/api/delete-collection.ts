@@ -3,6 +3,14 @@ import { fetcher } from '@/shared/api/fetcher'
 import { revalidateTag } from 'next/cache'
 
 export async function deleteCollection(id: number) {
-  await fetcher(`/collections/delete/${id}`, { method: 'DELETE' })
-  revalidateTag('collections')
+  try {
+    const res = await fetcher(`/collections/delete/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      return false
+    }
+    revalidateTag('collections')
+    return true
+  } catch (error) {
+    return false
+  }
 }
