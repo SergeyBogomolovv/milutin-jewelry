@@ -1,3 +1,4 @@
+import { AppHeader } from '@/features/header'
 import { AppSidebar } from '@/features/sidebar'
 import { SidebarProvider } from '@/shared/ui/sidebar'
 
@@ -9,7 +10,10 @@ export default function Layout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      {children}
+      <div className='flex flex-col w-full'>
+        <AppHeader />
+        {children}
+      </div>
     </SidebarProvider>
   )
 }

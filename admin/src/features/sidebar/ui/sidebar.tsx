@@ -11,31 +11,10 @@ import {
 } from '@/shared/ui/sidebar'
 import { DropdownMenu, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu'
 import { ChevronUp, User2 } from 'lucide-react'
-import CollectionsGroup from './collections'
-import { GiJewelCrown } from 'react-icons/gi'
-import { FaClipboardList } from 'react-icons/fa'
-import { IoNewspaper } from 'react-icons/io5'
 import { Suspense } from 'react'
-import Link from 'next/link'
+import CollectionsGroup from './collections'
 import LogoutDropdown from './logout-dropdown'
-
-const links = [
-  {
-    title: 'Коллекции',
-    url: '/collections',
-    icon: FaClipboardList,
-  },
-  {
-    title: 'Украшения',
-    url: '/collection-items',
-    icon: GiJewelCrown,
-  },
-  {
-    title: 'Статьи',
-    url: '/posts',
-    icon: IoNewspaper,
-  },
-]
+import NavigationGroup from './navigation'
 
 export function AppSidebar() {
   return (
@@ -44,18 +23,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Навигация</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {links.map((link) => (
-                <SidebarMenuItem key={link.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={link.url}>
-                      <link.icon />
-                      <span>{link.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <NavigationGroup />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
