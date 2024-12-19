@@ -15,8 +15,10 @@ import {
 } from '@/shared/ui/card'
 import { useSendCode } from '../api/send-code'
 import { login } from '../api/login'
+import { useRouter } from 'next/navigation'
 
-export default function LoginForm() {
+export function LoginForm() {
+  const router = useRouter()
   const form = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -29,7 +31,12 @@ export default function LoginForm() {
   return (
     <Card className='w-[400px] max-w-[95%]'>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(login)}>
+        <form
+          onSubmit={form.handleSubmit(async (data) => {
+            await login(data)
+            router.refresh()
+          })}
+        >
           <CardHeader className='items-center'>
             <CardTitle className='text-2xl'>Вход в админ панель</CardTitle>
             <CardDescription>Код придет на почту администратора</CardDescription>

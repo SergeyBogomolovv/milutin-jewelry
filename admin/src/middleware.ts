@@ -9,11 +9,11 @@ export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname
   const isOnPublicRoute = PUBLIC_ROUTES.includes(path)
   const authenticated = await checkAuth(req.cookies.get('auth_token')?.value || '')
-  if (!isOnPublicRoute && authenticated) {
+  if (!isOnPublicRoute && !authenticated) {
     return NextResponse.redirect(new URL(NOT_AUTHETICATED_REDIRECT_URL, req.nextUrl))
   }
 
-  if (isOnPublicRoute && !authenticated) {
+  if (isOnPublicRoute && authenticated) {
     return NextResponse.redirect(new URL(AUTHETICATED_REDIRECT_URL, req.nextUrl))
   }
 

@@ -1,4 +1,4 @@
-import { $api } from '@/shared/api/api'
+import { fetcher } from '@/shared/api/fetcher'
 import { startTransition, useActionState } from 'react'
 import { toast } from 'sonner'
 
@@ -12,7 +12,11 @@ export const useSendCode = () => {
 
 async function sendCode() {
   try {
-    await $api.post('/auth/send-code')
+    const res = await fetcher('/auth/send-code', { method: 'POST' })
+    if (!res.ok) {
+      toast.error('Ошибка отправки кода')
+      return { success: false }
+    }
     toast.success('Код отправлен на почту')
     return { success: true }
   } catch (error) {
