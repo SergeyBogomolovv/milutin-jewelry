@@ -10,6 +10,7 @@ import {
 import { CustomImage } from '@/shared/ui/image'
 import { Button } from '@/shared/ui/button'
 import DeleteButton from './delete-button'
+import { Pencil } from 'lucide-react'
 
 export function CollectionItemCard({ item }: { item: CollectionItem }) {
   return (
@@ -30,7 +31,10 @@ export function CollectionItemCard({ item }: { item: CollectionItem }) {
         />
       </CardContent>
       <CardFooter className='flex items-center gap-2'>
-        <Button variant={'outline'}>Редактировать</Button>
+        <Button variant={'outline'}>
+          <Pencil />
+          Редактировать
+        </Button>
         <DeleteButton id={item.id} />
       </CardFooter>
     </Card>

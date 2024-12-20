@@ -3,6 +3,8 @@ import { Button } from '@/shared/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { deleteCollectionItem } from '../api/delete-collection-item'
+import ConfirmDialog from '@/shared/ui/confirm-dialog'
+import { Trash } from 'lucide-react'
 
 export default function DeleteButton({ id }: { id: number }) {
   const [isLoading, setLoading] = useState(false)
@@ -17,8 +19,15 @@ export default function DeleteButton({ id }: { id: number }) {
     toast.success('Украшение удалено')
   }
   return (
-    <Button disabled={isLoading} onClick={deleteHandler} variant={'destructive'}>
-      {isLoading ? 'Удаление...' : 'Удалить'}
-    </Button>
+    <ConfirmDialog
+      title='Подтвердите удаление'
+      description={`Вы действительно хотите удалить это украшение?`}
+      handleConfirm={deleteHandler}
+    >
+      <Button disabled={isLoading} variant={'destructive'}>
+        <Trash />
+        {isLoading ? 'Удаление...' : 'Удалить'}
+      </Button>
+    </ConfirmDialog>
   )
 }

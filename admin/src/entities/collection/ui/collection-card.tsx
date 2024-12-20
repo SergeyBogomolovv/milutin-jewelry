@@ -11,6 +11,7 @@ import { Collection } from '../model/collection'
 import { CustomImage } from '@/shared/ui/image'
 import Link from 'next/link'
 import DeleteButton from './delete-button'
+import { Pencil } from 'lucide-react'
 
 interface Props {
   collection: Collection
@@ -36,7 +37,10 @@ export function CollectionCard({ collection }: Props) {
       </CardContent>
       <CardFooter className='flex items-center gap-2'>
         <Button asChild variant={'outline'}>
-          <Link href={`/collections/${collection.id}`}>Перейти</Link>
+          <Link href={`/collections/${collection.id}`}>
+            <Pencil />
+            Управление
+          </Link>
         </Button>
         <DeleteButton id={collection.id} />
       </CardFooter>
