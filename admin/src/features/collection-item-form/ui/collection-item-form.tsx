@@ -78,7 +78,7 @@ export function CollectionItemForm({ children, id }: { children: React.ReactNode
                   <FormControl>
                     <Input placeholder='Название' {...field} />
                   </FormControl>
-                  <FormDescription>Название украшения.</FormDescription>
+                  <FormDescription>Необязательное поле.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

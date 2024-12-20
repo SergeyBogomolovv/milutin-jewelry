@@ -1,16 +1,11 @@
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/shared/ui/sidebar'
-import { Gem, Newspaper, ScrollText } from 'lucide-react'
+import { Gem, Newspaper } from 'lucide-react'
 import Link from 'next/link'
 
 const links = [
   {
     title: 'Коллекции',
     url: '/collections',
-    icon: ScrollText,
-  },
-  {
-    title: 'Украшения',
-    url: '/collection-items',
     icon: Gem,
   },
   {

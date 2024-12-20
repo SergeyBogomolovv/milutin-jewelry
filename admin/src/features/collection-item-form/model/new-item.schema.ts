@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const newItemSchema = z.object({
-  title: z.string().min(1, { message: 'Название не может быть пустым' }),
+  title: z.optional(z.string()),
   description: z.optional(z.string()),
   image: typeof window === 'undefined' ? z.any() : z.instanceof(File),
 })

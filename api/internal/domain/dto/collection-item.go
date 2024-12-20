@@ -3,7 +3,7 @@ package dto
 import "mime/multipart"
 
 type CreateCollectionItemRequest struct {
-	Title        string `validate:"required"`
+	Title        string
 	Description  string
 	Image        multipart.File `validate:"required"`
 	CollectionID int            `validate:"required"`
