@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS collections
 CREATE TABLE IF NOT EXISTS collection_items
 (
 	item_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	collection_id INT REFERENCES collections(collection_id),
+	collection_id INT REFERENCES collections(collection_id) ON DELETE SET NULL,
 	title TEXT,
 	description TEXT,
 	image_id VARCHAR(255)

@@ -30,22 +30,32 @@ func (r *collectionItemsRepo) Create(ctx context.Context, payload *dto.CreateCol
 
 func (r *collectionItemsRepo) Update(ctx context.Context, payload *dto.UpdateCollectionItemInput) error {
 	query := `UPDATE collection_items SET title = $1, description = $2, image_id = $3 WHERE item_id = $4`
-	if res, err := r.db.ExecContext(ctx, query, payload.Title, payload.Description, payload.ImageID, payload.ID); err != nil {
-		if aff, err := res.RowsAffected(); err == nil && aff == 0 {
-			return errs.ErrCollectionItemNotFound
-		}
+	res, err := r.db.ExecContext(ctx, query, payload.Title, payload.Description, payload.ImageID, payload.ID)
+	if err != nil {
 		return err
+	}
+	aff, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if aff == 0 {
+		return errs.ErrCollectionItemNotFound
 	}
 	return nil
 }
 
 func (r *collectionItemsRepo) Delete(ctx context.Context, id int) error {
 	query := `DELETE FROM collection_items WHERE item_id = $1`
-	if res, err := r.db.ExecContext(ctx, query, id); err != nil {
-		if aff, err := res.RowsAffected(); err == nil && aff == 0 {
-			return errs.ErrCollectionItemNotFound
-		}
+	res, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
 		return err
+	}
+	aff, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if aff == 0 {
+		return errs.ErrCollectionItemNotFound
 	}
 	return nil
 }
