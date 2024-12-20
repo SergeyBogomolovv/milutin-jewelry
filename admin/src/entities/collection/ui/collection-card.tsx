@@ -18,14 +18,14 @@ interface Props {
 
 export function CollectionCard({ collection }: Props) {
   return (
-    <Card>
+    <Card className='flex flex-col'>
       <CardHeader>
         <CardTitle>{collection.title}</CardTitle>
         <CardDescription>
           {collection.description ? collection.description : 'Описание отсутствует'}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className='grow'>
         <CustomImage
           className='w-full object-cover rounded-md'
           src={collection.image_id}

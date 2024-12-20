@@ -29,6 +29,7 @@ import {
 } from '@/shared/ui/dialog'
 
 export function CollectionForm({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
   const form = useForm<NewCollectionFields>({
     resolver: zodResolver(newCollectionSchema),
     defaultValues: {
@@ -56,10 +57,11 @@ export function CollectionForm({ children }: { children: React.ReactNode }) {
     }
     setImagePreview(null)
     form.reset()
+    setOpen(false)
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className='max-h-[90vh] overflow-scroll'>
         <DialogHeader>
@@ -124,7 +126,7 @@ export function CollectionForm({ children }: { children: React.ReactNode }) {
             </FormItem>
             <DialogFooter className='flex items-center gap-2'>
               <Button className='w-full' disabled={form.formState.isSubmitting} type='submit'>
-                Создать
+                {form.formState.isSubmitting ? 'Создание...' : 'Создать'}
               </Button>
               <DialogClose asChild>
                 <Button className='w-full' type='button' variant='secondary'>
