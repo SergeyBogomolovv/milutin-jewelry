@@ -1,17 +1,17 @@
 'use server'
 import { cookies } from 'next/headers'
 import { LoginFields, tokenReponse } from '../model/login-schema'
-import { fetcher } from '@/shared/api/fetcher'
+import { fetcher } from '@/shared/lib/fetcher'
 
-export const login = async (data: LoginFields): Promise<boolean> => {
-  const c = await cookies()
+export const login = async (body: LoginFields): Promise<boolean> => {
   try {
-    const res = await fetcher('/auth/login', { method: 'POST', body: JSON.stringify(data) })
-    if (res.status === 400) {
+    const c = await cookies()
+    const res = await fetcher('/auth/login', { method: 'POST', body: JSON.stringify(body) })
+    if (!res.ok) {
       return false
     }
-    const json = await res.json()
-    const { token } = tokenReponse.parse(json)
+    const data = await res.json()
+    const { token } = tokenReponse.parse(data)
     c.set('auth_token', token, {
       sameSite: 'strict',
       expires: new Date(Date.now() + 1000 * 60 * 60 * 24),

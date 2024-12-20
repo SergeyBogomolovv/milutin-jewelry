@@ -1,5 +1,5 @@
 'use server'
-import { fetcher } from '@/shared/api/fetcher'
+import { fetcher } from '@/shared/lib/fetcher'
 
 export async function sendCode() {
   try {

@@ -1,5 +1,5 @@
 'use server'
-import { fetcher } from '@/shared/api/fetcher'
+import { fetcher } from '@/shared/lib/fetcher'
 import { revalidateTag } from 'next/cache'
 
 export async function deleteCollection(id: number) {
