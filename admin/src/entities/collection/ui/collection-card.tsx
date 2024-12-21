@@ -26,9 +26,9 @@ export function CollectionCard({ collection }: Props) {
           {collection.description ? collection.description : 'Описание отсутствует'}
         </CardDescription>
       </CardHeader>
-      <CardContent className='grow'>
+      <CardContent className='grow flex'>
         <CustomImage
-          className='w-full object-cover rounded-md'
+          className='w-full object-cover rounded-md aspect-auto grow'
           src={collection.image_id}
           width={500}
           height={500}

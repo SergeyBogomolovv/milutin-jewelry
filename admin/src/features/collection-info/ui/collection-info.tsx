@@ -2,7 +2,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { InfoFields, infoSchema } from '../model/info-schema'
-import { Card, CardFooter, CardHeader } from '@/shared/ui/card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form'
 import { Button } from '@/shared/ui/button'
 import { updateCollection } from '../api/update-collection'
@@ -13,6 +12,7 @@ import { CustomImage } from '@/shared/ui/image'
 import { Paperclip } from 'lucide-react'
 import { useRef, useState } from 'react'
 import Image from 'next/image'
+import { Textarea } from '@/shared/ui/textarea'
 
 export function CollectionInfo({ collection }: { collection: Collection }) {
   const form = useForm<InfoFields>({
@@ -45,90 +45,77 @@ export function CollectionInfo({ collection }: { collection: Collection }) {
   }
 
   return (
-    <Card>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardHeader className='flex md:flex-row md:gap-6 gap-4'>
-            <div className='flex flex-col items-center gap-2'>
-              {imagePreview ? (
-                <Image
-                  className='size-40 object-cover rounded-md'
-                  width={500}
-                  height={500}
-                  src={imagePreview}
-                  alt='Uploaded Image'
-                />
-              ) : (
-                <CustomImage
-                  className='md:size-40 size-full sm:size-[70%] object-cover rounded-md'
-                  src={collection.image_id}
-                  alt='Collection Image'
-                  width={500}
-                  height={500}
-                />
-              )}
-              <input
-                type='file'
-                accept='image/*'
-                ref={fileInputRef}
-                hidden
-                onChange={handleImageChange}
-                aria-hidden='true'
-                tabIndex={-1}
-              />
-              <Button
-                className='w-full'
-                type='button'
-                variant='outline'
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Paperclip />
-                Изменить
-              </Button>
-            </div>
-            <div className='flex flex-col w-full md:gap-2 gap-4'>
-              <Image
-                src='/line.svg'
-                alt='line'
-                width={200}
-                height={200}
-                className='mx-auto mb-auto w-full'
-              />
-              <FormField
-                control={form.control}
-                name='title'
-                render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel>Название</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Название' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name='description'
-                render={({ field }) => (
-                  <FormItem className='w-full'>
-                    <FormLabel>Описание</FormLabel>
-                    <FormControl>
-                      <Input placeholder='Описание' {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </CardHeader>
-          <CardFooter>
-            <Button disabled={form.formState.isSubmitting} type='submit'>
-              {form.formState.isSubmitting ? 'Сохранение...' : 'Сохранить'}
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+    <Form {...form}>
+      <form className='flex md:flex-row md:gap-6 gap-4' onSubmit={form.handleSubmit(onSubmit)}>
+        <div className='flex flex-col items-center gap-2'>
+          {imagePreview ? (
+            <Image
+              className='md:size-44 sm:size-40 size-36 object-cover rounded-md'
+              width={500}
+              height={500}
+              src={imagePreview}
+              alt='Uploaded Image'
+            />
+          ) : (
+            <CustomImage
+              className='md:size-44 sm:size-40 size-36 object-cover rounded-md'
+              src={collection.image_id}
+              alt='Collection Image'
+              width={500}
+              height={500}
+            />
+          )}
+          <input
+            type='file'
+            accept='image/*'
+            ref={fileInputRef}
+            hidden
+            onChange={handleImageChange}
+            aria-hidden='true'
+            tabIndex={-1}
+          />
+          <Button
+            className='w-full'
+            type='button'
+            variant='outline'
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Paperclip />
+            Изменить
+          </Button>
+        </div>
+        <div className='flex flex-col w-full md:gap-2 gap-4 justify-between'>
+          <FormField
+            control={form.control}
+            name='title'
+            render={({ field }) => (
+              <FormItem className='w-full'>
+                <FormLabel>Название</FormLabel>
+                <FormControl>
+                  <Input placeholder='Название' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='description'
+            render={({ field }) => (
+              <FormItem className='w-full'>
+                <FormLabel>Описание</FormLabel>
+                <FormControl>
+                  <Textarea className='resize-none' placeholder='Описание' {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button className='w-fit' disabled={form.formState.isSubmitting} type='submit'>
+            {form.formState.isSubmitting ? 'Сохранение...' : 'Сохранить'}
+          </Button>
+        </div>
+      </form>
+    </Form>
   )
 }

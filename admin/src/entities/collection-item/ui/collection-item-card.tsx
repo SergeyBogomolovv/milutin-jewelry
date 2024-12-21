@@ -21,9 +21,9 @@ export function CollectionItemCard({ item }: { item: CollectionItem }) {
           {item.description ? item.description : 'Описание отсутствует'}
         </CardDescription>
       </CardHeader>
-      <CardContent className='grow'>
+      <CardContent className='grow flex'>
         <CustomImage
-          className='w-full object-cover rounded-md'
+          className='w-full object-cover rounded-md aspect-auto grow'
           src={item.image_id}
           width={500}
           height={500}
