@@ -1,6 +1,6 @@
 'use server'
 import { fetcher } from '@/shared/lib/fetcher'
-import { InfoFields } from '../model/info-schema'
+import { UpdateCollectionFields } from '../model/update.schema'
 import { revalidateTag } from 'next/cache'
 
 interface UpdateCollectionResponse {
@@ -9,7 +9,7 @@ interface UpdateCollectionResponse {
 }
 
 export const updateCollection = async (
-  data: InfoFields,
+  data: UpdateCollectionFields,
   id: number,
 ): Promise<UpdateCollectionResponse> => {
   try {

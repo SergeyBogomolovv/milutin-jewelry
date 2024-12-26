@@ -92,7 +92,7 @@ export function UpdateCollectionItemForm({
               <FormLabel>Изображение</FormLabel>
               {imagePreview ? (
                 <Image
-                  className='w-[70%] mx-auto rounded-md'
+                  className='w-full rounded-md'
                   width={500}
                   height={500}
                   src={imagePreview}
@@ -100,7 +100,7 @@ export function UpdateCollectionItemForm({
                 />
               ) : (
                 <CustomImage
-                  className='w-[70%] mx-auto rounded-md'
+                  className='w-full rounded-md'
                   src={collectionItem.image_id}
                   alt={collectionItem.title}
                   width={500}

@@ -12,6 +12,7 @@ import { CustomImage } from '@/shared/ui/image'
 import Link from 'next/link'
 import DeleteButton from './delete-button'
 import { Pencil } from 'lucide-react'
+import { UpdateCollectionForm } from '@/features/collection-form'
 
 interface Props {
   collection: Collection
@@ -26,22 +27,25 @@ export function CollectionCard({ collection }: Props) {
           {collection.description ? collection.description : 'Описание отсутствует'}
         </CardDescription>
       </CardHeader>
-      <CardContent className='grow flex'>
-        <CustomImage
-          className='w-full object-cover rounded-md aspect-auto grow'
-          src={collection.image_id}
-          width={500}
-          height={500}
-          alt={collection.title}
-        />
-      </CardContent>
+      <Link href={`/collections/${collection.id}`}>
+        <CardContent className='grow flex'>
+          <CustomImage
+            className='w-full object-cover rounded-md aspect-auto grow'
+            src={collection.image_id}
+            width={500}
+            height={500}
+            alt={collection.title}
+          />
+        </CardContent>
+      </Link>
       <CardFooter className='flex items-center gap-2'>
-        <Button asChild variant={'outline'}>
-          <Link href={`/collections/${collection.id}`}>
+        <UpdateCollectionForm collection={collection}>
+          <Button variant={'outline'}>
             <Pencil />
-            Управление
-          </Link>
-        </Button>
+            Редактировать
+          </Button>
+        </UpdateCollectionForm>
+
         <DeleteButton id={collection.id} />
       </CardFooter>
     </Card>
