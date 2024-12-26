@@ -11,6 +11,7 @@ import { CustomImage } from '@/shared/ui/image'
 import { Button } from '@/shared/ui/button'
 import DeleteButton from './delete-button'
 import { Pencil } from 'lucide-react'
+import { UpdateCollectionItemForm } from '@/features/collection-item-form/ui/update-collection-item'
 
 export function CollectionItemCard({ item }: { item: CollectionItem }) {
   return (
@@ -31,10 +32,12 @@ export function CollectionItemCard({ item }: { item: CollectionItem }) {
         />
       </CardContent>
       <CardFooter className='flex items-center gap-2'>
-        <Button variant={'outline'}>
-          <Pencil />
-          Редактировать
-        </Button>
+        <UpdateCollectionItemForm collectionItem={item}>
+          <Button variant={'outline'}>
+            <Pencil />
+            Редактировать
+          </Button>
+        </UpdateCollectionItemForm>
         <DeleteButton id={item.id} />
       </CardFooter>
     </Card>
