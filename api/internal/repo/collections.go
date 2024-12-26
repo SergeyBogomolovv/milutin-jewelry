@@ -50,7 +50,7 @@ func (r *collectionsRepo) GetByID(ctx context.Context, id int) (*entities.Collec
 
 func (r *collectionsRepo) GetAll(ctx context.Context) ([]*entities.Collection, error) {
 	collections := make([]*entities.Collection, 0)
-	query := `SELECT collection_id, title, description, image_id FROM collections ORDER BY collection_id`
+	query := `SELECT collection_id, title, description, image_id FROM collections ORDER BY created_at DESC`
 	if err := r.db.SelectContext(ctx, &collections, query); err != nil {
 		return nil, err
 	}

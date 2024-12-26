@@ -74,7 +74,11 @@ func (r *collectionItemsRepo) GetOne(ctx context.Context, id int) (*entities.Col
 
 func (r *collectionItemsRepo) GetByCollection(ctx context.Context, id int) ([]*entities.CollectionItem, error) {
 	collections := make([]*entities.CollectionItem, 0)
-	query := `SELECT item_id, collection_id, title, description, image_id FROM collection_items WHERE collection_id = $1`
+	query := `
+	SELECT item_id, collection_id, title, description, image_id
+	FROM collection_items 
+	WHERE collection_id = $1 
+	ORDER BY created_at DESC`
 	if err := r.db.SelectContext(ctx, &collections, query, id); err != nil {
 		return nil, err
 	}
