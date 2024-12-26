@@ -2,18 +2,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRef, useState } from 'react'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form'
+import { Form, FormItem, FormLabel } from '@/shared/ui/form'
 import { Button } from '@/shared/ui/button'
 import { Paperclip } from 'lucide-react'
-import { Input } from '@/shared/ui/input'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import {
@@ -30,6 +21,8 @@ import { CollectionItem } from '@/entities/collection-item'
 import { UpdateItemFields, updateItemSchema } from '../model/update-item.schema'
 import { updateCollectionItem } from '../api/update-item'
 import { CustomImage } from '@/shared/ui/image'
+import { FormInputField } from '@/shared/ui/form-input-field'
+import HiddenInput from '@/shared/ui/hidden-input'
 
 export function UpdateCollectionItemForm({
   children,
@@ -39,6 +32,10 @@ export function UpdateCollectionItemForm({
   collectionItem: CollectionItem
 }) {
   const [open, setOpen] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
   const form = useForm<UpdateItemFields>({
     resolver: zodResolver(updateItemSchema),
     defaultValues: {
@@ -46,8 +43,6 @@ export function UpdateCollectionItemForm({
       description: collectionItem.description || '',
     },
   })
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -55,6 +50,7 @@ export function UpdateCollectionItemForm({
       const imageUrl = URL.createObjectURL(file)
       setImagePreview(imageUrl)
       form.setValue('image', file)
+      return () => URL.revokeObjectURL(imageUrl)
     }
   }
 
@@ -78,33 +74,19 @@ export function UpdateCollectionItemForm({
         </DialogHeader>
         <Form {...form}>
           <form className='flex flex-col gap-4' onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
+            <FormInputField
               control={form.control}
               name='title'
-              render={({ field }) => (
-                <FormItem className='w-full'>
-                  <FormLabel>Название</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Название' {...field} />
-                  </FormControl>
-                  <FormDescription>Необязательное поле.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label='Название'
+              placeholder='Название'
+              description='Необязательное поле.'
             />
-            <FormField
+            <FormInputField
               control={form.control}
               name='description'
-              render={({ field }) => (
-                <FormItem className='w-full'>
-                  <FormLabel>Описание</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Описание' {...field} />
-                  </FormControl>
-                  <FormDescription>Необязательное поле.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label='Описание'
+              placeholder='Описание'
+              description='Необязательное поле.'
             />
             <FormItem className='w-full flex flex-col gap-2'>
               <FormLabel>Изображение</FormLabel>
@@ -114,28 +96,18 @@ export function UpdateCollectionItemForm({
                   width={500}
                   height={500}
                   src={imagePreview}
-                  alt='Uploaded Image'
+                  alt='Загруженная картинка'
                 />
               ) : (
                 <CustomImage
                   className='w-[70%] mx-auto rounded-md'
                   src={collectionItem.image_id}
-                  alt='collection image'
+                  alt={collectionItem.title}
                   width={500}
                   height={500}
                 />
               )}
-              <FormControl>
-                <input
-                  type='file'
-                  accept='image/*'
-                  ref={fileInputRef}
-                  hidden
-                  onChange={handleImageChange}
-                  aria-hidden='true'
-                  tabIndex={-1}
-                />
-              </FormControl>
+              <HiddenInput ref={fileInputRef} handleImageChange={handleImageChange} />
               <Button type='button' variant='outline' onClick={() => fileInputRef.current?.click()}>
                 <Paperclip />
                 Изменить изображение

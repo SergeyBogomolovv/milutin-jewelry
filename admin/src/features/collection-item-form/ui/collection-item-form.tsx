@@ -2,18 +2,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRef, useState } from 'react'
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form'
+import { Form, FormItem, FormLabel } from '@/shared/ui/form'
 import { Button } from '@/shared/ui/button'
 import { Paperclip } from 'lucide-react'
-import { Input } from '@/shared/ui/input'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import {
@@ -27,9 +18,15 @@ import {
 } from '@/shared/ui/dialog'
 import { NewItemFields, newItemSchema } from '../model/new-item.schema'
 import { createCollectionItem } from '../api/create-item'
+import { FormInputField } from '@/shared/ui/form-input-field'
+import HiddenInput from '@/shared/ui/hidden-input'
 
 export function CollectionItemForm({ children, id }: { children: React.ReactNode; id: string }) {
   const [open, setOpen] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
   const form = useForm<NewItemFields>({
     resolver: zodResolver(newItemSchema),
     defaultValues: {
@@ -37,8 +34,6 @@ export function CollectionItemForm({ children, id }: { children: React.ReactNode
       description: '',
     },
   })
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -46,6 +41,7 @@ export function CollectionItemForm({ children, id }: { children: React.ReactNode
       const imageUrl = URL.createObjectURL(file)
       setImagePreview(imageUrl)
       form.setValue('image', file)
+      return () => URL.revokeObjectURL(imageUrl)
     }
   }
 
@@ -69,33 +65,19 @@ export function CollectionItemForm({ children, id }: { children: React.ReactNode
         </DialogHeader>
         <Form {...form}>
           <form className='flex flex-col gap-4' onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
+            <FormInputField
               control={form.control}
               name='title'
-              render={({ field }) => (
-                <FormItem className='w-full'>
-                  <FormLabel>Название</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Название' {...field} />
-                  </FormControl>
-                  <FormDescription>Необязательное поле.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label='Название'
+              placeholder='Название'
+              description='Необязательное поле.'
             />
-            <FormField
+            <FormInputField
               control={form.control}
               name='description'
-              render={({ field }) => (
-                <FormItem className='w-full'>
-                  <FormLabel>Описание</FormLabel>
-                  <FormControl>
-                    <Input placeholder='Описание' {...field} />
-                  </FormControl>
-                  <FormDescription>Необязательное поле.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label='Описание'
+              placeholder='Описание'
+              description='Необязательное поле.'
             />
             <FormItem className='w-full flex flex-col gap-2'>
               <FormLabel>Изображение</FormLabel>
@@ -108,17 +90,7 @@ export function CollectionItemForm({ children, id }: { children: React.ReactNode
                   alt='Uploaded Image'
                 />
               )}
-              <FormControl>
-                <input
-                  type='file'
-                  accept='image/*'
-                  ref={fileInputRef}
-                  hidden
-                  onChange={handleImageChange}
-                  aria-hidden='true'
-                  tabIndex={-1}
-                />
-              </FormControl>
+              <HiddenInput ref={fileInputRef} handleImageChange={handleImageChange} />
               <Button type='button' variant='outline' onClick={() => fileInputRef.current?.click()}>
                 <Paperclip />
                 {imagePreview ? 'Изменить изображение' : 'Прикрепить изображение'}

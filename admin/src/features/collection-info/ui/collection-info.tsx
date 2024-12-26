@@ -6,15 +6,20 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Button } from '@/shared/ui/button'
 import { updateCollection } from '../api/update-collection'
 import { toast } from 'sonner'
-import { Input } from '@/shared/ui/input'
 import { Collection } from '@/entities/collection'
 import { CustomImage } from '@/shared/ui/image'
 import { Paperclip } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { ChangeEventHandler, useRef, useState } from 'react'
 import Image from 'next/image'
 import { Textarea } from '@/shared/ui/textarea'
+import HiddenInput from '@/shared/ui/hidden-input'
+import { FormInputField } from '@/shared/ui/form-input-field'
 
 export function CollectionInfo({ collection }: { collection: Collection }) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
   const form = useForm<InfoFields>({
     resolver: zodResolver(infoSchema),
     defaultValues: {
@@ -23,22 +28,20 @@ export function CollectionInfo({ collection }: { collection: Collection }) {
     },
   })
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     const file = event.target.files?.[0]
     if (file) {
       const imageUrl = URL.createObjectURL(file)
       setImagePreview(imageUrl)
       form.setValue('image', file)
+      return () => URL.revokeObjectURL(imageUrl)
     }
   }
 
   const onSubmit = async (data: InfoFields) => {
-    const ok = await updateCollection(data, collection.id)
-    if (!ok) {
-      toast.error('Ошибка обновления коллекции')
+    const result = await updateCollection(data, collection.id)
+    if (!result.success) {
+      toast.error(`Ошибка обновления коллекции: ${result.error || 'Неизвестная ошибка'}`)
       return
     }
     toast.success('Коллекция обновлена')
@@ -54,26 +57,18 @@ export function CollectionInfo({ collection }: { collection: Collection }) {
               width={500}
               height={500}
               src={imagePreview}
-              alt='Uploaded Image'
+              alt='Загруженная картинка'
             />
           ) : (
             <CustomImage
               className='md:size-44 sm:size-40 size-36 object-cover rounded-md'
               src={collection.image_id}
-              alt='Collection Image'
+              alt={collection.title}
               width={500}
               height={500}
             />
           )}
-          <input
-            type='file'
-            accept='image/*'
-            ref={fileInputRef}
-            hidden
-            onChange={handleImageChange}
-            aria-hidden='true'
-            tabIndex={-1}
-          />
+          <HiddenInput ref={fileInputRef} handleImageChange={handleImageChange} />
           <Button
             className='w-full'
             type='button'
@@ -85,18 +80,11 @@ export function CollectionInfo({ collection }: { collection: Collection }) {
           </Button>
         </div>
         <div className='flex flex-col w-full md:gap-2 gap-4 justify-between'>
-          <FormField
+          <FormInputField
             control={form.control}
             name='title'
-            render={({ field }) => (
-              <FormItem className='w-full'>
-                <FormLabel>Название</FormLabel>
-                <FormControl>
-                  <Input placeholder='Название' {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label='Название'
+            placeholder='Название'
           />
           <FormField
             control={form.control}
