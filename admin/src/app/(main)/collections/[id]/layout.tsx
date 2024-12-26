@@ -12,21 +12,27 @@ export default async function CollectionLayout({
   params: Promise<{ id: string }>
 }>) {
   const { id } = await params
-  //TODO: handle error
-  const collection = await getCollection(id)
+
+  const { success, data } = await getCollection(id)
 
   return (
     <div className='flex flex-col w-full'>
       <header className='p-4 items-center flex pt-4'>
         <SidebarTrigger />
         <div className='flex items-center justify-between w-full'>
-          <h2 className='font-bold text-lg'>{collection.title}</h2>
-          <CollectionItemForm id={id}>
-            <Button variant={'outline'}>
-              <Plus />
-              Добавить украшение
-            </Button>
-          </CollectionItemForm>
+          {success && data ? (
+            <>
+              <h2 className='font-bold text-lg'>{data.title}</h2>
+              <CollectionItemForm id={id}>
+                <Button variant={'outline'}>
+                  <Plus />
+                  Добавить украшение
+                </Button>
+              </CollectionItemForm>
+            </>
+          ) : (
+            <h2 className='font-bold text-lg'>Коллекция не найдена</h2>
+          )}
         </div>
       </header>
       {children}

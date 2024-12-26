@@ -5,20 +5,22 @@ import { getCollections } from '@/entities/collection'
 import Link from 'next/link'
 
 export default function CollectionsGroup() {
-  const collections = use(getCollections())
+  const { data: collections, success } = use(getCollections())
 
   return (
     <SidebarMenu>
-      {collections.map((collection) => (
-        <SidebarMenuItem key={collection.id}>
-          <SidebarMenuButton asChild>
-            <Link href={`/collections/${collection.id}`}>
-              <ScrollText />
-              <span>{collection.title}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      {!success && <span>Ошибка загрузки коллекций</span>}
+      {collections &&
+        collections.map((collection) => (
+          <SidebarMenuItem key={collection.id}>
+            <SidebarMenuButton asChild>
+              <Link href={`/collections/${collection.id}`}>
+                <ScrollText />
+                <span>{collection.title}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
     </SidebarMenu>
   )
 }

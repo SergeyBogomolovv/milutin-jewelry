@@ -1,4 +1,5 @@
 'use client'
+
 import { Button } from '@/shared/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -8,23 +9,25 @@ import { Trash } from 'lucide-react'
 
 export default function DeleteButton({ id }: { id: number }) {
   const [isLoading, setLoading] = useState(false)
+
   const deleteHandler = async () => {
     setLoading(true)
-    const ok = await deleteCollectionItem(id)
+    const result = await deleteCollectionItem(id)
     setLoading(false)
-    if (!ok) {
-      toast.error('Ошибка удаления украшения')
+    if (!result.success) {
+      toast.error(`Ошибка удаления украшения: ${result.error || 'Неизвестная ошибка'}`)
       return
     }
-    toast.success('Украшение удалено')
+    toast.success('Украшение успешно удалено')
   }
+
   return (
     <ConfirmDialog
       title='Подтвердите удаление'
-      description={`Вы действительно хотите удалить это украшение?`}
+      description='Вы действительно хотите удалить это украшение?'
       handleConfirm={deleteHandler}
     >
-      <Button disabled={isLoading} variant={'destructive'}>
+      <Button disabled={isLoading} variant='destructive'>
         <Trash />
         {isLoading ? 'Удаление...' : 'Удалить'}
       </Button>

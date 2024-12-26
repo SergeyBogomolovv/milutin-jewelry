@@ -1,16 +1,25 @@
 'use server'
+
 import { fetcher } from '@/shared/lib/fetcher'
 import { revalidateTag } from 'next/cache'
 
-export async function deleteCollectionItem(id: number) {
+interface DeleteCollectionItemResponse {
+  success: boolean
+  error?: string
+}
+
+export async function deleteCollectionItem(id: number): Promise<DeleteCollectionItemResponse> {
   try {
     const res = await fetcher(`/collection-items/delete/${id}`, { method: 'DELETE' })
+
     if (!res.ok) {
-      return false
+      const errorMessage = await res.text()
+      return { success: false, error: errorMessage || 'Ошибка при удалении украшения' }
     }
+
     revalidateTag('collection-items')
-    return true
+    return { success: true }
   } catch (error) {
-    return false
+    return { success: false, error: (error as Error).message || 'Произошла ошибка при удалении' }
   }
 }
