@@ -6,8 +6,6 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 )
 
-type Middleware func(http.Handler) http.Handler
-
 func NewAuthMiddleware(secret string) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

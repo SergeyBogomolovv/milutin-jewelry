@@ -16,7 +16,7 @@ type CodesRepo interface {
 }
 
 type MailService interface {
-	SendCodeToAdmin(ctx context.Context, code string) error
+	SendCodeToAdmin(code string)
 }
 
 type authUsecase struct {
@@ -37,10 +37,7 @@ func (u *authUsecase) SendCode(ctx context.Context) error {
 		return err
 	}
 
-	if err := u.ms.SendCodeToAdmin(ctx, code); err != nil {
-		u.log.Error("failed to send email", "err", err)
-		return err
-	}
+	go u.ms.SendCodeToAdmin(code)
 
 	return nil
 }

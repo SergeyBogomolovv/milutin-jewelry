@@ -9,7 +9,7 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/entities"
 	errs "github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/errors"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
-	testutils "github.com/SergeyBogomolovv/milutin-jewelry/pkg/test-utils"
+	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -18,13 +18,13 @@ func TestCollectionItemsUsecase_Create(t *testing.T) {
 	mockRepo := new(collectionItemsRepoMock)
 	mockFS := new(filesServiceMock)
 	ctx := context.Background()
-	usecase := usecase.NewCollectionItemsUsecase(testutils.NewTestLogger(), mockFS, mockRepo)
+	usecase := usecase.NewCollectionItemsUsecase(utils.NewTestLogger(), mockFS, mockRepo)
 	t.Run("success", func(t *testing.T) {
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("image_url", nil).Once()
 		mockRepo.On("Create", ctx, mock.Anything).Return(1, nil).Once()
 		mockRepo.On("CollectionExists", ctx, mock.Anything).Return(nil).Once()
 
-		id, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: testutils.NewTestFile("image")})
+		id, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: utils.NewTestFile("image")})
 		assert.NoError(t, err)
 		assert.Equal(t, 1, id)
 		mockFS.AssertExpectations(t)
@@ -33,7 +33,7 @@ func TestCollectionItemsUsecase_Create(t *testing.T) {
 	t.Run("failed to upload image", func(t *testing.T) {
 		mockRepo.On("CollectionExists", ctx, mock.Anything).Return(nil).Once()
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("", assert.AnError).Once()
-		_, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: testutils.NewTestFile("image")})
+		_, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: utils.NewTestFile("image")})
 		assert.Error(t, err)
 		mockFS.AssertExpectations(t)
 	})
@@ -48,7 +48,7 @@ func TestCollectionItemsUsecase_Create(t *testing.T) {
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("image_url", nil).Once()
 		mockFS.On("DeleteImage", ctx, mock.Anything).Return(nil).Once()
 		mockRepo.On("Create", ctx, mock.Anything).Return(0, assert.AnError).Once()
-		_, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: testutils.NewTestFile("image")})
+		_, err := usecase.Create(ctx, &dto.CreateCollectionItemRequest{Image: utils.NewTestFile("image")})
 		assert.Error(t, err)
 	})
 	mockFS.AssertExpectations(t)
@@ -59,14 +59,14 @@ func TestCollectionItemsUsecase_Update(t *testing.T) {
 	mockRepo := new(collectionItemsRepoMock)
 	mockFS := new(filesServiceMock)
 	ctx := context.Background()
-	usecase := usecase.NewCollectionItemsUsecase(testutils.NewTestLogger(), mockFS, mockRepo)
+	usecase := usecase.NewCollectionItemsUsecase(utils.NewTestLogger(), mockFS, mockRepo)
 	t.Run("success", func(t *testing.T) {
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("image_url", nil).Once()
 		mockRepo.On("GetOne", ctx, mock.Anything).Return(&entities.CollectionItem{ImageID: "old_image_id"}, nil).Once()
 		mockFS.On("DeleteImage", ctx, "old_image_id").Return(nil).Once()
 		mockRepo.On("Update", ctx, mock.Anything).Return(nil).Once()
 
-		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: testutils.NewTestFile("image")})
+		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: utils.NewTestFile("image")})
 
 		assert.NoError(t, err)
 		mockFS.AssertExpectations(t)
@@ -75,7 +75,7 @@ func TestCollectionItemsUsecase_Update(t *testing.T) {
 	t.Run("failed to upload image", func(t *testing.T) {
 		mockRepo.On("GetOne", ctx, mock.Anything).Return(&entities.CollectionItem{ImageID: "old_image_id"}, nil).Once()
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("", assert.AnError).Once()
-		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: testutils.NewTestFile("image")})
+		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: utils.NewTestFile("image")})
 		assert.Error(t, err)
 		mockFS.AssertExpectations(t)
 	})
@@ -89,7 +89,7 @@ func TestCollectionItemsUsecase_Update(t *testing.T) {
 		mockFS.On("UploadImage", ctx, mock.Anything, mock.Anything).Return("image_url", nil).Once()
 		mockRepo.On("GetOne", ctx, mock.Anything).Return(&entities.CollectionItem{ImageID: "old_image_id"}, nil).Once()
 		mockRepo.On("Update", ctx, mock.Anything).Return(assert.AnError).Once()
-		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: testutils.NewTestFile("image")})
+		err := usecase.Update(ctx, &dto.UpdateCollectionItemRequest{Image: utils.NewTestFile("image")})
 		assert.Error(t, err)
 		mockRepo.AssertExpectations(t)
 		mockFS.AssertExpectations(t)
@@ -100,7 +100,7 @@ func TestCollectionItemsUsecase_Delete(t *testing.T) {
 	mockRepo := new(collectionItemsRepoMock)
 	mockFS := new(filesServiceMock)
 	ctx := context.Background()
-	usecase := usecase.NewCollectionItemsUsecase(testutils.NewTestLogger(), mockFS, mockRepo)
+	usecase := usecase.NewCollectionItemsUsecase(utils.NewTestLogger(), mockFS, mockRepo)
 	t.Run("success", func(t *testing.T) {
 		mockFS.On("DeleteImage", ctx, mock.Anything).Return(nil).Once()
 		mockRepo.On("GetOne", ctx, 1).Return(&entities.CollectionItem{ImageID: "image_id", ID: 1}, nil).Once()
@@ -132,7 +132,7 @@ func TestCollectionItemsUsecase_Delete(t *testing.T) {
 func TestCollectionItemsUsecase_GetByCollection(t *testing.T) {
 	mockRepo := new(collectionItemsRepoMock)
 	ctx := context.Background()
-	usecase := usecase.NewCollectionItemsUsecase(testutils.NewTestLogger(), nil, mockRepo)
+	usecase := usecase.NewCollectionItemsUsecase(utils.NewTestLogger(), nil, mockRepo)
 	t.Run("success", func(t *testing.T) {
 		mockRepo.On("CollectionExists", ctx, 1).Return(nil).Once()
 		mockRepo.On("GetByCollection", ctx, 1).Return([]*entities.CollectionItem{{ID: 1}}, nil).Once()
@@ -159,7 +159,7 @@ func TestCollectionItemsUsecase_GetByCollection(t *testing.T) {
 func TestCollectionItemsUsecase_GetOne(t *testing.T) {
 	mockRepo := new(collectionItemsRepoMock)
 	ctx := context.Background()
-	usecase := usecase.NewCollectionItemsUsecase(testutils.NewTestLogger(), nil, mockRepo)
+	usecase := usecase.NewCollectionItemsUsecase(utils.NewTestLogger(), nil, mockRepo)
 	t.Run("success", func(t *testing.T) {
 		mockRepo.On("GetOne", ctx, 1).Return(&entities.CollectionItem{ID: 1}, nil).Once()
 		res, err := usecase.GetOne(ctx, 1)
