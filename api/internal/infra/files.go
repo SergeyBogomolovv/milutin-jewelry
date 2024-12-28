@@ -25,6 +25,8 @@ type filesService struct {
 	log    *slog.Logger
 }
 
+var qualities = map[string]int{"low": 1, "high": 90}
+
 func NewFilesService(log *slog.Logger, c cfg.ObjectStorageConfig) *filesService {
 	config, err := config.LoadDefaultConfig(context.Background(),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(c.AccessKey, c.SecretKey, "")),
@@ -39,33 +41,15 @@ func NewFilesService(log *slog.Logger, c cfg.ObjectStorageConfig) *filesService 
 	return &filesService{client: client, bucket: c.Bucket, log: log.With(slog.String("op", "filesService"))}
 }
 
-func (s *filesService) Delete(ctx context.Context, key string) error {
-	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
-		Bucket: aws.String(s.bucket),
-		Key:    aws.String(key),
-	})
-	return err
-}
-
-func (f *filesService) Upload(ctx context.Context, key string, data []byte) error {
-	_, err := f.client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(f.bucket),
-		Key:    aws.String(key),
-		Body:   bytes.NewReader(data),
-	})
-	return err
-}
-
 func (s *filesService) DeleteImage(ctx context.Context, key string) error {
 	s.log.Info("deleting image", "key", key)
 	var wg sync.WaitGroup
 
-	qualities := []string{"low", "med", "high"}
-	for _, quality := range qualities {
+	for quality := range qualities {
 		wg.Add(1)
 		go func(quality string) {
 			defer wg.Done()
-			if err := s.Delete(ctx, fmt.Sprintf("%s_%s.jpg", key, quality)); err != nil {
+			if err := s.delete(ctx, fmt.Sprintf("%s_%s.jpg", key, quality)); err != nil {
 				s.log.Error("failed to delete image", "err", err, "key", key, "quality", quality)
 			}
 		}(quality)
@@ -87,7 +71,7 @@ func (s *filesService) UploadImage(ctx context.Context, file multipart.File, key
 	}
 	imageID := uuid.NewString()
 
-	results := compressImage(ctx, img)
+	results := compressImagesChan(ctx, img)
 
 	for res := range results {
 		if res.Err != nil {
@@ -95,11 +79,13 @@ func (s *filesService) UploadImage(ctx context.Context, file multipart.File, key
 			s.log.Error("failed to compress image", "err", res.Err, "quality", res.Quality)
 			return "", res.Err
 		}
-		if err := s.Upload(ctx, fmt.Sprintf("%s/%s_%s.jpg", key, imageID, res.Quality), res.Data); err != nil {
+		if err := s.upload(ctx, fmt.Sprintf("%s/%s_%s.jpg", key, imageID, res.Quality), res.Data); err != nil {
 			cancel()
+			s.log.Error("failed to upload image", "err", err, "quality", res.Quality)
 			return "", err
 		}
 	}
+
 	return fmt.Sprintf("%s/%s", key, imageID), nil
 }
 
@@ -109,9 +95,8 @@ type result struct {
 	Err     error
 }
 
-func compressImage(ctx context.Context, img image.Image) <-chan result {
+func compressImagesChan(ctx context.Context, img image.Image) <-chan result {
 	var wg sync.WaitGroup
-	qualities := map[string]int{"low": 30, "med": 60, "high": 90}
 	results := make(chan result, len(qualities))
 
 	for lvl, quality := range qualities {
@@ -141,6 +126,23 @@ func compressImage(ctx context.Context, img image.Image) <-chan result {
 	}()
 
 	return results
+}
+
+func (s *filesService) delete(ctx context.Context, key string) error {
+	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(key),
+	})
+	return err
+}
+
+func (f *filesService) upload(ctx context.Context, key string, data []byte) error {
+	_, err := f.client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(f.bucket),
+		Key:    aws.String(key),
+		Body:   bytes.NewReader(data),
+	})
+	return err
 }
 
 func compressJPEG(img image.Image, quality int) ([]byte, error) {
