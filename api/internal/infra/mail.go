@@ -34,7 +34,7 @@ func (s *mailService) SendCodeToAdmin(code string) {
 	m.SetHeader("To", s.to)
 
 	m.SetHeader("Subject", "Вход в админ панель milutin-jewelry")
-	m.SetBody("text/html", fmt.Sprintf("Код авторизации: <b>%s</b>", code))
+	m.SetBody("text/html", fmt.Sprintf("Код авторизации: <b>%s</b>. Код действителен в течении 5 минут", code))
 
 	d := gomail.NewDialer(s.host, s.port, s.user, s.pass)
 
