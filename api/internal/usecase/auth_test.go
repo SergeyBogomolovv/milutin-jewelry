@@ -6,7 +6,7 @@ import (
 
 	errs "github.com/SergeyBogomolovv/milutin-jewelry/internal/domain/errors"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
-	testutils "github.com/SergeyBogomolovv/milutin-jewelry/pkg/test-utils"
+	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -15,7 +15,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 	ctx := context.Background()
 	mockCodesRepo := new(mockCodesRepo)
 
-	usecase := usecase.NewAuthUsecase(testutils.NewTestLogger(), mockCodesRepo, nil, "secret")
+	usecase := usecase.NewAuthUsecase(utils.NewTestLogger(), mockCodesRepo, nil, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockCodesRepo.On("Check", ctx, "code").Return(nil).Once()
@@ -61,11 +61,11 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 	mockCodesRepo := new(mockCodesRepo)
 	mockMailService := new(mockMailService)
 
-	usecase := usecase.NewAuthUsecase(testutils.NewTestLogger(), mockCodesRepo, mockMailService, "secret")
+	usecase := usecase.NewAuthUsecase(utils.NewTestLogger(), mockCodesRepo, mockMailService, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockCodesRepo.On("Create", ctx).Return("code", nil).Once()
-		mockMailService.On("SendCodeToAdmin", ctx, "code").Return(nil).Once()
+		mockMailService.On("SendCodeToAdmin", "code").Return(nil).Once()
 		err := usecase.SendCode(ctx)
 		assert.NoError(t, err)
 
@@ -74,15 +74,6 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 
 	t.Run("failed to create code", func(t *testing.T) {
 		mockCodesRepo.On("Create", ctx).Return("", assert.AnError).Once()
-		err := usecase.SendCode(ctx)
-		assert.Error(t, err)
-
-		mockCodesRepo.AssertExpectations(t)
-	})
-
-	t.Run("failed to send email", func(t *testing.T) {
-		mockCodesRepo.On("Create", ctx).Return("code", nil).Once()
-		mockMailService.On("SendCodeToAdmin", ctx, "code").Return(assert.AnError).Once()
 		err := usecase.SendCode(ctx)
 		assert.Error(t, err)
 
@@ -113,7 +104,7 @@ type mockMailService struct {
 	mock.Mock
 }
 
-func (m *mockMailService) SendCodeToAdmin(ctx context.Context, code string) error {
-	args := m.Called(ctx, code)
-	return args.Error(0)
+func (m *mockMailService) SendCodeToAdmin(code string) {
+	args := m.Called(code)
+	args.Error(0)
 }
