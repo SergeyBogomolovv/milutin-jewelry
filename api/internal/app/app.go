@@ -8,6 +8,7 @@ import (
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
+	authcontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
 	repo "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage"
@@ -41,7 +42,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codeStorage := codestorage.New(redis)
 	authUsecase := authusecase.New(log, codeStorage, mailService, cfg.JWTSecret)
-	controller.RegisterAuthController(log, router, authUsecase)
+	authcontroller.Register(log, router, authUsecase)
 
 	return &application{
 		srv: &http.Server{Addr: cfg.Addr, Handler: corsMiddleware(loggerMiddleware(router))},
