@@ -19,42 +19,46 @@ func TestItemsUsecase_Create(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		image := utils.NewTestFile("image")
-		item := &uc.Item{CollectionID: 1, ImageID: "image_id"}
-		mockStorage.On("CollectionExists", ctx, item.CollectionID).Return(true, nil).Once()
-		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return(item.ImageID, nil).Once()
+		payload := uc.CreateItemPayload{CollectionID: 1, Title: "title"}
+		mockStorage.On("CollectionExists", ctx, payload.CollectionID).Return(true, nil).Once()
+		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("image_id", nil).Once()
 		mockStorage.On("Save", ctx, mock.Anything).Return(nil).Once()
 
-		err := usecase.Create(ctx, item, image)
+		item, err := usecase.Create(ctx, payload, image)
 		assert.NoError(t, err)
+		assert.Equal(t, payload.Title, item.Title)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)
 	})
 
 	t.Run("collection not found", func(t *testing.T) {
-		item := &uc.Item{CollectionID: 1}
-		mockStorage.On("CollectionExists", ctx, item.CollectionID).Return(false, nil).Once()
-		err := usecase.Create(ctx, item, nil)
+		payload := uc.CreateItemPayload{CollectionID: 1}
+		mockStorage.On("CollectionExists", ctx, payload.CollectionID).Return(false, nil).Once()
+		item, err := usecase.Create(ctx, payload, nil)
+		assert.Nil(t, item)
 		assert.ErrorIs(t, err, uc.ErrCollectionNotFound)
 		mockStorage.AssertExpectations(t)
 	})
 
 	t.Run("failed to upload image", func(t *testing.T) {
-		item := &uc.Item{CollectionID: 1}
+		payload := uc.CreateItemPayload{CollectionID: 1}
 		image := utils.NewTestFile("image")
-		mockStorage.On("CollectionExists", ctx, item.CollectionID).Return(true, nil).Once()
+		mockStorage.On("CollectionExists", ctx, payload.CollectionID).Return(true, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("", assert.AnError).Once()
-		err := usecase.Create(ctx, item, image)
+		item, err := usecase.Create(ctx, payload, image)
+		assert.Nil(t, item)
 		assert.Error(t, err)
 		mockFilesService.AssertExpectations(t)
 	})
 
 	t.Run("storage error", func(t *testing.T) {
 		image := utils.NewTestFile("image")
-		item := &uc.Item{CollectionID: 1, ImageID: "image_id"}
-		mockStorage.On("CollectionExists", ctx, item.CollectionID).Return(true, nil).Once()
-		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return(item.ImageID, nil).Once()
+		payload := uc.CreateItemPayload{CollectionID: 1}
+		mockStorage.On("CollectionExists", ctx, payload.CollectionID).Return(true, nil).Once()
+		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("image_id", nil).Once()
 		mockStorage.On("Save", ctx, mock.Anything).Return(assert.AnError).Once()
-		err := usecase.Create(ctx, item, image)
+		item, err := usecase.Create(ctx, payload, image)
+		assert.Nil(t, item)
 		assert.Error(t, err)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)
@@ -69,49 +73,52 @@ func TestItemsUsecase_Update(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		image := utils.NewTestFile("image")
-		item := &uc.Item{ID: 1}
-		saved := &storage.Item{Title: "title", Description: "description", ImageID: "old_id"}
-		mockStorage.On("GetById", ctx, item.ID).Return(saved, nil).Once()
+		payload := uc.UpdateItemPayload{ID: 1}
+		saved := &storage.Item{ImageID: "old_id"}
+		mockStorage.On("GetById", ctx, payload.ID).Return(saved, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("new_id", nil).Once()
 		mockStorage.On("Update", ctx, mock.Anything).Return(nil).Once()
 		mockFilesService.On("DeleteImage", ctx, saved.ImageID).Return(nil).Once()
 
-		err := usecase.Update(ctx, item, image)
+		err := usecase.Update(ctx, payload, image)
 		assert.NoError(t, err)
-		assert.Equal(t, "new_id", item.ImageID)
-		assert.Equal(t, saved.Title, item.Title)
-		assert.Equal(t, saved.Description, item.Description)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)
 	})
 
 	t.Run("item not found", func(t *testing.T) {
-		item := &uc.Item{ID: 1}
-		mockStorage.On("GetById", ctx, item.ID).Return((*storage.Item)(nil), storage.ErrItemNotFound).Once()
-		err := usecase.Update(ctx, item, nil)
+		payload := uc.UpdateItemPayload{ID: 1}
+
+		mockStorage.On("GetById", ctx, payload.ID).Return((*storage.Item)(nil), storage.ErrItemNotFound).Once()
+
+		err := usecase.Update(ctx, payload, nil)
 		assert.ErrorIs(t, err, uc.ErrItemNotFound)
 		mockStorage.AssertExpectations(t)
 	})
 
 	t.Run("failed to upload image", func(t *testing.T) {
 		image := utils.NewTestFile("image")
-		item := &uc.Item{ID: 1}
-		mockStorage.On("GetById", ctx, item.ID).Return(&storage.Item{}, nil).Once()
+		payload := uc.UpdateItemPayload{ID: 1}
+
+		mockStorage.On("GetById", ctx, payload.ID).Return(&storage.Item{}, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("", assert.AnError).Once()
-		err := usecase.Update(ctx, item, image)
+
+		err := usecase.Update(ctx, payload, image)
 		assert.Error(t, err)
 		mockFilesService.AssertExpectations(t)
 	})
 
 	t.Run("failed to delete image", func(t *testing.T) {
 		image := utils.NewTestFile("image")
-		item := &uc.Item{ID: 1}
+		payload := uc.UpdateItemPayload{ID: 1}
 		saved := &storage.Item{ImageID: "image_id"}
-		mockStorage.On("GetById", ctx, item.ID).Return(saved, nil).Once()
+
+		mockStorage.On("GetById", ctx, payload.ID).Return(saved, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("new_id", nil).Once()
 		mockStorage.On("Update", ctx, mock.Anything).Return(nil).Once()
 		mockFilesService.On("DeleteImage", ctx, saved.ImageID).Return(assert.AnError).Once()
-		err := usecase.Update(ctx, item, image)
+
+		err := usecase.Update(ctx, payload, image)
 		assert.Error(t, err)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)
@@ -119,11 +126,13 @@ func TestItemsUsecase_Update(t *testing.T) {
 
 	t.Run("storage error", func(t *testing.T) {
 		image := utils.NewTestFile("image")
-		item := &uc.Item{ID: 1}
-		mockStorage.On("GetById", ctx, item.ID).Return(&storage.Item{}, nil).Once()
+		payload := uc.UpdateItemPayload{ID: 1}
+
+		mockStorage.On("GetById", ctx, payload.ID).Return(&storage.Item{}, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("image_id", nil).Once()
 		mockStorage.On("Update", ctx, mock.Anything).Return(assert.AnError).Once()
-		err := usecase.Update(ctx, item, image)
+
+		err := usecase.Update(ctx, payload, image)
 		assert.Error(t, err)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)

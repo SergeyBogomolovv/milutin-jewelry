@@ -20,48 +20,45 @@ func New(log *slog.Logger, files FilesService, storage Storage) *usecase {
 	return &usecase{log: log.With(slog.String("dest", dest)), storage: storage, files: files}
 }
 
-func (u *usecase) Create(ctx context.Context, item *Item, image multipart.File) error {
+func (u *usecase) Create(ctx context.Context, payload CreateItemPayload, image multipart.File) (*Item, error) {
 	const op = "Create"
 	log := u.log.With(slog.String("op", op))
 
-	exists, err := u.storage.CollectionExists(ctx, item.CollectionID)
+	exists, err := u.storage.CollectionExists(ctx, payload.CollectionID)
 	if err != nil {
 		log.Error("can't check collection exists", "err", err)
-		return err
+		return nil, err
 	}
 	if !exists {
 		log.Info("collection not found")
-		return ErrCollectionNotFound
+		return nil, ErrCollectionNotFound
 	}
 
 	imageID, err := u.files.UploadImage(ctx, image, itemsKey)
 	if err != nil {
 		log.Error("failed to upload image", "err", err)
-		return err
+		return nil, err
 	}
-	item.ImageID = imageID
 
-	saved := &storage.Item{
-		CollectionID: item.CollectionID,
-		Title:        item.Title,
-		Description:  item.Description,
-		ImageID:      item.ImageID,
+	item := &storage.Item{
+		CollectionID: payload.CollectionID,
+		Title:        payload.Title,
+		Description:  payload.Description,
+		ImageID:      imageID,
 	}
-	if err := u.storage.Save(ctx, saved); err != nil {
+	if err := u.storage.Save(ctx, item); err != nil {
 		log.Error("can't save item", "err", err)
-		return err
+		return nil, err
 	}
-	item.ID = saved.ID
-	item.CreatedAt = saved.CreatedAt
 
-	return nil
+	return newItem(item), nil
 }
 
-func (u *usecase) Update(ctx context.Context, item *Item, image multipart.File) error {
+func (u *usecase) Update(ctx context.Context, payload UpdateItemPayload, image multipart.File) error {
 	const op = "Update"
 	log := u.log.With(slog.String("op", op))
 
-	existingItem, err := u.storage.GetById(ctx, item.ID)
+	existingItem, err := u.storage.GetById(ctx, payload.ID)
 	if err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
 			log.Info("item not found", "err", err)
@@ -70,11 +67,11 @@ func (u *usecase) Update(ctx context.Context, item *Item, image multipart.File) 
 		log.Error("can't get item", "err", err)
 		return err
 	}
-	if item.Title != "" {
-		existingItem.Title = item.Title
+	if payload.Title != nil {
+		existingItem.Title = *payload.Title
 	}
-	if item.Description != "" {
-		existingItem.Description = item.Description
+	if payload.Description != nil {
+		existingItem.Description = *payload.Description
 	}
 	oldImageID := existingItem.ImageID
 	if image != nil {
@@ -89,11 +86,8 @@ func (u *usecase) Update(ctx context.Context, item *Item, image multipart.File) 
 		log.Error("can't update item", "err", err)
 		return err
 	}
-	item.Title = existingItem.Title
-	item.Description = existingItem.Description
-	item.ImageID = existingItem.ImageID
 
-	if oldImageID != item.ImageID {
+	if oldImageID != existingItem.ImageID {
 		if err := u.files.DeleteImage(ctx, oldImageID); err != nil {
 			log.Error("can't delete image", "err", err)
 			return err

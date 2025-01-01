@@ -43,6 +43,18 @@ func newItem(item *storage.Item) *Item {
 	}
 }
 
+type CreateItemPayload struct {
+	CollectionID int
+	Title        string
+	Description  string
+}
+
+type UpdateItemPayload struct {
+	ID          int
+	Title       *string
+	Description *string
+}
+
 var (
 	ErrCollectionNotFound = errors.New("collection not exist")
 	ErrItemNotFound       = errors.New("item not found")
