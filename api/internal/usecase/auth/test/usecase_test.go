@@ -6,14 +6,14 @@ import (
 
 	codestorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
 	authusecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
-	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
+	tu "github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthUsecase_Login(t *testing.T) {
 	ctx := context.Background()
 	mockStorage := new(mockStorage)
-	usecase := authusecase.New(utils.NewTestLogger(), mockStorage, nil, "secret")
+	usecase := authusecase.New(tu.NewTestLogger(), mockStorage, nil, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Check", ctx, "code").Return(nil).Once()
@@ -59,7 +59,7 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 	mockStorage := new(mockStorage)
 	mockMailService := new(mockMailService)
 
-	usecase := authusecase.New(utils.NewTestLogger(), mockStorage, mockMailService, "secret")
+	usecase := authusecase.New(tu.NewTestLogger(), mockStorage, mockMailService, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Create", ctx).Return("code", nil).Once()

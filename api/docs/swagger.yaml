@@ -1,0 +1,265 @@
+definitions:
+  authcontroller.LoginBody:
+    properties:
+      code:
+        type: string
+    type: object
+  authcontroller.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  itemscontroller.Item:
+    properties:
+      collection_id:
+        type: integer
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      image_id:
+        type: string
+      title:
+        type: string
+    type: object
+  res.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  res.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Описание API для сервиса Milutin Jewelry
+  title: Milutin Jewelry API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Нужен код с почты админа, отправляет jwt токен
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/authcontroller.LoginBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authcontroller.TokenResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "403":
+          description: Неверный код
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Вход
+      tags:
+      - auth
+  /auth/send-code:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет код на почту админа
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/res.MessageResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Отправка кода
+      tags:
+      - auth
+  /items/collection/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получение украшений по ID коллекции, сортировка по дате создания
+      parameters:
+      - description: ID коллекции
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/itemscontroller.Item'
+            type: array
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Коллекция не найдена
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Получение украшений по ID коллекции
+      tags:
+      - items
+  /items/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Создание украшения в коллекции
+      parameters:
+      - description: ID коллекции
+        in: formData
+        name: collection_id
+        required: true
+        type: integer
+      - description: Название
+        in: formData
+        name: title
+        type: string
+      - description: Описание
+        in: formData
+        name: description
+        type: string
+      - description: Изображение
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/itemscontroller.Item'
+        "400":
+          description: Неверный формат данных
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Коллекции не существует
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Создание украшения
+      tags:
+      - items
+  /items/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID украшения
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Item successfully deleted
+          schema:
+            $ref: '#/definitions/itemscontroller.Item'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Item not found
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Удаление украшения
+      tags:
+      - items
+  /items/update/{id}:
+    put:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: ID украшения
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новое название
+        in: formData
+        name: title
+        type: string
+      - description: Новое описание
+        in: formData
+        name: description
+        type: string
+      - description: Новое изображение
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Item successfully updated
+          schema:
+            $ref: '#/definitions/itemscontroller.Item'
+        "400":
+          description: Invalid form data
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Item not found
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Обновление украшения
+      tags:
+      - items
+swagger: "2.0"

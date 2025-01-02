@@ -20,7 +20,7 @@ func New(log *slog.Logger, files FilesService, storage Storage) *usecase {
 	return &usecase{log: log.With(slog.String("dest", dest)), storage: storage, files: files}
 }
 
-func (u *usecase) Create(ctx context.Context, payload CreateItemPayload, image multipart.File) (*Item, error) {
+func (u *usecase) Create(ctx context.Context, payload CreateItemPayload, image multipart.File) (*storage.Item, error) {
 	const op = "Create"
 	log := u.log.With(slog.String("op", op))
 
@@ -51,52 +51,52 @@ func (u *usecase) Create(ctx context.Context, payload CreateItemPayload, image m
 		return nil, err
 	}
 
-	return newItem(item), nil
+	return item, nil
 }
 
-func (u *usecase) Update(ctx context.Context, payload UpdateItemPayload, image multipart.File) error {
+func (u *usecase) Update(ctx context.Context, payload UpdateItemPayload, image multipart.File) (*storage.Item, error) {
 	const op = "Update"
 	log := u.log.With(slog.String("op", op))
 
-	existingItem, err := u.storage.GetById(ctx, payload.ID)
+	item, err := u.storage.GetById(ctx, payload.ID)
 	if err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
 			log.Info("item not found", "err", err)
-			return ErrItemNotFound
+			return nil, ErrItemNotFound
 		}
 		log.Error("can't get item", "err", err)
-		return err
+		return nil, err
 	}
 	if payload.Title != nil {
-		existingItem.Title = *payload.Title
+		item.Title = *payload.Title
 	}
 	if payload.Description != nil {
-		existingItem.Description = *payload.Description
+		item.Description = *payload.Description
 	}
-	oldImageID := existingItem.ImageID
+	oldImageID := item.ImageID
 	if image != nil {
 		imageID, err := u.files.UploadImage(ctx, image, itemsKey)
 		if err != nil {
 			log.Error("can't upload image", "err", err)
-			return err
+			return nil, err
 		}
-		existingItem.ImageID = imageID
+		item.ImageID = imageID
 	}
-	if err := u.storage.Update(ctx, existingItem); err != nil {
+	if err := u.storage.Update(ctx, item); err != nil {
 		log.Error("can't update item", "err", err)
-		return err
+		return nil, err
 	}
 
-	if oldImageID != existingItem.ImageID {
+	if oldImageID != item.ImageID {
 		if err := u.files.DeleteImage(ctx, oldImageID); err != nil {
 			log.Error("can't delete image", "err", err)
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return item, nil
 }
 
-func (u *usecase) Delete(ctx context.Context, id int) error {
+func (u *usecase) Delete(ctx context.Context, id int) (*storage.Item, error) {
 	const op = "Delete"
 	log := u.log.With(slog.String("op", op))
 
@@ -104,28 +104,28 @@ func (u *usecase) Delete(ctx context.Context, id int) error {
 	if err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
 			log.Info("item not found", "err", err)
-			return ErrItemNotFound
+			return nil, ErrItemNotFound
 		}
 		log.Error("can't get collection item", "err", err)
-		return err
+		return nil, err
 	}
 
 	if err := u.storage.Delete(ctx, id); err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
 			log.Info("item not found", "err", err)
-			return ErrItemNotFound
+			return nil, ErrItemNotFound
 		}
 		log.Error("can't delete collection item", "err", err)
-		return err
+		return nil, err
 	}
 	if err := u.files.DeleteImage(ctx, item.ImageID); err != nil {
 		log.Error("failed to delete image", "err", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return item, nil
 }
 
-func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]*Item, error) {
+func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]*storage.Item, error) {
 	const op = "GetByCollectionId"
 	log := u.log.With(slog.String("op", op))
 
@@ -139,15 +139,10 @@ func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]*Item, error
 		return nil, ErrCollectionNotFound
 	}
 
-	saved, err := u.storage.GetByCollectionId(ctx, id)
+	items, err := u.storage.GetByCollectionId(ctx, id)
 	if err != nil {
 		log.Error("can't get items", "err", err)
 		return nil, err
-	}
-
-	items := make([]*Item, len(saved))
-	for i, item := range saved {
-		items[i] = newItem(item)
 	}
 	return items, nil
 }

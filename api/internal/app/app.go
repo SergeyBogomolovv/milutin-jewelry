@@ -9,14 +9,18 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
 	authcontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
+	itemscontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/items"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
 	repo "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage"
 	codestorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
+	itemstorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/items"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
 	authusecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
+	itemsusecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/items"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type application struct {
@@ -26,6 +30,7 @@ type application struct {
 
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
+	router.Handle("/docs/", httpSwagger.WrapHandler)
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 	corsMiddleware := middleware.NewCORSMiddleware(cfg.CORSOrigin)
 	loggerMiddleware := middleware.NewLoggerMiddleware(log)
@@ -35,9 +40,9 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	collectionsUsecase := usecase.NewCollectionsUsecase(log, filesService, collectionsRepo)
 	controller.RegisterCollectionsController(log, router, collectionsUsecase, authMiddleware)
 
-	collectionItemsRepo := repo.NewCollectionItemsRepo(db)
-	collectionItemsUsecase := usecase.NewCollectionItemsUsecase(log, filesService, collectionItemsRepo)
-	controller.RegisterCollectionItemsController(log, router, collectionItemsUsecase, authMiddleware)
+	itemsStorage := itemstorage.New(db)
+	itemsUsecase := itemsusecase.New(log, filesService, itemsStorage)
+	itemscontroller.Register(log, router, itemsUsecase, authMiddleware)
 
 	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
 	codeStorage := codestorage.New(redis)

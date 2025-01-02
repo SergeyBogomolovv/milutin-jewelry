@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
+	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/e"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -24,7 +24,7 @@ func (r *storage) Check(ctx context.Context, code string) error {
 }
 
 func (r *storage) Create(ctx context.Context) (code string, err error) {
-	defer func() { err = utils.WrapIfErr("can't create code", err) }()
+	defer func() { err = e.WrapIfErr("can't create code", err) }()
 	code, err = generateCode()
 	if err != nil {
 		return "", err

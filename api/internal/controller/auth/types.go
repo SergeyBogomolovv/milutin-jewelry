@@ -4,16 +4,16 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
+	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/res"
 )
 
-type AuthUsecase interface {
+type Usecase interface {
 	Login(ctx context.Context, code string) (string, error)
 	SendCode(ctx context.Context) error
 }
 
 type LoginBody struct {
-	Code string `json:"code"`
+	Code string `json:"code" validate:"len=6"`
 }
 
 type TokenResponse struct {
@@ -21,21 +21,5 @@ type TokenResponse struct {
 }
 
 func WriteToken(w http.ResponseWriter, token string, status int) error {
-	return utils.WriteJSON(w, TokenResponse{Token: token}, status)
-}
-
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
-
-func WriteError(w http.ResponseWriter, err string, status int) {
-	utils.WriteJSON(w, ErrorResponse{Error: err}, status)
-}
-
-type MessageResponse struct {
-	Message string `json:"message"`
-}
-
-func WriteMessage(w http.ResponseWriter, msg string, status int) {
-	utils.WriteJSON(w, MessageResponse{Message: msg}, status)
+	return res.WriteJSON(w, TokenResponse{Token: token}, status)
 }

@@ -7,12 +7,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/SergeyBogomolovv/milutin-jewelry/docs"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/app"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/db"
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/redis"
 )
 
+// @title Milutin Jewelry API
+// @version 1.0
+// @description Описание API для сервиса Milutin Jewelry
 func main() {
 	cfg := config.New()
 

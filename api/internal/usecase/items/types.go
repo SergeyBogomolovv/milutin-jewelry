@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
-	"time"
 
 	storage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/items"
 )
@@ -21,26 +20,6 @@ type Storage interface {
 type FilesService interface {
 	UploadImage(ctx context.Context, image multipart.File, dest string) (string, error)
 	DeleteImage(ctx context.Context, key string) error
-}
-
-type Item struct {
-	ID           int       `json:"id"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	CollectionID int       `json:"collection_id"`
-	ImageID      string    `json:"image_id"`
-	CreatedAt    time.Time `json:"created_at"`
-}
-
-func newItem(item *storage.Item) *Item {
-	return &Item{
-		ID:           item.ID,
-		Title:        item.Title,
-		Description:  item.Description,
-		CollectionID: item.CollectionID,
-		ImageID:      item.ImageID,
-		CreatedAt:    item.CreatedAt,
-	}
 }
 
 type CreateItemPayload struct {
