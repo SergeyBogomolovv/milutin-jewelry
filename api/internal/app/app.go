@@ -10,8 +10,8 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
 	authcontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
 	itemscontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/items"
-	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/files"
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/mail"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
 	repo "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage"
 	codestorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
@@ -45,7 +45,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	itemsUsecase := itemsusecase.New(log, filesService, itemsStorage)
 	itemscontroller.Register(log, router, itemsUsecase, authMiddleware)
 
-	mailService := infra.NewMailService(log, cfg.Mail, cfg.AdminEmail)
+	mailService := mail.New(log, cfg.Mail, cfg.AdminEmail)
 	codeStorage := codestorage.New(redis)
 	authUsecase := authusecase.New(log, codeStorage, mailService, cfg.JWTSecret)
 	authcontroller.Register(log, router, authUsecase)

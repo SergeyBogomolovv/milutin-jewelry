@@ -1,7 +1,6 @@
-package infra
+package mail
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
@@ -17,9 +16,10 @@ type mailService struct {
 	to   string
 }
 
-func NewMailService(log *slog.Logger, cfg config.MailConfig, to string) *mailService {
+func New(log *slog.Logger, cfg config.MailConfig, to string) *mailService {
+	const dest = "mailService"
 	return &mailService{
-		log:  log,
+		log:  log.With(slog.String("dest", dest)),
 		host: cfg.Host,
 		port: cfg.Port,
 		user: cfg.User,
@@ -29,18 +29,21 @@ func NewMailService(log *slog.Logger, cfg config.MailConfig, to string) *mailSer
 }
 
 func (s *mailService) SendCodeToAdmin(code string) {
+	const op = "SendCodeToAdmin"
+	log := s.log.With(slog.String("op", op))
+
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.user)
 	m.SetHeader("To", s.to)
 
 	m.SetHeader("Subject", "Вход в админ панель milutin-jewelry")
-	m.SetBody("text/html", fmt.Sprintf("Код авторизации: <b>%s</b>. Код действителен в течении 5 минут", code))
+	m.SetBody("text/html", messageBody(code))
 
 	d := gomail.NewDialer(s.host, s.port, s.user, s.pass)
 
 	if err := d.DialAndSend(m); err != nil {
-		s.log.Error("failed to send email", "err", err)
+		log.Error("failed to send email", "err", err)
 		return
 	}
-	s.log.Info("email sent")
+	log.Info("email sent")
 }
