@@ -11,6 +11,7 @@ import (
 	authcontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
 	itemscontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/items"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra"
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/files"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
 	repo "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage"
 	codestorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
@@ -34,7 +35,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 	corsMiddleware := middleware.NewCORSMiddleware(cfg.CORSOrigin)
 	loggerMiddleware := middleware.NewLoggerMiddleware(log)
-	filesService := infra.NewFilesService(log, cfg.ObjectStorage)
+	filesService := files.New(log, cfg.ObjectStorage)
 
 	collectionsRepo := repo.NewCollectionsRepo(db)
 	collectionsUsecase := usecase.NewCollectionsUsecase(log, filesService, collectionsRepo)
