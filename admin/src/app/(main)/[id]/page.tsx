@@ -9,7 +9,6 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
       {!success && (
         <h1 className='text-2xl font-semibold text-red-500'>Ошибка загрузки украшений.</h1>
       )}
-
       {items && (
         <>
           <h2 className='font-bold text-2xl'>

@@ -5,7 +5,7 @@ import Link from 'next/link'
 const links = [
   {
     title: 'Коллекции',
-    url: '/collections',
+    url: '/',
     icon: Gem,
   },
   {

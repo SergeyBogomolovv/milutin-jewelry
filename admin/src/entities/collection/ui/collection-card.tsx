@@ -13,6 +13,7 @@ import Link from 'next/link'
 import DeleteButton from './delete-button'
 import { Pencil } from 'lucide-react'
 import { UpdateCollectionForm } from '@/features/collection-form'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip'
 
 interface Props {
   collection: Collection
@@ -27,17 +28,26 @@ export function CollectionCard({ collection }: Props) {
           {collection.description ? collection.description : 'Описание отсутствует'}
         </CardDescription>
       </CardHeader>
-      <Link href={`/collections/${collection.id}`}>
-        <CardContent className='grow flex'>
-          <CustomImage
-            className='w-full object-cover rounded-md aspect-auto grow'
-            src={collection.image_id}
-            width={500}
-            height={500}
-            alt={collection.title}
-          />
-        </CardContent>
-      </Link>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <CardContent className='grow flex'>
+              <Link href={`/${collection.id}`} className='grow flex'>
+                <CustomImage
+                  className='w-full object-cover rounded-md aspect-auto grow'
+                  src={collection.image_id}
+                  width={500}
+                  height={500}
+                  alt={collection.title}
+                />
+              </Link>
+            </CardContent>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Перейти на страницу коллекции</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <CardFooter className='flex items-center gap-2'>
         <UpdateCollectionForm collection={collection}>
           <Button variant={'outline'}>
@@ -45,7 +55,6 @@ export function CollectionCard({ collection }: Props) {
             Редактировать
           </Button>
         </UpdateCollectionForm>
-
         <DeleteButton id={collection.id} />
       </CardFooter>
     </Card>

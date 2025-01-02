@@ -14,7 +14,7 @@ export default function CollectionsGroup() {
         collections.map((collection) => (
           <SidebarMenuItem key={collection.id}>
             <SidebarMenuButton asChild>
-              <Link href={`/collections/${collection.id}`}>
+              <Link href={`/${collection.id}`}>
                 <ScrollText />
                 <span>{collection.title}</span>
               </Link>
