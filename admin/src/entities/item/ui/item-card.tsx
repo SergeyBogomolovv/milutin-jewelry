@@ -1,4 +1,4 @@
-import { CollectionItem } from '../model/collection-item'
+import { Item } from '../model/collection-item'
 import {
   Card,
   CardContent,
@@ -11,9 +11,9 @@ import { CustomImage } from '@/shared/ui/image'
 import { Button } from '@/shared/ui/button'
 import DeleteButton from './delete-button'
 import { Pencil } from 'lucide-react'
-import { UpdateCollectionItemForm } from '@/features/collection-item-form/ui/update-collection-item'
+import { UpdateItemForm } from '@/features/item-form'
 
-export function CollectionItemCard({ item }: { item: CollectionItem }) {
+export function ItemCard({ item }: { item: Item }) {
   return (
     <Card className='flex flex-col'>
       <CardHeader>
@@ -28,16 +28,16 @@ export function CollectionItemCard({ item }: { item: CollectionItem }) {
           src={item.image_id}
           width={500}
           height={500}
-          alt={item.title}
+          alt={item.title || 'Название отсутствует'}
         />
       </CardContent>
       <CardFooter className='flex items-center gap-2'>
-        <UpdateCollectionItemForm collectionItem={item}>
+        <UpdateItemForm item={item}>
           <Button variant={'outline'}>
             <Pencil />
             Редактировать
           </Button>
-        </UpdateCollectionItemForm>
+        </UpdateItemForm>
         <DeleteButton id={item.id} />
       </CardFooter>
     </Card>

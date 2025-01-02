@@ -1,9 +1,9 @@
-import { CollectionItemCard, getCollectionItemsByCollection } from '@/entities/collection-item'
+import { ItemCard, getItemsByCollection } from '@/entities/item'
 
 export default async function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
-  const { data: items, success } = await getCollectionItemsByCollection(id)
+  const { data: items, success } = await getItemsByCollection(id)
   return (
     <main className='flex flex-col gap-4 px-6 py-2'>
       {!success && (
@@ -19,7 +19,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
           </h2>
           <section className='grid md:grid-cols-2 lg:grid-cols-3 gap-4'>
             {items.map((item) => (
-              <CollectionItemCard key={item.id} item={item} />
+              <ItemCard key={item.id} item={item} />
             ))}
           </section>
         </>

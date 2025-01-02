@@ -16,31 +16,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog'
-import { NewItemFields } from '../model/new-item.schema'
-import { CollectionItem } from '@/entities/collection-item'
-import { UpdateItemFields, updateItemSchema } from '../model/update-item.schema'
-import { updateCollectionItem } from '../api/update-item'
-import { CustomImage } from '@/shared/ui/image'
+import { NewItemFields, newItemSchema } from '../model/new-item.schema'
+import { createItem } from '../api/create-item'
 import { FormInputField } from '@/shared/ui/form-input-field'
 import HiddenInput from '@/shared/ui/hidden-input'
 
-export function UpdateCollectionItemForm({
-  children,
-  collectionItem,
-}: {
-  children: React.ReactNode
-  collectionItem: CollectionItem
-}) {
+export function ItemForm({ children, id }: { children: React.ReactNode; id: string }) {
   const [open, setOpen] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const form = useForm<UpdateItemFields>({
-    resolver: zodResolver(updateItemSchema),
+  const form = useForm<NewItemFields>({
+    resolver: zodResolver(newItemSchema),
     defaultValues: {
-      title: collectionItem.title || '',
-      description: collectionItem.description || '',
+      title: '',
+      description: '',
     },
   })
 
@@ -55,9 +46,9 @@ export function UpdateCollectionItemForm({
   }
 
   const onSubmit = async (data: NewItemFields) => {
-    const ok = await updateCollectionItem(data, String(collectionItem.id))
+    const ok = await createItem(data, id)
     if (!ok) {
-      toast.error('Ошибка обновления коллекции')
+      toast.error('Ошибка создания украшения')
       return
     }
     setImagePreview(null)
@@ -70,7 +61,7 @@ export function UpdateCollectionItemForm({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className='max-h-[90vh] overflow-scroll'>
         <DialogHeader>
-          <DialogTitle>Изменить украшение</DialogTitle>
+          <DialogTitle>Новое украшение</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form className='flex flex-col gap-4' onSubmit={form.handleSubmit(onSubmit)}>
@@ -90,32 +81,24 @@ export function UpdateCollectionItemForm({
             />
             <FormItem className='w-full flex flex-col gap-2'>
               <FormLabel>Изображение</FormLabel>
-              {imagePreview ? (
+              {imagePreview && (
                 <Image
-                  className='w-full rounded-md'
+                  className='w-[70%] mx-auto rounded-md'
                   width={500}
                   height={500}
                   src={imagePreview}
-                  alt='Загруженная картинка'
-                />
-              ) : (
-                <CustomImage
-                  className='w-full rounded-md'
-                  src={collectionItem.image_id}
-                  alt={collectionItem.title}
-                  width={500}
-                  height={500}
+                  alt='Uploaded Image'
                 />
               )}
               <HiddenInput ref={fileInputRef} handleImageChange={handleImageChange} />
               <Button type='button' variant='outline' onClick={() => fileInputRef.current?.click()}>
                 <Paperclip />
-                Изменить изображение
+                {imagePreview ? 'Изменить изображение' : 'Прикрепить изображение'}
               </Button>
             </FormItem>
             <DialogFooter className='flex items-center gap-2'>
               <Button className='w-full' disabled={form.formState.isSubmitting} type='submit'>
-                {form.formState.isSubmitting ? 'Сохранение...' : 'Сохранить'}
+                {form.formState.isSubmitting ? 'Создание...' : 'Создать'}
               </Button>
               <DialogClose asChild>
                 <Button className='w-full' type='button' variant='secondary'>

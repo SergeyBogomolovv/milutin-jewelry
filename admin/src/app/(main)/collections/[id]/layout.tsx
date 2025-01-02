@@ -1,5 +1,5 @@
 import { getCollection } from '@/entities/collection'
-import { CollectionItemForm } from '@/features/collection-item-form'
+import { ItemForm } from '@/features/item-form'
 import { Button } from '@/shared/ui/button'
 import { SidebarTrigger } from '@/shared/ui/sidebar'
 import { Plus } from 'lucide-react'
@@ -23,12 +23,12 @@ export default async function CollectionLayout({
           {success && data ? (
             <>
               <h2 className='font-bold text-lg'>{data.title}</h2>
-              <CollectionItemForm id={id}>
+              <ItemForm id={id}>
                 <Button variant={'outline'}>
                   <Plus />
                   Добавить украшение
                 </Button>
-              </CollectionItemForm>
+              </ItemForm>
             </>
           ) : (
             <h2 className='font-bold text-lg'>Коллекция не найдена</h2>

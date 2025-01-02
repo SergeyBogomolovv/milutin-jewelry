@@ -3,7 +3,7 @@
 import { Button } from '@/shared/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { deleteCollectionItem } from '../api/delete-collection-item'
+import { deleteItem } from '../api/delete-item'
 import ConfirmDialog from '@/shared/ui/confirm-dialog'
 import { Trash } from 'lucide-react'
 
@@ -12,7 +12,7 @@ export default function DeleteButton({ id }: { id: number }) {
 
   const deleteHandler = async () => {
     setLoading(true)
-    const result = await deleteCollectionItem(id)
+    const result = await deleteItem(id)
     setLoading(false)
     if (!result.success) {
       toast.error(`Ошибка удаления украшения: ${result.error || 'Неизвестная ошибка'}`)
