@@ -96,6 +96,281 @@ const docTemplate = `{
                 }
             }
         },
+        "/collections/all": {
+            "get": {
+                "description": "Получение списка всех коллекций",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "collections"
+                ],
+                "summary": "Получение всех коллекций",
+                "responses": {
+                    "200": {
+                        "description": "Список всех коллекций",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/collectionscontroller.Collection"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/collections/create": {
+            "post": {
+                "description": "Создание новой коллекции",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "collections"
+                ],
+                "summary": "Создание коллекции",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Название коллекции",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Описание коллекции",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Изображение коллекции",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Коллекция успешно создана",
+                        "schema": {
+                            "$ref": "#/definitions/collectionscontroller.Collection"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет доступа",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/collections/delete/{id}": {
+            "delete": {
+                "description": "Удаление существующей коллекции",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "collections"
+                ],
+                "summary": "Удаление коллекции",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID коллекции",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Коллекция успешно удалена",
+                        "schema": {
+                            "$ref": "#/definitions/collectionscontroller.Collection"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет доступа",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Коллекция не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/collections/update/{id}": {
+            "put": {
+                "description": "Обновление данных существующей коллекции",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "collections"
+                ],
+                "summary": "Обновление коллекции",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID коллекции",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Новое название коллекции",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Новое описание коллекции",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Новое изображение коллекции",
+                        "name": "image",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Коллекция успешно обновлена",
+                        "schema": {
+                            "$ref": "#/definitions/collectionscontroller.Collection"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет доступа",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Коллекция не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/collections/{id}": {
+            "get": {
+                "description": "Получение данных одной коллекции по её ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "collections"
+                ],
+                "summary": "Получение одной коллекции",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID коллекции",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные коллекции",
+                        "schema": {
+                            "$ref": "#/definitions/collectionscontroller.Collection"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Коллекция не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/items/collection/{id}": {
             "get": {
                 "description": "Получение украшений по ID коллекции, сортировка по дате создания",
@@ -370,26 +645,57 @@ const docTemplate = `{
                 }
             }
         },
+        "collectionscontroller.Collection": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-01-01T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Описание коллекции"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "image_id": {
+                    "type": "string",
+                    "example": "12345"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Кольца"
+                }
+            }
+        },
         "itemscontroller.Item": {
             "type": "object",
             "properties": {
                 "collection_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "2025-01-01T12:00:00Z"
                 },
                 "description": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Описание украшения"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "image_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "67890"
                 },
                 "title": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Кольцо"
                 }
             }
         },

@@ -1,11 +1,11 @@
-package authusecase
+package auth
 
 import (
 	"context"
 	"errors"
 	"log/slog"
 
-	storage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
+	storage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/code"
 )
 
 type usecase struct {

@@ -9,19 +9,43 @@ definitions:
       token:
         type: string
     type: object
+  collectionscontroller.Collection:
+    properties:
+      created_at:
+        example: "2025-01-01T12:00:00Z"
+        type: string
+      description:
+        example: Описание коллекции
+        type: string
+      id:
+        example: 1
+        type: integer
+      image_id:
+        example: "12345"
+        type: string
+      title:
+        example: Кольца
+        type: string
+    type: object
   itemscontroller.Item:
     properties:
       collection_id:
+        example: 1
         type: integer
       created_at:
+        example: "2025-01-01T12:00:00Z"
         type: string
       description:
+        example: Описание украшения
         type: string
       id:
+        example: 1
         type: integer
       image_id:
+        example: "67890"
         type: string
       title:
+        example: Кольцо
         type: string
     type: object
   res.ErrorResponse:
@@ -93,6 +117,188 @@ paths:
       summary: Отправка кода
       tags:
       - auth
+  /collections/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получение данных одной коллекции по её ID
+      parameters:
+      - description: ID коллекции
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные коллекции
+          schema:
+            $ref: '#/definitions/collectionscontroller.Collection'
+        "400":
+          description: Неверный формат данных
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Коллекция не найдена
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Получение одной коллекции
+      tags:
+      - collections
+  /collections/all:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка всех коллекций
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список всех коллекций
+          schema:
+            items:
+              $ref: '#/definitions/collectionscontroller.Collection'
+            type: array
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Получение всех коллекций
+      tags:
+      - collections
+  /collections/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Создание новой коллекции
+      parameters:
+      - description: Название коллекции
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: Описание коллекции
+        in: formData
+        name: description
+        type: string
+      - description: Изображение коллекции
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Коллекция успешно создана
+          schema:
+            $ref: '#/definitions/collectionscontroller.Collection'
+        "400":
+          description: Неверный формат данных
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Создание коллекции
+      tags:
+      - collections
+  /collections/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаление существующей коллекции
+      parameters:
+      - description: ID коллекции
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Коллекция успешно удалена
+          schema:
+            $ref: '#/definitions/collectionscontroller.Collection'
+        "400":
+          description: Неверный формат данных
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Коллекция не найдена
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Удаление коллекции
+      tags:
+      - collections
+  /collections/update/{id}:
+    put:
+      consumes:
+      - multipart/form-data
+      description: Обновление данных существующей коллекции
+      parameters:
+      - description: ID коллекции
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новое название коллекции
+        in: formData
+        name: title
+        type: string
+      - description: Новое описание коллекции
+        in: formData
+        name: description
+        type: string
+      - description: Новое изображение коллекции
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Коллекция успешно обновлена
+          schema:
+            $ref: '#/definitions/collectionscontroller.Collection'
+        "400":
+          description: Неверный формат данных
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "401":
+          description: Нет доступа
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Коллекция не найдена
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Обновление коллекции
+      tags:
+      - collections
   /items/collection/{id}:
     get:
       consumes:

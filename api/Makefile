@@ -9,6 +9,10 @@ test:
 run:
 	@go run cmd/main.go
 
+.PHONY gen-docs:
+gen-docs:
+	@swag init -g cmd/main.go
+
 .PHONY: migrate-create
 migrate-create:
 	@name=$(name);

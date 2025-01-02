@@ -7,18 +7,18 @@ import (
 	"time"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
-	"github.com/SergeyBogomolovv/milutin-jewelry/internal/controller"
-	authcontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
-	itemscontroller "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/items"
-	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/files"
+	authController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
+	collectionController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/collection"
+	itemController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/item"
+	fileService "github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/file"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/mail"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
-	repo "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage"
-	codestorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
-	itemstorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/items"
-	"github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase"
-	authusecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
-	itemsusecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/items"
+	codeStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/code"
+	collectionStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/collection"
+	itemStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/item"
+	authUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
+	collectionUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/collection"
+	itemUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/item"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
@@ -32,23 +32,25 @@ type application struct {
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
 	router := http.NewServeMux()
 	router.Handle("/docs/", httpSwagger.WrapHandler)
+
 	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
 	corsMiddleware := middleware.NewCORSMiddleware(cfg.CORSOrigin)
 	loggerMiddleware := middleware.NewLoggerMiddleware(log)
-	filesService := files.New(log, cfg.ObjectStorage)
 
-	collectionsRepo := repo.NewCollectionsRepo(db)
-	collectionsUsecase := usecase.NewCollectionsUsecase(log, filesService, collectionsRepo)
-	controller.RegisterCollectionsController(log, router, collectionsUsecase, authMiddleware)
-
-	itemsStorage := itemstorage.New(db)
-	itemsUsecase := itemsusecase.New(log, filesService, itemsStorage)
-	itemscontroller.Register(log, router, itemsUsecase, authMiddleware)
-
+	filesService := fileService.New(log, cfg.ObjectStorage)
 	mailService := mail.New(log, cfg.Mail, cfg.AdminEmail)
-	codeStorage := codestorage.New(redis)
-	authUsecase := authusecase.New(log, codeStorage, mailService, cfg.JWTSecret)
-	authcontroller.Register(log, router, authUsecase)
+
+	collectionStorage := collectionStorage.New(db)
+	collectionUsecase := collectionUsecase.New(log, filesService, collectionStorage)
+	collectionController.Register(log, router, collectionUsecase, authMiddleware)
+
+	itemStorage := itemStorage.New(db)
+	itemUsecase := itemUsecase.New(log, filesService, itemStorage)
+	itemController.Register(log, router, itemUsecase, authMiddleware)
+
+	codeStorage := codeStorage.New(redis)
+	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.JWTSecret)
+	authController.Register(log, router, authUsecase)
 
 	return &application{
 		srv: &http.Server{Addr: cfg.Addr, Handler: corsMiddleware(loggerMiddleware(router))},

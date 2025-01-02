@@ -1,4 +1,4 @@
-package authusecase_test
+package auth_test
 
 import (
 	"context"

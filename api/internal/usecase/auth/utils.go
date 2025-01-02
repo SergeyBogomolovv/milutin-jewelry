@@ -1,4 +1,4 @@
-package authusecase
+package auth
 
 import (
 	"time"

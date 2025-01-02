@@ -1,11 +1,11 @@
-package authusecase_test
+package auth_test
 
 import (
 	"context"
 	"testing"
 
-	codestorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/codes"
-	authusecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
+	storage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/code"
+	uc "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
 	tu "github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,7 +13,7 @@ import (
 func TestAuthUsecase_Login(t *testing.T) {
 	ctx := context.Background()
 	mockStorage := new(mockStorage)
-	usecase := authusecase.New(tu.NewTestLogger(), mockStorage, nil, "secret")
+	usecase := uc.New(tu.NewTestLogger(), mockStorage, nil, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Check", ctx, "code").Return(nil).Once()
@@ -26,9 +26,9 @@ func TestAuthUsecase_Login(t *testing.T) {
 	})
 
 	t.Run("invalid code", func(t *testing.T) {
-		mockStorage.On("Check", ctx, "code").Return(codestorage.ErrInvalidCode).Once()
+		mockStorage.On("Check", ctx, "code").Return(storage.ErrInvalidCode).Once()
 		token, err := usecase.Login(ctx, "code")
-		assert.ErrorIs(t, err, authusecase.ErrInvalidCode)
+		assert.ErrorIs(t, err, uc.ErrInvalidCode)
 		assert.Empty(t, token)
 
 		mockStorage.AssertExpectations(t)
@@ -59,7 +59,7 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 	mockStorage := new(mockStorage)
 	mockMailService := new(mockMailService)
 
-	usecase := authusecase.New(tu.NewTestLogger(), mockStorage, mockMailService, "secret")
+	usecase := uc.New(tu.NewTestLogger(), mockStorage, mockMailService, "secret")
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Create", ctx).Return("code", nil).Once()
