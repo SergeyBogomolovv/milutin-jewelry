@@ -13,7 +13,7 @@ import (
 func TestAuthUsecase_Login(t *testing.T) {
 	ctx := context.Background()
 	mockStorage := new(mockStorage)
-	usecase := uc.New(tu.NewTestLogger(), mockStorage, nil, "secret")
+	usecase := uc.New(tu.NewTestLogger(), mockStorage, nil, newTestConfig())
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Check", ctx, "code").Return(nil).Once()
@@ -59,7 +59,7 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 	mockStorage := new(mockStorage)
 	mockMailService := new(mockMailService)
 
-	usecase := uc.New(tu.NewTestLogger(), mockStorage, mockMailService, "secret")
+	usecase := uc.New(tu.NewTestLogger(), mockStorage, mockMailService, newTestConfig())
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Create", ctx).Return("code", nil).Once()

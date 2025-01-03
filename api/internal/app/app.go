@@ -29,16 +29,16 @@ type application struct {
 	log *slog.Logger
 }
 
-func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config) *application {
+func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg config.Config) *application {
 	router := http.NewServeMux()
 	router.Handle("/docs/", httpSwagger.WrapHandler)
 
-	authMiddleware := middleware.NewAuthMiddleware(cfg.JWTSecret)
+	authMiddleware := middleware.NewAuthMiddleware(cfg.Jwt.Secret)
 	corsMiddleware := middleware.NewCORSMiddleware(cfg.CORSOrigin)
 	loggerMiddleware := middleware.NewLoggerMiddleware(log)
 
 	filesService := fileService.New(log, cfg.ObjectStorage)
-	mailService := mail.New(log, cfg.Mail, cfg.AdminEmail)
+	mailService := mail.New(log, cfg.Mail)
 
 	collectionStorage := collectionStorage.New(db)
 	collectionUsecase := collectionUsecase.New(log, filesService, collectionStorage)
@@ -49,7 +49,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg *config.Config)
 	itemController.Register(log, router, itemUsecase, authMiddleware)
 
 	codeStorage := codeStorage.New(redis)
-	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.JWTSecret)
+	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.Jwt)
 	authController.Register(log, router, authUsecase)
 
 	return &application{

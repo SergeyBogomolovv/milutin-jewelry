@@ -12,6 +12,7 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/db"
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/redis"
+	"github.com/joho/godotenv"
 )
 
 // @title Milutin Jewelry API
@@ -36,4 +37,8 @@ func main() {
 
 	<-ctx.Done()
 	app.Stop()
+}
+
+func init() {
+	godotenv.Load()
 }

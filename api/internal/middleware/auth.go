@@ -7,7 +7,7 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/utils"
 )
 
-func NewAuthMiddleware(secret string) Middleware {
+func NewAuthMiddleware(secret []byte) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -20,7 +20,7 @@ func NewAuthMiddleware(secret string) Middleware {
 				res.WriteError(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
-			if err := utils.VerifyToken(token, []byte(secret)); err != nil {
+			if err := utils.VerifyToken(token, secret); err != nil {
 				res.WriteError(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}

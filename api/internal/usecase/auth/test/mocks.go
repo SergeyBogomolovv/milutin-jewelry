@@ -3,6 +3,7 @@ package auth_test
 import (
 	"context"
 
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -32,4 +33,11 @@ type mockMailService struct {
 func (m *mockMailService) SendCodeToAdmin(code string) {
 	args := m.Called(code)
 	args.Error(0)
+}
+
+func newTestConfig() config.JwtConfig {
+	return config.JwtConfig{
+		Secret: []byte("secret"),
+		TTL:    1,
+	}
 }

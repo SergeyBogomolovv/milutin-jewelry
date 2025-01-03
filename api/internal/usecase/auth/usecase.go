@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"time"
 
+	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	storage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/code"
 )
 
@@ -13,15 +15,17 @@ type usecase struct {
 	codes     CodeStorage
 	mail      MailService
 	jwtSecret []byte
+	jwtTTL    time.Duration
 }
 
-func New(log *slog.Logger, codes CodeStorage, mail MailService, jwtSecret string) *usecase {
+func New(log *slog.Logger, codes CodeStorage, mail MailService, conf config.JwtConfig) *usecase {
 	const dest = "authUsecase"
 	return &usecase{
 		log:       log.With(slog.String("dest", dest)),
 		codes:     codes,
 		mail:      mail,
-		jwtSecret: []byte(jwtSecret),
+		jwtSecret: conf.Secret,
+		jwtTTL:    conf.TTL,
 	}
 }
 

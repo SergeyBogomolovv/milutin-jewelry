@@ -16,7 +16,7 @@ type mailService struct {
 	to   string
 }
 
-func New(log *slog.Logger, cfg config.MailConfig, to string) *mailService {
+func New(log *slog.Logger, cfg config.MailConfig) *mailService {
 	const dest = "mailService"
 	return &mailService{
 		log:  log.With(slog.String("dest", dest)),
@@ -24,7 +24,7 @@ func New(log *slog.Logger, cfg config.MailConfig, to string) *mailService {
 		port: cfg.Port,
 		user: cfg.User,
 		pass: cfg.Pass,
-		to:   to,
+		to:   cfg.Admin,
 	}
 }
 
