@@ -2,7 +2,6 @@ package code
 
 import (
 	"crypto/rand"
-	"fmt"
 	"math/big"
 )
 
@@ -21,6 +20,6 @@ func generateCode() (string, error) {
 	return string(otp), nil
 }
 
-func codeString(code string) string {
-	return fmt.Sprintf("code:%s", code)
-}
+const (
+	codeKey = "code"
+)

@@ -17,7 +17,7 @@ func New(redis *redis.Client) *storage {
 }
 
 func (r *storage) Check(ctx context.Context, code string) error {
-	if err := r.redis.Get(ctx, codeString(code)).Err(); err != nil {
+	if err := r.redis.Get(ctx, codeKey).Err(); err != nil {
 		return ErrInvalidCode
 	}
 	return nil
@@ -29,14 +29,14 @@ func (r *storage) Create(ctx context.Context) (code string, err error) {
 	if err != nil {
 		return "", err
 	}
-	if err := r.redis.Set(ctx, codeString(code), true, time.Minute*5).Err(); err != nil {
+	if err := r.redis.Set(ctx, codeKey, code, time.Minute*5).Err(); err != nil {
 		return "", err
 	}
 	return code, nil
 }
 
 func (r *storage) Delete(ctx context.Context, code string) error {
-	if err := r.redis.Del(ctx, codeString(code)).Err(); err != nil {
+	if err := r.redis.Del(ctx, codeKey).Err(); err != nil {
 		return ErrCodeNotFound
 	}
 	return nil
