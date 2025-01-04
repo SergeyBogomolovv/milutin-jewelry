@@ -209,9 +209,9 @@ func (c *controller) ItemsByCollection(w http.ResponseWriter, r *http.Request) {
 		res.WriteError(w, "failed to get collection items", http.StatusInternalServerError)
 		return
 	}
-	result := make([]*Item, len(items))
+	result := make([]Item, len(items))
 	for i, item := range items {
-		result[i] = NewItem(item)
+		result[i] = NewItem(&item)
 	}
 	res.WriteJSON(w, result, http.StatusOK)
 }

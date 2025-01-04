@@ -13,7 +13,7 @@ type Storage interface {
 	Update(ctx context.Context, collection *storage.Collection) error
 	Delete(ctx context.Context, id int) error
 	GetByID(ctx context.Context, id int) (*storage.Collection, error)
-	GetAll(ctx context.Context) ([]*storage.Collection, error)
+	GetAll(ctx context.Context) ([]storage.Collection, error)
 }
 
 type FilesService interface {

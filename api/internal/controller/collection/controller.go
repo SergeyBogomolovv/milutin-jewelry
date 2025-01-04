@@ -178,9 +178,9 @@ func (c *controller) GetAllCollections(w http.ResponseWriter, r *http.Request) {
 		res.WriteError(w, "failed to get collections", http.StatusInternalServerError)
 		return
 	}
-	result := make([]*Collection, len(collections))
+	result := make([]Collection, len(collections))
 	for i, collection := range collections {
-		result[i] = NewCollection(collection)
+		result[i] = NewCollection(&collection)
 	}
 	res.WriteJSON(w, result, http.StatusOK)
 }

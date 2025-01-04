@@ -32,9 +32,9 @@ func (m *storageMock) GetByID(ctx context.Context, id int) (*storage.Collection,
 	return args.Get(0).(*storage.Collection), args.Error(1)
 }
 
-func (m *storageMock) GetAll(ctx context.Context) ([]*storage.Collection, error) {
+func (m *storageMock) GetAll(ctx context.Context) ([]storage.Collection, error) {
 	args := m.Called(ctx)
-	return args.Get(0).([]*storage.Collection), args.Error(1)
+	return args.Get(0).([]storage.Collection), args.Error(1)
 }
 
 type fileServiceMock struct {

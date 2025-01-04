@@ -13,7 +13,7 @@ type Storage interface {
 	Update(ctx context.Context, item *storage.Item) error
 	Delete(ctx context.Context, id int) error
 	GetById(ctx context.Context, id int) (*storage.Item, error)
-	GetByCollectionId(ctx context.Context, id int) ([]*storage.Item, error)
+	GetByCollectionId(ctx context.Context, id int) ([]storage.Item, error)
 	CollectionExists(ctx context.Context, id int) (bool, error)
 }
 

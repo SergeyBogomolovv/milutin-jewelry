@@ -125,7 +125,7 @@ func (u *usecase) Delete(ctx context.Context, id int) (*storage.Item, error) {
 	return item, nil
 }
 
-func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]*storage.Item, error) {
+func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]storage.Item, error) {
 	const op = "GetByCollectionId"
 	log := u.log.With(slog.String("op", op))
 

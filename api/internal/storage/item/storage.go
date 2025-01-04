@@ -75,8 +75,8 @@ func (r *storage) GetById(ctx context.Context, id int) (item *Item, err error) {
 	return item, nil
 }
 
-func (r *storage) GetByCollectionId(ctx context.Context, id int) ([]*Item, error) {
-	items := make([]*Item, 0)
+func (r *storage) GetByCollectionId(ctx context.Context, id int) ([]Item, error) {
+	items := make([]Item, 0)
 	query := `
 	SELECT item_id, collection_id, title, description, image_id, created_at
 	FROM collection_items 

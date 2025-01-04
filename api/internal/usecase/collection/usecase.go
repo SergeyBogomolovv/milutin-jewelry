@@ -82,7 +82,7 @@ func (u *usecase) Update(ctx context.Context, payload UpdateCollectionPayload, i
 	return collection, nil
 }
 
-func (u *usecase) GetAll(ctx context.Context) ([]*storage.Collection, error) {
+func (u *usecase) GetAll(ctx context.Context) ([]storage.Collection, error) {
 	const op = "GetAll"
 	log := u.log.With(slog.String("op", op))
 

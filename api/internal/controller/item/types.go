@@ -13,7 +13,7 @@ type Usecase interface {
 	Create(ctx context.Context, payload uc.CreateItemPayload, image multipart.File) (*storage.Item, error)
 	Update(ctx context.Context, payload uc.UpdateItemPayload, image multipart.File) (*storage.Item, error)
 	Delete(ctx context.Context, id int) (*storage.Item, error)
-	GetByCollectionId(ctx context.Context, id int) ([]*storage.Item, error)
+	GetByCollectionId(ctx context.Context, id int) ([]storage.Item, error)
 }
 
 type Item struct {
@@ -25,8 +25,8 @@ type Item struct {
 	CreatedAt    time.Time `json:"created_at" example:"2025-01-01T12:00:00Z"`
 }
 
-func NewItem(item *storage.Item) *Item {
-	return &Item{
+func NewItem(item *storage.Item) Item {
+	return Item{
 		ID:           item.ID,
 		Title:        item.Title,
 		Description:  item.Description,

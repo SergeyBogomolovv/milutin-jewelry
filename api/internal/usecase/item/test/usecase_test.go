@@ -207,7 +207,7 @@ func TestItemsUsecase_GetByCollection(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		const collectionID = 1
 		mockStorage.On("CollectionExists", ctx, collectionID).Return(true, nil).Once()
-		mockStorage.On("GetByCollectionId", ctx, collectionID).Return([]*storage.Item{{ID: 1}, {ID: 2}}, nil).Once()
+		mockStorage.On("GetByCollectionId", ctx, collectionID).Return([]storage.Item{{ID: 1}, {ID: 2}}, nil).Once()
 		items, err := usecase.GetByCollectionId(ctx, collectionID)
 		assert.NoError(t, err)
 		assert.Len(t, items, 2)
@@ -225,7 +225,7 @@ func TestItemsUsecase_GetByCollection(t *testing.T) {
 	t.Run("storage error", func(t *testing.T) {
 		const collectionID = 1
 		mockStorage.On("CollectionExists", ctx, collectionID).Return(true, nil).Once()
-		mockStorage.On("GetByCollectionId", ctx, collectionID).Return(([]*storage.Item)(nil), assert.AnError).Once()
+		mockStorage.On("GetByCollectionId", ctx, collectionID).Return(([]storage.Item)(nil), assert.AnError).Once()
 		res, err := usecase.GetByCollectionId(ctx, collectionID)
 		assert.Error(t, err)
 		assert.Nil(t, res)

@@ -32,9 +32,9 @@ func (m *storageMock) GetById(ctx context.Context, id int) (*storage.Item, error
 	return args.Get(0).(*storage.Item), args.Error(1)
 }
 
-func (m *storageMock) GetByCollectionId(ctx context.Context, id int) ([]*storage.Item, error) {
+func (m *storageMock) GetByCollectionId(ctx context.Context, id int) ([]storage.Item, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0).([]*storage.Item), args.Error(1)
+	return args.Get(0).([]storage.Item), args.Error(1)
 }
 
 func (m *storageMock) CollectionExists(ctx context.Context, id int) (bool, error) {
