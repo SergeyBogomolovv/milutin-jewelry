@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	cfg "github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
+	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/e"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -37,23 +38,45 @@ func New(log *slog.Logger, c cfg.ObjectStorageConfig) *filesService {
 	return &filesService{client: client, bucket: c.Bucket, log: log.With(slog.String("dest", dest))}
 }
 
-func (s *filesService) DeleteImage(ctx context.Context, key string) error {
+func (s *filesService) DeleteImage(ctx context.Context, key string) (err error) {
+	defer func() { err = e.WrapIfErr("can't delete image", err) }()
 	const op = "DeleteImage"
 	log := s.log.With(slog.String("op", op), slog.String("key", key))
 
 	log.Info("deleting image")
 	var wg sync.WaitGroup
+	errCh := make(chan error, 1)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	for quality := range qualities {
 		wg.Add(1)
 		go func(quality string) {
 			defer wg.Done()
-			if err := s.delete(ctx, fmt.Sprintf("%s_%s.jpg", key, quality)); err != nil {
-				log.Error("failed to delete image", "err", err, "quality", quality)
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				if err := s.delete(ctx, fmt.Sprintf("%s_%s.jpg", key, quality)); err != nil {
+					log.Error("failed to delete image", "err", err, "quality", quality)
+					select {
+					case errCh <- err:
+						cancel()
+					default:
+					}
+				}
 			}
 		}(quality)
 	}
-	wg.Wait()
+
+	go func() {
+		wg.Wait()
+		close(errCh)
+	}()
+
+	if err, ok := <-errCh; ok {
+		return err
+	}
 	return nil
 }
 
