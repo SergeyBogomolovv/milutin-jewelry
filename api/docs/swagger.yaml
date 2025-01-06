@@ -299,6 +299,38 @@ paths:
       summary: Обновление коллекции
       tags:
       - collections
+  /items/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID украшения
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/itemscontroller.Item'
+        "400":
+          description: Invalid request parameters
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "404":
+          description: Украшние не найдено
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/res.ErrorResponse'
+      summary: Получение украшения по ID
+      tags:
+      - items
   /items/collection/{id}:
     get:
       consumes:

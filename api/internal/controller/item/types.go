@@ -14,6 +14,7 @@ type Usecase interface {
 	Update(ctx context.Context, payload uc.UpdateItemPayload, image multipart.File) (*storage.Item, error)
 	Delete(ctx context.Context, id int) (*storage.Item, error)
 	GetByCollectionId(ctx context.Context, id int) ([]storage.Item, error)
+	GetById(ctx context.Context, id int) (*storage.Item, error)
 }
 
 type Item struct {

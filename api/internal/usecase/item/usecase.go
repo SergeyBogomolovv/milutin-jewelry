@@ -146,3 +146,19 @@ func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]storage.Item
 	}
 	return items, nil
 }
+
+func (u *usecase) GetById(ctx context.Context, id int) (*storage.Item, error) {
+	const op = "GetById"
+	log := u.log.With(slog.String("op", op))
+
+	item, err := u.storage.GetById(ctx, id)
+	if err != nil {
+		if errors.Is(err, storage.ErrItemNotFound) {
+			log.Info("item not found", "err", err)
+			return nil, ErrItemNotFound
+		}
+		log.Error("can't get item", "err", err)
+		return nil, err
+	}
+	return item, nil
+}

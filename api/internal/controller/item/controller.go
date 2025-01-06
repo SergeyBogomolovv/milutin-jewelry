@@ -28,6 +28,7 @@ func Register(log *slog.Logger, router *http.ServeMux, usecase Usecase, auth mid
 	}
 	r := http.NewServeMux()
 	r.HandleFunc("GET /collection/{id}", c.ItemsByCollection)
+	r.HandleFunc("GET /{id}", c.ById)
 
 	pr := http.NewServeMux()
 	pr.HandleFunc("POST /create", c.CreateCollectionItem)
@@ -214,4 +215,32 @@ func (c *controller) ItemsByCollection(w http.ResponseWriter, r *http.Request) {
 		result[i] = NewItem(&item)
 	}
 	res.WriteJSON(w, result, http.StatusOK)
+}
+
+// @Summary      Получение украшения по ID
+// @Tags         items
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID украшения"
+// @Success      200  {object}  Item
+// @Failure      400  {object}  res.ErrorResponse  "Invalid request parameters"
+// @Failure      404  {object}  res.ErrorResponse  "Украшние не найдено"
+// @Failure      500  {object}  res.ErrorResponse  "Internal server error"
+// @Router       /items/{id} [get]
+func (c *controller) ById(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		res.WriteError(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	item, err := c.usecase.GetById(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, uc.ErrItemNotFound) {
+			res.WriteError(w, "collection item not found", http.StatusNotFound)
+			return
+		}
+		res.WriteError(w, "failed to get collection item", http.StatusInternalServerError)
+		return
+	}
+	res.WriteJSON(w, NewItem(item), http.StatusOK)
 }
