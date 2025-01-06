@@ -1,55 +1,37 @@
 'use client'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/shared/ui/dialog'
-import { default as NextImage, ImageProps } from 'next/image'
-import { useState } from 'react'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { ImageProps, Image as AntImage } from 'antd'
+import { Eye } from 'lucide-react'
 import { IMAGE_URL } from '../lib/constants'
-import { cn } from '../lib/utils'
 
 interface Props extends ImageProps {
-  className?: string
-  previewClassName?: string
+  title?: string
+  description?: string
 }
-export function Image({ src, alt, className, previewClassName, ...props }: Props) {
-  const [isLoaded, setLoaded] = useState(false)
 
+export function Image({ src, title, description, ...props }: Props) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <NextImage
-          {...props}
-          alt={alt}
-          src={`${IMAGE_URL}/${src}${isLoaded ? '_high.jpg' : '_low.jpg'}`}
-          blurDataURL='/placeholder.jpg'
-          placeholder='blur'
-          onLoad={() => setLoaded(true)}
-          className={cn('rounded-lg cursor-pointer', className)}
-        />
-      </DialogTrigger>
-      <DialogContent className='p-0 m-0 border-none bg-transparent flex items-center justify-center shadow-none'>
-        <VisuallyHidden>
-          <DialogTitle>{alt}</DialogTitle>
-          <DialogDescription>{alt}</DialogDescription>
-        </VisuallyHidden>
-        <DialogHeader className='max-h-[90vh] overflow-auto flex justify-center'>
-          <NextImage
-            {...props}
-            alt={alt}
-            src={`${IMAGE_URL}/${src}${isLoaded ? '_high.jpg' : '_low.jpg'}`}
-            blurDataURL='/placeholder.jpg'
-            placeholder='blur'
-            onLoad={() => setLoaded(true)}
-            className={cn('object-cover relative rounded-lg max-h-[90vh]', previewClassName)}
-          />
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+    <AntImage
+      loading='lazy'
+      src={`${IMAGE_URL}/${src}_high.jpg`}
+      placeholder={<AntImage preview={false} src={`${IMAGE_URL}/${src}_low.jpg`} {...props} />}
+      preview={{
+        mask: (
+          <div className='flex items-center gap-1'>
+            <Eye size={16} />
+            Развернуть
+          </div>
+        ),
+        // TODO: поправить
+        toolbarRender: () => (
+          <div className='flex flex-col gap-4 bg-background/60 py-2 px-6 items-center text-white rounded-lg'>
+            <h3 className='font-bold text-lg'>{title}</h3>
+            <p>{description}</p>
+          </div>
+        ),
+      }}
+      {...props}
+    />
   )
 }
+
+export { default as PreviewGroup } from 'antd/es/image/PreviewGroup'

@@ -3,6 +3,8 @@ import { Poiret_One } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/shared/ui/sonner'
 import { Header } from '@/features/header'
+import { AntdRegistry } from '@ant-design/nextjs-registry'
+import '@ant-design/v5-patch-for-react-19'
 
 const poiretOne = Poiret_One({
   weight: '400',
@@ -23,8 +25,10 @@ export default function RootLayout({
     <html lang='ru'>
       <body className={`${poiretOne.className} antialiased`}>
         <Toaster />
-        <Header />
-        {children}
+        <AntdRegistry>
+          <Header />
+          {children}
+        </AntdRegistry>
       </body>
     </html>
   )
