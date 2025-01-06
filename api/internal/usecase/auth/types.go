@@ -12,7 +12,7 @@ type CodeStorage interface {
 }
 
 type MailService interface {
-	SendCodeToAdmin(code string)
+	SendCodeToAdmin(code string) error
 }
 
 var (

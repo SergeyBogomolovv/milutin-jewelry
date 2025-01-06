@@ -77,4 +77,13 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 
 		mockStorage.AssertExpectations(t)
 	})
+
+	t.Run("failed to send code", func(t *testing.T) {
+		mockStorage.On("Create", ctx).Return("code", nil).Once()
+		mockMailService.On("SendCodeToAdmin", "code").Return(assert.AnError).Once()
+		err := usecase.SendCode(ctx)
+		assert.Error(t, err)
+		mockStorage.AssertExpectations(t)
+		mockMailService.AssertExpectations(t)
+	})
 }

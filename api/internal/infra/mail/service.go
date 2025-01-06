@@ -28,7 +28,7 @@ func New(log *slog.Logger, cfg config.MailConfig) *mailService {
 	}
 }
 
-func (s *mailService) SendCodeToAdmin(code string) {
+func (s *mailService) SendCodeToAdmin(code string) error {
 	const op = "SendCodeToAdmin"
 	log := s.log.With(slog.String("op", op))
 
@@ -43,7 +43,8 @@ func (s *mailService) SendCodeToAdmin(code string) {
 
 	if err := d.DialAndSend(m); err != nil {
 		log.Error("failed to send email", "err", err)
-		return
+		return err
 	}
 	log.Info("email sent")
+	return nil
 }

@@ -30,9 +30,9 @@ type mockMailService struct {
 	mock.Mock
 }
 
-func (m *mockMailService) SendCodeToAdmin(code string) {
+func (m *mockMailService) SendCodeToAdmin(code string) error {
 	args := m.Called(code)
-	args.Error(0)
+	return args.Error(0)
 }
 
 func newTestConfig() config.JwtConfig {

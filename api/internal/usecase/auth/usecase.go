@@ -39,7 +39,10 @@ func (u *usecase) SendCode(ctx context.Context) error {
 		return err
 	}
 
-	go u.mail.SendCodeToAdmin(code)
+	if err := u.mail.SendCodeToAdmin(code); err != nil {
+		log.Error("can't send login code to admin", "err", err)
+		return err
+	}
 
 	return nil
 }
