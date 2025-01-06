@@ -1,4 +1,4 @@
-package collectionscontroller
+package collections
 
 import (
 	"errors"

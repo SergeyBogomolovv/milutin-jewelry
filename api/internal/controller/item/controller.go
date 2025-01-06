@@ -1,4 +1,4 @@
-package itemscontroller
+package items
 
 import (
 	"errors"

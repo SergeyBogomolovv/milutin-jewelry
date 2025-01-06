@@ -1,4 +1,4 @@
-package itemsusecase_test
+package items_test
 
 import (
 	"context"
