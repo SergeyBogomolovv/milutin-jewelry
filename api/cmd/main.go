@@ -30,13 +30,15 @@ func main() {
 
 	app := app.New(log, db, redis, cfg)
 
-	go app.Start()
-
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	<-ctx.Done()
-	app.Stop()
+	go func() {
+		<-ctx.Done()
+		app.Stop()
+	}()
+
+	app.Start()
 }
 
 func init() {
