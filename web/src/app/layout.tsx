@@ -1,8 +1,9 @@
+import './globals.css'
 import type { Metadata } from 'next'
 import { Poiret_One } from 'next/font/google'
-import './globals.css'
 import { Toaster } from '@/shared/ui/sonner'
 import { Header } from '@/features/header'
+import { Footer } from '@/features/footer'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
 import '@ant-design/v5-patch-for-react-19'
 
@@ -28,6 +29,7 @@ export default function RootLayout({
         <AntdRegistry>
           <Header />
           {children}
+          <Footer />
         </AntdRegistry>
       </body>
     </html>
