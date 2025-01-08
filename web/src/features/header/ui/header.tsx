@@ -1,6 +1,5 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ClipboardCopyIcon, UserRound } from 'lucide-react'
 import { toast } from 'sonner'
 import { Contacts } from '@/features/contacts'
@@ -17,7 +16,7 @@ export function Header() {
   return (
     <div className='bg-zinc-950 flex gap-4 items-end justify-between lg:pb-7 pb-6 pt-3 xl:px-12 lg:px-10 md:px-9 px-5'>
       <Link href='/'>
-        <Image src={Logo} alt='Михаил Милютин' className='xl:w-72 lg:w-60 md:w-56 w-48' />
+        <Logo className='xl:w-72 lg:w-60 md:w-56 w-48' />
       </Link>
       <div className='flex gap-2'>
         <Contacts>
