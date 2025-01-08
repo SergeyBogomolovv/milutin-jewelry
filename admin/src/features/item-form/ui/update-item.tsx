@@ -55,7 +55,6 @@ export function UpdateItemForm({ children, item }: { children: React.ReactNode; 
       return
     }
     setImagePreview(null)
-    form.reset()
     setOpen(false)
   }
 

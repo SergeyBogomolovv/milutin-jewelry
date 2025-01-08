@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	usecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
@@ -14,15 +13,13 @@ import (
 type controller struct {
 	validate *validator.Validate
 	usecase  Usecase
-	log      *slog.Logger
 }
 
-func Register(log *slog.Logger, router *http.ServeMux, usecase Usecase) {
+func Register(router *http.ServeMux, usecase Usecase) {
 	const dest = "authController"
 	controller := &controller{
 		usecase:  usecase,
 		validate: validator.New(validator.WithRequiredStructEnabled()),
-		log:      log.With(slog.String("dest", dest)),
 	}
 	r := http.NewServeMux()
 	r.HandleFunc("POST /login", controller.Login)
@@ -43,12 +40,8 @@ func Register(log *slog.Logger, router *http.ServeMux, usecase Usecase) {
 // @Failure      500    {object}  res.ErrorResponse  "Внутренняя ошибка сервера"
 // @Router       /auth/login [post]
 func (c *controller) Login(w http.ResponseWriter, r *http.Request) {
-	const op = "Login"
-	log := c.log.With(slog.String("op", op))
-
 	var payload LoginBody
 	if err := res.DecodeBody(r, &payload); err != nil {
-		log.Error("failed to decode payload", "err", err)
 		res.WriteError(w, "invalid payload", http.StatusBadRequest)
 		return
 	}

@@ -20,10 +20,9 @@ type controller struct {
 	log      *slog.Logger
 }
 
-func Register(log *slog.Logger, router *http.ServeMux, usecase Usecase, auth middleware.Middleware) {
+func Register(router *http.ServeMux, usecase Usecase, auth middleware.Middleware) {
 	const dest = "collectionsController"
 	c := &controller{
-		log:      log.With(slog.String("dest", dest)),
 		usecase:  usecase,
 		validate: validator.New(validator.WithRequiredStructEnabled()),
 	}
@@ -106,18 +105,27 @@ func (c *controller) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	payload := uc.UpdateCollectionPayload{ID: id}
-	title := r.FormValue("title")
-	description := r.FormValue("description")
-	if title != "" {
+
+	if r.Form.Has("title") {
+		title := r.FormValue("title")
 		payload.Title = &title
 	}
-	if description != "" {
+	if r.Form.Has("description") {
+		description := r.FormValue("description")
 		payload.Description = &description
 	}
+
 	var image multipart.File
-	if image, _, err = r.FormFile("image"); err == nil {
+
+	if r.Form.Has("image") {
+		image, _, err = r.FormFile("image")
+		if err != nil {
+			res.WriteError(w, "invalid image", http.StatusBadRequest)
+			return
+		}
 		defer image.Close()
 	}
+
 	if err := c.validate.Struct(payload); err != nil {
 		res.WriteError(w, "invalid payload", http.StatusBadRequest)
 		return

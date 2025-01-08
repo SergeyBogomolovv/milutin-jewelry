@@ -61,7 +61,6 @@ export function UpdateCollectionForm({
       return
     }
     setImagePreview(null)
-    form.reset()
     setOpen(false)
     toast.success('Коллекция обновлена')
   }

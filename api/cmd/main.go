@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	_ "github.com/SergeyBogomolovv/milutin-jewelry/docs"
@@ -22,25 +23,34 @@ func main() {
 	cfg := config.New()
 
 	db := db.New(cfg.PostgresUrl)
-	defer db.Close()
 	redis := redis.New(cfg.RedisUrl)
-	defer redis.Close()
 
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	log := newLogger()
 
 	app := app.New(log, db, redis, cfg)
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer stop()
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
 		<-ctx.Done()
 		app.Stop()
 	}()
 
 	app.Start()
+	wg.Wait()
 }
 
 func init() {
 	godotenv.Load()
+}
+
+func newLogger() *slog.Logger {
+	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
 }

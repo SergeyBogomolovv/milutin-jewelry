@@ -6,8 +6,8 @@ import { UpdateItemFields } from '../model/update-item.schema'
 export const updateItem = async (fields: UpdateItemFields, collectionId: string) => {
   try {
     const formData = new FormData()
-    if (fields.title) formData.append('title', fields.title)
-    if (fields.description) formData.append('description', fields.description)
+    formData.append('title', fields.title || '')
+    formData.append('description', fields.description || '')
     if (fields.image) formData.append('image', fields.image)
     formData.append('collection_id', collectionId)
     const res = await fetcher(`/items/update/${collectionId}`, {

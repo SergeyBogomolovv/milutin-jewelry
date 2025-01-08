@@ -2,7 +2,6 @@ package items
 
 import (
 	"errors"
-	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -15,14 +14,12 @@ import (
 
 type controller struct {
 	usecase  Usecase
-	log      *slog.Logger
 	validate *validator.Validate
 }
 
-func Register(log *slog.Logger, router *http.ServeMux, usecase Usecase, auth middleware.Middleware) {
+func Register(router *http.ServeMux, usecase Usecase, auth middleware.Middleware) {
 	const dest = "itemsController"
 	c := &controller{
-		log:      log.With(slog.String("dest", dest)),
 		usecase:  usecase,
 		validate: validator.New(validator.WithRequiredStructEnabled()),
 	}
@@ -55,11 +52,7 @@ func Register(log *slog.Logger, router *http.ServeMux, usecase Usecase, auth mid
 // @Failure      500  {object}  res.ErrorResponse  "Ошибка сервера"
 // @Router       /items/create [post]
 func (c *controller) CreateCollectionItem(w http.ResponseWriter, r *http.Request) {
-	const op = "CreateCollectionItem"
-	log := c.log.With(slog.String("op", op))
-
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		log.Error("failed to parse multipart form", "err", err)
 		res.WriteError(w, "invalid form", http.StatusBadRequest)
 		return
 	}
@@ -110,11 +103,7 @@ func (c *controller) CreateCollectionItem(w http.ResponseWriter, r *http.Request
 // @Failure      500  {object}  res.ErrorResponse    "Internal server error"
 // @Router       /items/update/{id} [put]
 func (c *controller) UpdateCollectionItem(w http.ResponseWriter, r *http.Request) {
-	const op = "UpdateCollectionItem"
-	log := c.log.With(slog.String("op", op))
-
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		log.Error("failed to parse multipart form", "err", err)
 		res.WriteError(w, "invalid form", http.StatusBadRequest)
 		return
 	}
@@ -124,18 +113,24 @@ func (c *controller) UpdateCollectionItem(w http.ResponseWriter, r *http.Request
 		res.WriteError(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	title := r.FormValue("title")
-	description := r.FormValue("description")
+
 	payload := uc.UpdateItemPayload{ID: id}
-	if title != "" {
+	if r.Form.Has("title") {
+		title := r.FormValue("title")
 		payload.Title = &title
 	}
-	if description != "" {
+	if r.Form.Has("description") {
+		description := r.FormValue("description")
 		payload.Description = &description
 	}
 
 	var image multipart.File
-	if image, _, err = r.FormFile("image"); err == nil {
+	if r.Form.Has("image") {
+		image, _, err = r.FormFile("image")
+		if err != nil {
+			res.WriteError(w, "invalid image", http.StatusBadRequest)
+			return
+		}
 		defer image.Close()
 	}
 

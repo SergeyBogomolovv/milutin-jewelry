@@ -25,42 +25,49 @@ import (
 )
 
 type application struct {
-	srv *http.Server
-	log *slog.Logger
+	srv   *http.Server
+	log   *slog.Logger
+	db    *sqlx.DB
+	redis *redis.Client
 }
 
 func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg config.Config) *application {
 	router := http.NewServeMux()
 	router.Handle("/docs/", httpSwagger.WrapHandler)
 
-	authMiddleware := middleware.NewAuthMiddleware(cfg.Jwt.Secret)
-	corsMiddleware := middleware.NewCORSMiddleware(cfg.CORSOrigin)
-	loggerMiddleware := middleware.NewLoggerMiddleware(log)
+	authMW := middleware.NewAuthMiddleware(cfg.Jwt.Secret)
+	corsMW := middleware.NewCORSMiddleware(cfg.CORSOrigin)
+	logMW := middleware.NewLoggerMiddleware(log)
 
 	filesService := fileService.New(log, cfg.ObjectStorage)
 	mailService := mail.New(log, cfg.Mail)
 
 	collectionStorage := collectionStorage.New(db)
 	collectionUsecase := collectionUsecase.New(log, filesService, collectionStorage)
-	collectionController.Register(log, router, collectionUsecase, authMiddleware)
+	collectionController.Register(router, collectionUsecase, authMW)
 
 	itemStorage := itemStorage.New(db)
 	itemUsecase := itemUsecase.New(log, filesService, itemStorage)
-	itemController.Register(log, router, itemUsecase, authMiddleware)
+	itemController.Register(router, itemUsecase, authMW)
 
 	codeStorage := codeStorage.New(redis)
 	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.Jwt)
-	authController.Register(log, router, authUsecase)
+	authController.Register(router, authUsecase)
+
+	srv := &http.Server{Addr: cfg.Addr, Handler: corsMW(logMW(router))}
 
 	return &application{
-		srv: &http.Server{Addr: cfg.Addr, Handler: corsMiddleware(loggerMiddleware(router))},
-		log: log,
+		srv:   srv,
+		log:   log,
+		db:    db,
+		redis: redis,
 	}
 }
 
 func (a *application) Start() {
 	const op = "app.Run"
 	log := a.log.With(slog.String("op", op))
+
 	log.Info("starting server", "addr", a.srv.Addr)
 	a.srv.ListenAndServe()
 }
@@ -68,8 +75,16 @@ func (a *application) Start() {
 func (a *application) Stop() {
 	const op = "app.Stop"
 	log := a.log.With(slog.String("op", op))
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
 	a.srv.Shutdown(ctx)
 	log.Info("server stopped")
+
+	a.redis.Shutdown(ctx)
+	a.log.Info("redis stopped")
+
+	a.db.Close()
+	log.Info("database stopped")
 }

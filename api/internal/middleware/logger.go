@@ -6,9 +6,21 @@ import (
 	"time"
 )
 
+var ignoringMethods = map[string]bool{
+	http.MethodConnect: true,
+	http.MethodGet:     true,
+	http.MethodHead:    true,
+	http.MethodTrace:   true,
+	http.MethodOptions: true,
+}
+
 func NewLoggerMiddleware(log *slog.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if ignoringMethods[r.Method] {
+				next.ServeHTTP(w, r)
+				return
+			}
 			start := time.Now()
 			rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
 			next.ServeHTTP(rec, r)

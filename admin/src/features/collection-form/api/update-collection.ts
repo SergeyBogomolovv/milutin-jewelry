@@ -15,7 +15,7 @@ export const updateCollection = async (
   try {
     const formData = new FormData()
     if (data.title) formData.append('title', data.title)
-    if (data.description) formData.append('description', data.description)
+    formData.append('description', data.description || '')
     if (data.image) formData.append('image', data.image)
 
     const res = await fetcher(`/collections/update/${id}`, {
