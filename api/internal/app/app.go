@@ -83,7 +83,7 @@ func (a *application) Stop() {
 	log.Info("server stopped")
 
 	a.redis.Shutdown(ctx)
-	a.log.Info("redis stopped")
+	log.Info("redis stopped")
 
 	a.db.Close()
 	log.Info("database stopped")

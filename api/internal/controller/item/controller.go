@@ -125,12 +125,7 @@ func (c *controller) UpdateCollectionItem(w http.ResponseWriter, r *http.Request
 	}
 
 	var image multipart.File
-	if r.Form.Has("image") {
-		image, _, err = r.FormFile("image")
-		if err != nil {
-			res.WriteError(w, "invalid image", http.StatusBadRequest)
-			return
-		}
+	if image, _, err = r.FormFile("image"); err == nil {
 		defer image.Close()
 	}
 

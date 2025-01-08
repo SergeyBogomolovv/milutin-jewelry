@@ -3,7 +3,6 @@ package collections
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -17,7 +16,6 @@ import (
 type controller struct {
 	validate *validator.Validate
 	usecase  Usecase
-	log      *slog.Logger
 }
 
 func Register(router *http.ServeMux, usecase Usecase, auth middleware.Middleware) {
@@ -66,7 +64,6 @@ func (c *controller) CreateCollection(w http.ResponseWriter, r *http.Request) {
 
 	payload := uc.CreateCollectionPayload{Title: r.FormValue("title"), Description: r.FormValue("description")}
 	if err := c.validate.Struct(payload); err != nil {
-		c.log.Error("failed to validate payload", "err", err)
 		res.WriteError(w, fmt.Sprintf("invalid payload: %s", err), http.StatusBadRequest)
 		return
 	}
@@ -116,13 +113,7 @@ func (c *controller) UpdateCollection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var image multipart.File
-
-	if r.Form.Has("image") {
-		image, _, err = r.FormFile("image")
-		if err != nil {
-			res.WriteError(w, "invalid image", http.StatusBadRequest)
-			return
-		}
+	if image, _, err = r.FormFile("image"); err == nil {
 		defer image.Close()
 	}
 
