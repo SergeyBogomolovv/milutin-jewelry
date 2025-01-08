@@ -11,7 +11,7 @@ export function Footer() {
         предварительной записи.
       </p>
       <Contacts>
-        <Button className='rounded-full aspect-square sm:size-12 size-10'>
+        <Button className='rounded-full aspect-square sm:size-12 size-10' aria-label='Контакты'>
           <UserRound />
         </Button>
       </Contacts>
