@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'storage.yandexcloud.net',
-        pathname: '/milutin-jewelry/**',
+        pathname: '/**',
       },
     ],
   },

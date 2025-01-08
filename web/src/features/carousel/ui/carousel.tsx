@@ -1,4 +1,5 @@
-import { Carousel as AntCarousel, Image } from 'antd'
+import { Carousel as AntCarousel } from 'antd'
+import Image from 'next/image'
 
 const slides = [
   {
@@ -30,13 +31,13 @@ export function Carousel() {
         <Image
           className='w-full object-cover sm:aspect-auto aspect-square'
           key={src}
-          preview={false}
-          loading='lazy'
           src={src}
+          width={1200}
+          height={700}
+          blurDataURL={placeholder}
+          placeholder='blur'
           alt='Алиса в стране чудес'
-          placeholder={
-            <Image preview={false} src={placeholder} width={'100%'} alt='Алиса в стране чудес' />
-          }
+          priority={true}
         />
       ))}
     </AntCarousel>
