@@ -9,8 +9,8 @@ const links = [
     icon: Gem,
   },
   {
-    title: 'Статьи',
-    url: '/posts',
+    title: 'Баннеры',
+    url: '/banners',
     icon: Newspaper,
   },
 ]

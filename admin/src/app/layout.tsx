@@ -10,8 +10,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Milutin Jewelry Admin',
-  description: 'Admin app for milutin jewelry',
+  title: 'Milutin Jewellery Admin',
+  description: 'Admin app for milutin jewellery',
 }
 
 export default function RootLayout({

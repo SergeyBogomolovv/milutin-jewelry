@@ -20,7 +20,8 @@ export default async function CollectionLayout({
       <header className='p-4 items-center flex pt-4'>
         <SidebarTrigger />
         <div className='flex items-center justify-between w-full'>
-          {success && data ? (
+          {!success && <h2 className='font-bold text-lg'>Коллекция не найдена</h2>}
+          {data && (
             <>
               <h2 className='font-bold text-lg'>{data.title}</h2>
               <ItemForm id={id}>
@@ -30,8 +31,6 @@ export default async function CollectionLayout({
                 </Button>
               </ItemForm>
             </>
-          ) : (
-            <h2 className='font-bold text-lg'>Коллекция не найдена</h2>
           )}
         </div>
       </header>
