@@ -33,7 +33,7 @@ func (s *storage) List(ctx context.Context) ([]Banner, error) {
 	query := `
   SELECT banner_id, image_id, mobile_image_id, collection_id, created_at
   FROM banners 
-  ORDER BY created_at DESC`
+  ORDER BY created_at`
 	banners := make([]Banner, 0)
 	if err := s.db.SelectContext(ctx, &banners, query); err != nil {
 		return nil, err

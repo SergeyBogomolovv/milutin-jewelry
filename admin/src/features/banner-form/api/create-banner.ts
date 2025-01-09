@@ -12,8 +12,8 @@ export const createBanner = async (fields: NewBannerFields): Promise<CreateBanne
   try {
     const formData = new FormData()
     if (fields.collection_id) formData.append('collection_id', fields.collection_id)
-    formData.append('description', fields.image)
-    formData.append('description', fields.mobile_image)
+    formData.append('image', fields.image)
+    formData.append('mobile_image', fields.mobile_image)
 
     const res = await fetcher('/banners/create', { method: 'POST', body: formData })
 
