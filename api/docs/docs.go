@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/authcontroller.LoginBody"
+                            "$ref": "#/definitions/auth.LoginBody"
                         }
                     }
                 ],
@@ -43,7 +43,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/authcontroller.TokenResponse"
+                            "$ref": "#/definitions/auth.TokenResponse"
                         }
                     },
                     "400": {
@@ -96,6 +96,160 @@ const docTemplate = `{
                 }
             }
         },
+        "/banners/all": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "banners"
+                ],
+                "summary": "Получение всех баннеров",
+                "responses": {
+                    "200": {
+                        "description": "Список всех баннеров",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/internal_controller_banner.Banner"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/banners/create": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "banners"
+                ],
+                "summary": "Создание баннера",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID коллекции",
+                        "name": "collection_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Изображение",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Изображение для мобильных устройств",
+                        "name": "mobile_image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Баннер создан",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_banner.Banner"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет доступа",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Коллекция не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/banners/delete/{id}": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "banners"
+                ],
+                "summary": "Удаление баннера",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID баннера",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Баннер успешно удален",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_banner.Banner"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Нет доступа",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Баннер не найден",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/res.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/collections/all": {
             "get": {
                 "description": "Получение списка всех коллекций",
@@ -115,7 +269,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/collectionscontroller.Collection"
+                                "$ref": "#/definitions/collections.Collection"
                             }
                         }
                     },
@@ -167,7 +321,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Коллекция успешно создана",
                         "schema": {
-                            "$ref": "#/definitions/collectionscontroller.Collection"
+                            "$ref": "#/definitions/collections.Collection"
                         }
                     },
                     "400": {
@@ -217,7 +371,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Коллекция успешно удалена",
                         "schema": {
-                            "$ref": "#/definitions/collectionscontroller.Collection"
+                            "$ref": "#/definitions/collections.Collection"
                         }
                     },
                     "400": {
@@ -291,7 +445,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Коллекция успешно обновлена",
                         "schema": {
-                            "$ref": "#/definitions/collectionscontroller.Collection"
+                            "$ref": "#/definitions/collections.Collection"
                         }
                     },
                     "400": {
@@ -347,7 +501,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Данные коллекции",
                         "schema": {
-                            "$ref": "#/definitions/collectionscontroller.Collection"
+                            "$ref": "#/definitions/collections.Collection"
                         }
                     },
                     "400": {
@@ -399,7 +553,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/itemscontroller.Item"
+                                "$ref": "#/definitions/items.Item"
                             }
                         }
                     },
@@ -469,7 +623,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/itemscontroller.Item"
+                            "$ref": "#/definitions/items.Item"
                         }
                     },
                     "400": {
@@ -524,7 +678,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Item successfully deleted",
                         "schema": {
-                            "$ref": "#/definitions/itemscontroller.Item"
+                            "$ref": "#/definitions/items.Item"
                         }
                     },
                     "400": {
@@ -597,7 +751,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Item successfully updated",
                         "schema": {
-                            "$ref": "#/definitions/itemscontroller.Item"
+                            "$ref": "#/definitions/items.Item"
                         }
                     },
                     "400": {
@@ -652,7 +806,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/itemscontroller.Item"
+                            "$ref": "#/definitions/items.Item"
                         }
                     },
                     "400": {
@@ -678,7 +832,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "authcontroller.LoginBody": {
+        "auth.LoginBody": {
             "type": "object",
             "properties": {
                 "code": {
@@ -686,7 +840,7 @@ const docTemplate = `{
                 }
             }
         },
-        "authcontroller.TokenResponse": {
+        "auth.TokenResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -694,7 +848,7 @@ const docTemplate = `{
                 }
             }
         },
-        "collectionscontroller.Collection": {
+        "collections.Collection": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -719,7 +873,24 @@ const docTemplate = `{
                 }
             }
         },
-        "itemscontroller.Item": {
+        "internal_controller_banner.Banner": {
+            "type": "object",
+            "properties": {
+                "collection_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_id": {
+                    "type": "string"
+                },
+                "mobile_image_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "items.Item": {
             "type": "object",
             "properties": {
                 "collection_id": {

@@ -8,15 +8,18 @@ import (
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	authController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/auth"
+	bannerController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/banner"
 	collectionController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/collection"
 	itemController "github.com/SergeyBogomolovv/milutin-jewelry/internal/controller/item"
 	fileService "github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/file"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/infra/mail"
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/middleware"
+	bannerStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/banner"
 	codeStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/code"
 	collectionStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/collection"
 	itemStorage "github.com/SergeyBogomolovv/milutin-jewelry/internal/storage/item"
 	authUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/auth"
+	bannerUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/banner"
 	collectionUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/collection"
 	itemUsecase "github.com/SergeyBogomolovv/milutin-jewelry/internal/usecase/item"
 	"github.com/jmoiron/sqlx"
@@ -53,6 +56,10 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg config.Config) 
 	codeStorage := codeStorage.New(redis)
 	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.Jwt)
 	authController.Register(router, authUsecase)
+
+	bannerStorage := bannerStorage.New(db)
+	bannerUsecase := bannerUsecase.New(log, filesService, bannerStorage)
+	bannerController.Register(router, bannerUsecase, authMW)
 
 	srv := &http.Server{Addr: cfg.Addr, Handler: corsMW(logMW(router))}
 

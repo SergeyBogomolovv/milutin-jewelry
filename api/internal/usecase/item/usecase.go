@@ -61,7 +61,6 @@ func (u *usecase) Update(ctx context.Context, payload UpdateItemPayload, image m
 	item, err := u.storage.GetById(ctx, payload.ID)
 	if err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
-			log.Info("item not found", "err", err)
 			return nil, ErrItemNotFound
 		}
 		log.Error("can't get item", "err", err)
@@ -103,7 +102,6 @@ func (u *usecase) Delete(ctx context.Context, id int) (*storage.Item, error) {
 	item, err := u.storage.GetById(ctx, id)
 	if err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
-			log.Info("item not found", "err", err)
 			return nil, ErrItemNotFound
 		}
 		log.Error("can't get collection item", "err", err)
@@ -135,7 +133,6 @@ func (u *usecase) GetByCollectionId(ctx context.Context, id int) ([]storage.Item
 		return nil, err
 	}
 	if !exists {
-		log.Info("collection not found")
 		return nil, ErrCollectionNotFound
 	}
 
@@ -154,7 +151,6 @@ func (u *usecase) GetById(ctx context.Context, id int) (*storage.Item, error) {
 	item, err := u.storage.GetById(ctx, id)
 	if err != nil {
 		if errors.Is(err, storage.ErrItemNotFound) {
-			log.Info("item not found", "err", err)
 			return nil, ErrItemNotFound
 		}
 		log.Error("can't get item", "err", err)
