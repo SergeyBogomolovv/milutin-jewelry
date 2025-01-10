@@ -36,7 +36,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                   width={1200}
                   height={700}
                   alt={banner.id.toString()}
-                  priority={true}
+                  priority
                 />
               </Link>
             ) : (
@@ -47,7 +47,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                 width={1200}
                 height={700}
                 alt={banner.id.toString()}
-                priority={true}
+                priority
               />
             ),
           )
@@ -60,7 +60,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                   width={700}
                   height={700}
                   alt={banner.id.toString()}
-                  priority={true}
+                  priority
                 />
               </Link>
             ) : (
@@ -71,7 +71,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                 width={700}
                 height={700}
                 alt={banner.id.toString()}
-                priority={true}
+                priority
               />
             ),
           )}

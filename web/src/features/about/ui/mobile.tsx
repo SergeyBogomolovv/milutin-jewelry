@@ -9,7 +9,7 @@ export default function AboutMobile() {
     <section className='w-11/12 mx-auto flex flex-col items-center gap-8 my-8'>
       <Separator />
       <h1 className='text-4xl'>Об авторе</h1>
-      <Image src={mikhail} alt='Михал Милютин' className='rounded-lg w-9/12 sm:w-7/12' />
+      <Image priority src={mikhail} alt='Михал Милютин' className='rounded-lg w-9/12 sm:w-7/12' />
       <div className='flex flex-col gap-2 items-center'>
         <p className='text-center text-muted-foreground tracking-wider text-lg sm:w-9/12'>
           Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного

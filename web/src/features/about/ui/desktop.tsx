@@ -9,7 +9,7 @@ export default function AboutDesktop() {
     <section className='container mx-auto lg:space-y-20 space-y-16 lg:my-20 my-16'>
       <Separator />
       <div className='flex justify-center lg:gap-20 gap-16'>
-        <Image src={mikhail} alt='Михал Милютин' className='rounded-lg' />
+        <Image priority src={mikhail} alt='Михал Милютин' className='rounded-lg' />
         <div className='flex flex-col justify-between items-center'>
           <h1 className='text-4xl'>Об авторе</h1>
           <div className='flex flex-col gap-2 items-center'>
