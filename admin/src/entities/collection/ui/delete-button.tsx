@@ -1,5 +1,4 @@
 'use client'
-
 import { Button } from '@/shared/ui/button'
 import { deleteCollection } from '../api/delete-collection'
 import { toast } from 'sonner'
@@ -11,14 +10,15 @@ export default function DeleteButton({ id }: { id: number }) {
   const [isLoading, setLoading] = useState(false)
 
   const deleteHandler = async () => {
-    setLoading(true)
-    const result = await deleteCollection(id)
-    setLoading(false)
-    if (!result.success) {
-      toast.error(`Ошибка удаления коллекции: ${result.error || 'Неизвестная ошибка'}`)
-      return
+    try {
+      setLoading(true)
+      await deleteCollection(id)
+      setLoading(false)
+      toast.success('Коллекция удалена')
+    } catch (error) {
+      setLoading(false)
+      toast.error('Произошла ошибка удаления коллекции')
     }
-    toast.success('Коллекция успешно удалена')
   }
 
   return (

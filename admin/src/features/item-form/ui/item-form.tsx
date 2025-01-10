@@ -46,14 +46,15 @@ export function ItemForm({ children, id }: { children: React.ReactNode; id: stri
   }
 
   const onSubmit = async (data: NewItemFields) => {
-    const ok = await createItem(data, id)
-    if (!ok) {
+    try {
+      await createItem(data, id)
+      setImagePreview(null)
+      form.reset()
+      setOpen(false)
+      toast.success('Украшение создано')
+    } catch (error) {
       toast.error('Ошибка создания украшения')
-      return
     }
-    setImagePreview(null)
-    form.reset()
-    setOpen(false)
   }
 
   return (

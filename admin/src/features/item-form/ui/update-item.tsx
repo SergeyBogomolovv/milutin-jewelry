@@ -16,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog'
-import { NewItemFields } from '../model/new-item.schema'
 import { Item } from '@/entities/item'
 import { UpdateItemFields, updateItemSchema } from '../model/update-item.schema'
 import { updateItem } from '../api/update-item'
@@ -48,14 +47,15 @@ export function UpdateItemForm({ children, item }: { children: React.ReactNode; 
     }
   }
 
-  const onSubmit = async (data: NewItemFields) => {
-    const ok = await updateItem(data, String(item.id))
-    if (!ok) {
+  const onSubmit = async (data: UpdateItemFields) => {
+    try {
+      await updateItem(data, item.id)
+      toast.success('Украшение обновлено')
+      setImagePreview(null)
+      setOpen(false)
+    } catch (error) {
       toast.error('Ошибка обновления украшения')
-      return
     }
-    setImagePreview(null)
-    setOpen(false)
   }
 
   return (

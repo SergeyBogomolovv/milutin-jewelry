@@ -46,15 +46,15 @@ export function CollectionForm({ children }: { children: React.ReactNode }) {
   }
 
   const onSubmit = async (data: NewCollectionFields) => {
-    const result = await createCollection(data)
-    if (!result.success) {
-      toast.error(`Ошибка создания коллекции: ${result.error || 'Неизвестная ошибка'}`)
-      return
+    try {
+      await createCollection(data)
+      toast.success('Коллекция создана')
+      setImagePreview(null)
+      form.reset()
+      setOpen(false)
+    } catch (error) {
+      toast.error('Произошла ошибка создания коллекции')
     }
-    toast.success('Коллекция успешно создана!')
-    setImagePreview(null)
-    form.reset()
-    setOpen(false)
   }
 
   return (

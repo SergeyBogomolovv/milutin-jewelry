@@ -55,14 +55,14 @@ export function UpdateCollectionForm({
   }
 
   const onSubmit = async (data: UpdateCollectionFields) => {
-    const result = await updateCollection(data, collection.id)
-    if (!result.success) {
-      toast.error(`Ошибка обновления коллекции: ${result.error || 'Неизвестная ошибка'}`)
-      return
+    try {
+      await updateCollection(data, collection.id)
+      setImagePreview(null)
+      setOpen(false)
+      toast.success('Коллекция обновлена')
+    } catch (error) {
+      toast.error('Произошла ошибка обновления коллекции')
     }
-    setImagePreview(null)
-    setOpen(false)
-    toast.success('Коллекция обновлена')
   }
 
   return (
