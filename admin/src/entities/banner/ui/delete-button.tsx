@@ -1,5 +1,4 @@
 'use client'
-
 import { Button } from '@/shared/ui/button'
 import { toast } from 'sonner'
 import { useState } from 'react'
@@ -11,14 +10,15 @@ export default function DeleteButton({ id }: { id: number }) {
   const [isLoading, setLoading] = useState(false)
 
   const deleteHandler = async () => {
-    setLoading(true)
-    const result = await deleteBanner(id)
-    setLoading(false)
-    if (!result.success) {
-      toast.error(`Ошибка удаления баннера: ${result.error || 'Неизвестная ошибка'}`)
-      return
+    try {
+      setLoading(true)
+      await deleteBanner(id)
+      setLoading(false)
+      toast.success('Баннер удален')
+    } catch (error) {
+      setLoading(false)
+      toast.error('Произошла ошибка удаления баннера')
     }
-    toast.success('Баннер удален')
   }
 
   return (

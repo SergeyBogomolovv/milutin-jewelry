@@ -1,7 +1,7 @@
 import { API_URL } from '../constants'
 import { getToken } from '../utils/auth'
 
-export async function fetcher(path: string, opts: RequestInit = {}) {
+export async function fetchWithAuth(path: string, opts: RequestInit = {}) {
   const token = await getToken()
   return fetch(`${API_URL}${path}`, {
     ...opts,
@@ -10,4 +10,8 @@ export async function fetcher(path: string, opts: RequestInit = {}) {
       ...opts.headers,
     },
   })
+}
+
+export async function fetcher(path: string, opts: RequestInit = {}) {
+  return fetch(API_URL + path, opts)
 }

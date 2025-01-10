@@ -69,15 +69,18 @@ export function BannerForm({
   }
 
   const onSubmit = async (data: NewBannerFields) => {
-    const result = await createBanner(data)
-    if (!result.success) {
-      toast.error(`Ошибка создания баннера: ${result.error || 'Неизвестная ошибка'}`)
-      return
+    try {
+      await createBanner(data)
+      toast.success('Баннер создан')
+
+      setImagePreview(null)
+      setMobileImagePreview(null)
+
+      form.reset()
+      setOpen(false)
+    } catch (error) {
+      toast.error('Произошла ошибка создания баннера')
     }
-    toast.success('Баннер успешно создан!')
-    setImagePreview(null)
-    form.reset()
-    setOpen(false)
   }
 
   return (
