@@ -9,17 +9,16 @@ import {
 import { Banner } from '../model/banner'
 import { CustomImage } from '@/shared/ui/image'
 import DeleteButton from './delete-button'
-import { use } from 'react'
-import { getCollection } from '@/entities/collection'
+import { Collection } from '@/entities/collection'
 
-export function BannerCard({ banner }: { banner: Banner }) {
+export function BannerCard({ banner, collections }: { banner: Banner; collections: Collection[] }) {
   let title = 'Без ссылки на коллекцию'
-  if (banner.collection_id) {
-    const { data } = use(getCollection(String(banner.collection_id)))
-    if (data) {
-      title = data.title
+  collections.forEach((collection) => {
+    if (collection.id === banner.collection_id) {
+      title = collection.title
     }
-  }
+  })
+
   return (
     <Card className='flex flex-col'>
       <CardHeader>

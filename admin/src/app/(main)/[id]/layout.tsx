@@ -11,30 +11,38 @@ export default async function CollectionLayout({
   children: React.ReactNode
   params: Promise<{ id: string }>
 }>) {
-  const { id } = await params
+  try {
+    const { id } = await params
+    const collection = await getCollection(id)
 
-  const { success, data } = await getCollection(id)
-
-  return (
-    <div className='flex flex-col w-full'>
-      <header className='p-4 items-center flex pt-4'>
-        <SidebarTrigger />
-        <div className='flex items-center justify-between w-full'>
-          {!success && <h2 className='font-bold text-lg'>Коллекция не найдена</h2>}
-          {data && (
-            <>
-              <h2 className='font-bold text-lg'>{data.title}</h2>
-              <ItemForm id={id}>
-                <Button variant={'outline'}>
-                  <Plus />
-                  Добавить украшение
-                </Button>
-              </ItemForm>
-            </>
-          )}
-        </div>
-      </header>
-      {children}
-    </div>
-  )
+    return (
+      <div className='flex flex-col w-full'>
+        <header className='p-4 items-center flex pt-4'>
+          <SidebarTrigger />
+          <div className='flex items-center justify-between w-full'>
+            <h2 className='font-bold text-lg'>{collection.title}</h2>
+            <ItemForm id={id}>
+              <Button variant={'outline'}>
+                <Plus />
+                Добавить украшение
+              </Button>
+            </ItemForm>
+          </div>
+        </header>
+        {children}
+      </div>
+    )
+  } catch (error) {
+    return (
+      <div className='flex flex-col w-full'>
+        <header className='p-4 items-center flex pt-4'>
+          <SidebarTrigger />
+          <div className='flex items-center justify-between w-full'>
+            <h2 className='font-bold text-lg'>Коллекция не найдена</h2>
+          </div>
+        </header>
+        {children}
+      </div>
+    )
+  }
 }
