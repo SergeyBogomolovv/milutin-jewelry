@@ -5,7 +5,7 @@ import S3Image from '@/shared/ui/s3-image'
 
 export function CollectionCard({ collection }: { collection: Collection }) {
   return (
-    <Link href={`/collections/${collection.id}`} className='flex flex-col items-center gap-5'>
+    <Link href={`/${collection.id}`} className='flex flex-col items-center gap-5'>
       <S3Image
         alt={collection.title}
         src={collection.image_id}

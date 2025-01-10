@@ -4,11 +4,12 @@ import { ExternalLinkIcon } from 'lucide-react'
 import Image from 'next/image'
 import mikhail from '@/assets/mikhail.jpg'
 
-export default function AboutDesktop() {
+export function About() {
   return (
-    <section className='container mx-auto lg:space-y-20 space-y-16 lg:my-20 my-16'>
+    <section className='md:container w-11/12 mx-auto lg:gap-20 md:gap-16 gap-8 lg:my-20 md:my-16 my-8 flex flex-col items-center'>
       <Separator />
-      <div className='flex justify-center lg:gap-20 gap-16'>
+      {/* Desktop */}
+      <div className='hidden md:flex justify-center lg:gap-20 gap-16'>
         <Image priority src={mikhail} alt='Михал Милютин' className='rounded-lg' />
         <div className='flex flex-col justify-between items-center'>
           <h1 className='text-4xl'>Об авторе</h1>
@@ -25,6 +26,25 @@ export default function AboutDesktop() {
           </div>
           <div />
         </div>
+      </div>
+
+      {/* Mobile */}
+      <h1 className='text-4xl md:hidden'>Об авторе</h1>
+      <Image
+        priority
+        src={mikhail}
+        alt='Михал Милютин'
+        className='rounded-lg w-9/12 sm:w-7/12 md:hidden'
+      />
+      <div className='flex flex-col gap-2 items-center md:hidden'>
+        <p className='text-center text-muted-foreground tracking-wider text-lg sm:w-9/12'>
+          Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного
+          мастерства и художественной фантазии.
+        </p>
+        <Button variant='link' className='font-bold text-lg'>
+          Подробнее
+          <ExternalLinkIcon />
+        </Button>
       </div>
       <Separator />
     </section>

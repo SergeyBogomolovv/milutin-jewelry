@@ -29,7 +29,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
       {!isMobile
         ? banners.map((banner) =>
             banner.collection_id ? (
-              <Link href={`/collections/${banner.collection_id}`} key={banner.id}>
+              <Link href={`/${banner.collection_id}`} key={banner.id}>
                 <S3Image
                   className='w-full object-cover aspect-auto'
                   src={banner.image_id}
@@ -53,7 +53,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
           )
         : banners.map((banner) =>
             banner.collection_id ? (
-              <Link href={`/collections/${banner.collection_id}`} key={banner.id}>
+              <Link href={`/${banner.collection_id}`} key={banner.id}>
                 <S3Image
                   className='w-full object-cover aspect-auto'
                   src={banner.mobile_image_id}
