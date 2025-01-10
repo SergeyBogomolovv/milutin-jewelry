@@ -3,16 +3,16 @@ include .env
 BUILD_ARGS=--build-arg NEXT_PUBLIC_IMAGE_URL=$(NEXT_PUBLIC_IMAGE_URL)
 
 build-migrate:
-	@docker build -f ./api/Dockerfile.migrate -t grekas/jewellery-migrate api 
+	@docker build -f ./api/build/migrate.Dockerfile -t grekas/jewellery-migrate ./api 
 
 build-web:
-	@docker build $(BUILD_ARGS) -t grekas/jewellery-web web
+	@docker build $(BUILD_ARGS) -t grekas/jewellery-web ./web
 
 build-admin:
-	@docker build $(BUILD_ARGS) -t grekas/jewellery-admin admin
+	@docker build $(BUILD_ARGS) -t grekas/jewellery-admin ./admin
 
 build-api:
-	@docker build -t grekas/jewellery-api api
+	@docker build -f ./api/build/Dockerfile -t grekas/jewellery-api ./api
 
 push-web:
 	@docker push grekas/jewellery-web
