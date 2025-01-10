@@ -6,7 +6,7 @@ import { collectionSchema } from '../model/schema'
 export async function getCollections() {
   try {
     const res = await fetcher('/collections/all', {
-      next: { tags: ['collections'] },
+      next: { tags: ['collections'], revalidate: 60 },
       cache: 'force-cache',
     })
     const json = await res.json()
