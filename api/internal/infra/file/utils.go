@@ -4,50 +4,34 @@ import (
 	"bytes"
 	"context"
 	"image"
+
+	"golang.org/x/image/draw"
+
 	"image/jpeg"
-	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-var qualities = map[string]int{"low": 10, "high": 90}
-
-type result struct {
-	Quality string
-	Data    []byte
-	Err     error
+func compressHigh(img image.Image, quality int) ([]byte, error) {
+	var buff bytes.Buffer
+	if err := jpeg.Encode(&buff, img, &jpeg.Options{Quality: quality}); err != nil {
+		return nil, err
+	}
+	return buff.Bytes(), nil
 }
 
-func compressImagesChan(ctx context.Context, img image.Image) <-chan result {
-	var wg sync.WaitGroup
-	results := make(chan result, len(qualities))
+func compressLow(img image.Image, bound int) ([]byte, error) {
+	dstImg := image.NewRGBA(image.Rect(0, 0, bound, bound))
+	draw.NearestNeighbor.Scale(dstImg, dstImg.Rect, img, img.Bounds(), draw.Over, nil)
 
-Loop:
-	for lvl, quality := range qualities {
-		select {
-		case <-ctx.Done():
-			break Loop
-		default:
-			wg.Add(1)
-			go func(lvl string, quality int) {
-				defer wg.Done()
-				compressed, err := compressJPEG(img, quality)
-				if err != nil {
-					results <- result{Quality: lvl, Err: err}
-					return
-				}
-				results <- result{Quality: lvl, Data: compressed}
-			}(lvl, quality)
-		}
+	var buff bytes.Buffer
+	err := jpeg.Encode(&buff, dstImg, nil)
+	if err != nil {
+		return nil, err
 	}
 
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	return results
+	return buff.Bytes(), nil
 }
 
 func (s *filesService) delete(ctx context.Context, key string) error {
@@ -65,12 +49,4 @@ func (f *filesService) upload(ctx context.Context, key string, data []byte) erro
 		Body:   bytes.NewReader(data),
 	})
 	return err
-}
-
-func compressJPEG(img image.Image, quality int) ([]byte, error) {
-	var buff bytes.Buffer
-	if err := jpeg.Encode(&buff, img, &jpeg.Options{Quality: quality}); err != nil {
-		return nil, err
-	}
-	return buff.Bytes(), nil
 }

@@ -7,7 +7,6 @@ import (
 	_ "image/png"
 	"log/slog"
 	"mime/multipart"
-	"sync"
 
 	cfg "github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/e"
@@ -44,37 +43,15 @@ func (s *filesService) DeleteImage(ctx context.Context, key string) (err error) 
 	log := s.log.With(slog.String("op", op), slog.String("key", key))
 
 	log.Info("deleting image")
-	var wg sync.WaitGroup
-	errCh := make(chan error, 1)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for quality := range qualities {
-		wg.Add(1)
-		go func(quality string) {
-			defer wg.Done()
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				if err := s.delete(ctx, fmt.Sprintf("%s_%s.jpg", key, quality)); err != nil {
-					log.Error("failed to delete image", "err", err, "quality", quality)
-					select {
-					case errCh <- err:
-						cancel()
-					default:
-					}
-				}
-			}
-		}(quality)
+	if err := s.delete(ctx, fmt.Sprintf("%s.jpg", key)); err != nil {
+		log.Error("failed to delete image", "err", err)
+		return err
 	}
-
-	go func() {
-		wg.Wait()
-		close(errCh)
-	}()
-
-	if err, ok := <-errCh; ok {
+	if err := s.delete(ctx, fmt.Sprintf("%s_low.jpg", key)); err != nil {
+		log.Error("failed to delete image", "err", err)
 		return err
 	}
 	return nil
@@ -96,19 +73,26 @@ func (s *filesService) UploadImage(ctx context.Context, file multipart.File, pat
 	}
 	imageID := uuid.NewString()
 
-	results := compressImagesChan(ctx, img)
+	compressedHigh, err := compressHigh(img, 100)
+	if err != nil {
+		log.Error("failed to compress image to jpeg", "err", err)
+		return "", err
+	}
 
-	for res := range results {
-		if res.Err != nil {
-			cancel()
-			log.Error("failed to compress image", "err", res.Err, "quality", res.Quality)
-			return "", res.Err
-		}
-		if err := s.upload(ctx, fmt.Sprintf("%s/%s_%s.jpg", path, imageID, res.Quality), res.Data); err != nil {
-			cancel()
-			log.Error("failed to upload image", "err", err, "quality", res.Quality)
-			return "", err
-		}
+	compressedLow, err := compressLow(img, 10)
+	if err != nil {
+		log.Error("failed to compress image to base64", "err", err)
+		return "", err
+	}
+
+	if err := s.upload(ctx, fmt.Sprintf("%s/%s.jpg", path, imageID), compressedHigh); err != nil {
+		log.Error("failed to upload image", "err", err)
+		return "", err
+	}
+
+	if err := s.upload(ctx, fmt.Sprintf("%s/%s_low.jpg", path, imageID), compressedLow); err != nil {
+		log.Error("failed to upload image", "err", err)
+		return "", err
 	}
 
 	return fmt.Sprintf("%s/%s", path, imageID), nil
