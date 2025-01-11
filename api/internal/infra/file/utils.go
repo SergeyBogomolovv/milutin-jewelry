@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 
 	"golang.org/x/image/draw"
@@ -13,6 +14,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+func lowKey(key string) string {
+	return fmt.Sprintf("%s_low.jpg", key)
+}
+
+func highKey(key string) string {
+	return fmt.Sprintf("%s.jpg", key)
+}
+
 func compressHigh(img image.Image, quality int) ([]byte, error) {
 	var buff bytes.Buffer
 	if err := jpeg.Encode(&buff, img, &jpeg.Options{Quality: quality}); err != nil {
@@ -22,11 +31,11 @@ func compressHigh(img image.Image, quality int) ([]byte, error) {
 }
 
 func compressLow(img image.Image, bound int) ([]byte, error) {
-	dstImg := image.NewRGBA(image.Rect(0, 0, bound, bound))
-	draw.NearestNeighbor.Scale(dstImg, dstImg.Rect, img, img.Bounds(), draw.Over, nil)
+	dst := image.NewRGBA(image.Rect(0, 0, bound, bound))
+	draw.NearestNeighbor.Scale(dst, dst.Rect, img, img.Bounds(), draw.Over, nil)
 
 	var buff bytes.Buffer
-	err := jpeg.Encode(&buff, dstImg, nil)
+	err := jpeg.Encode(&buff, dst, nil)
 	if err != nil {
 		return nil, err
 	}

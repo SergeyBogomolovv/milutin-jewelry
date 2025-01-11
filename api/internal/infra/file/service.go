@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
 )
 
 type filesService struct {
@@ -37,34 +38,32 @@ func New(log *slog.Logger, c cfg.ObjectStorageConfig) *filesService {
 	return &filesService{client: client, bucket: c.Bucket, log: log.With(slog.String("dest", dest))}
 }
 
-func (s *filesService) DeleteImage(ctx context.Context, key string) (err error) {
-	defer func() { err = e.WrapIfErr("can't delete image", err) }()
+func (s *filesService) DeleteImage(ctx context.Context, key string) error {
 	const op = "DeleteImage"
 	log := s.log.With(slog.String("op", op), slog.String("key", key))
 
-	log.Info("deleting image")
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	eg, ctx := errgroup.WithContext(ctx)
 
-	if err := s.delete(ctx, fmt.Sprintf("%s.jpg", key)); err != nil {
+	eg.Go(func() error {
+		return s.delete(ctx, lowKey(key))
+	})
+	eg.Go(func() error {
+		return s.delete(ctx, highKey(key))
+	})
+
+	if err := eg.Wait(); err != nil {
 		log.Error("failed to delete image", "err", err)
-		return err
+		return e.Wrap("failed to delete image", err)
 	}
-	if err := s.delete(ctx, fmt.Sprintf("%s_low.jpg", key)); err != nil {
-		log.Error("failed to delete image", "err", err)
-		return err
-	}
+
+	log.Info("image deleted")
+
 	return nil
 }
 
 func (s *filesService) UploadImage(ctx context.Context, file multipart.File, path string) (string, error) {
 	const op = "UploadImage"
 	log := s.log.With(slog.String("op", op), slog.String("path", path))
-
-	log.Info("uploading image")
-
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
 	img, _, err := image.Decode(file)
 	if err != nil {
@@ -73,27 +72,32 @@ func (s *filesService) UploadImage(ctx context.Context, file multipart.File, pat
 	}
 	imageID := uuid.NewString()
 
-	compressedHigh, err := compressHigh(img, 100)
-	if err != nil {
-		log.Error("failed to compress image to jpeg", "err", err)
-		return "", err
-	}
+	eg, ctx := errgroup.WithContext(ctx)
 
-	compressedLow, err := compressLow(img, 10)
-	if err != nil {
-		log.Error("failed to compress image to base64", "err", err)
-		return "", err
-	}
+	eg.Go(func() error {
+		data, err := compressHigh(img, 90)
+		if err != nil {
+			log.Error("failed to compress high image", "err", err)
+			return err
+		}
+		return s.upload(ctx, highKey(fmt.Sprintf("%s/%s", path, imageID)), data)
+	})
 
-	if err := s.upload(ctx, fmt.Sprintf("%s/%s.jpg", path, imageID), compressedHigh); err != nil {
+	eg.Go(func() error {
+		data, err := compressLow(img, 50)
+		if err != nil {
+			log.Error("failed to compress low image", "err", err)
+			return err
+		}
+		return s.upload(ctx, lowKey(fmt.Sprintf("%s/%s", path, imageID)), data)
+	})
+
+	if err := eg.Wait(); err != nil {
 		log.Error("failed to upload image", "err", err)
 		return "", err
 	}
 
-	if err := s.upload(ctx, fmt.Sprintf("%s/%s_low.jpg", path, imageID), compressedLow); err != nil {
-		log.Error("failed to upload image", "err", err)
-		return "", err
-	}
-
-	return fmt.Sprintf("%s/%s", path, imageID), nil
+	key := fmt.Sprintf("%s/%s", path, imageID)
+	log.Info("image uploaded", "key", key)
+	return key, nil
 }
