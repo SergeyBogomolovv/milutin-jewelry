@@ -30,9 +30,11 @@ func compressHigh(img image.Image, quality int) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
-func compressLow(img image.Image, bound int) ([]byte, error) {
-	dst := image.NewRGBA(image.Rect(0, 0, bound, bound))
-	draw.NearestNeighbor.Scale(dst, dst.Rect, img, img.Bounds(), draw.Over, nil)
+func compressLow(img image.Image, width int) ([]byte, error) {
+	bounds := img.Bounds()
+
+	dst := image.NewRGBA(image.Rect(0, 0, width, bounds.Dy()*width/bounds.Dx()))
+	draw.NearestNeighbor.Scale(dst, dst.Rect, img, bounds, draw.Over, nil)
 
 	var buff bytes.Buffer
 	err := jpeg.Encode(&buff, dst, nil)
