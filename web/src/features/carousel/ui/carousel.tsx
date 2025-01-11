@@ -13,7 +13,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
     return (
       <AntCarousel autoplay autoplaySpeed={3000}>
         <Image
-          className='w-full object-cover sm:aspect-[16/7] aspect-[16/10]'
+          className='w-full object-cover md:aspect-[16/7] aspect-[4/3]'
           src='/placeholder.jpg'
           width={800}
           height={350}
@@ -26,55 +26,30 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
 
   return (
     <AntCarousel autoplay autoplaySpeed={3000}>
-      {!isMobile
-        ? banners.map((banner) =>
-            banner.collection_id ? (
-              <Link href={`/${banner.collection_id}`} key={banner.id}>
-                <S3Image
-                  className='w-full object-cover aspect-auto'
-                  src={banner.image_id}
-                  width={1000}
-                  height={450}
-                  alt={banner.image_id}
-                  priority
-                />
-              </Link>
-            ) : (
-              <S3Image
-                className='w-full object-cover aspect-auto'
-                key={banner.id}
-                src={banner.image_id}
-                width={1000}
-                height={450}
-                alt={banner.image_id}
-                priority
-              />
-            ),
-          )
-        : banners.map((banner) =>
-            banner.collection_id ? (
-              <Link href={`/${banner.collection_id}`} key={banner.id}>
-                <S3Image
-                  className='w-full object-cover aspect-auto'
-                  src={banner.mobile_image_id}
-                  width={700}
-                  height={700}
-                  alt={banner.image_id}
-                  priority
-                />
-              </Link>
-            ) : (
-              <S3Image
-                className='w-full object-cover aspect-auto'
-                key={banner.id}
-                src={banner.mobile_image_id}
-                width={700}
-                height={700}
-                alt={banner.image_id}
-                priority
-              />
-            ),
-          )}
+      {banners.map((banner) =>
+        banner.collection_id ? (
+          <Link href={`/${banner.collection_id}`} key={banner.id}>
+            <S3Image
+              className='w-full object-cover md:aspect-[16/7] aspect-[4/3]'
+              src={isMobile ? banner.mobile_image_id : banner.image_id}
+              width={1000}
+              height={450}
+              alt={banner.image_id}
+              priority
+            />
+          </Link>
+        ) : (
+          <S3Image
+            className='w-full object-cover md:aspect-[16/7] aspect-[4/3]'
+            key={banner.id}
+            src={isMobile ? banner.mobile_image_id : banner.image_id}
+            width={1000}
+            height={450}
+            alt={banner.image_id}
+            priority
+          />
+        ),
+      )}
     </AntCarousel>
   )
 }
