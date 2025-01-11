@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/shared/ui/card'
 import { Collection } from '../model/collection'
-import { CustomImage } from '@/shared/ui/image'
+import { Image } from '@/shared/ui/image'
 import Link from 'next/link'
 import DeleteButton from './delete-button'
 import { Pencil } from 'lucide-react'
@@ -33,7 +33,7 @@ export function CollectionCard({ collection }: Props) {
           <TooltipTrigger asChild>
             <CardContent className='grow flex'>
               <Link href={`/${collection.id}`} className='grow flex'>
-                <CustomImage
+                <Image
                   className='w-full object-cover rounded-md aspect-auto grow'
                   src={collection.image_id}
                   width={500}

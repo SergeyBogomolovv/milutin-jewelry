@@ -19,7 +19,7 @@ import {
 import { Item } from '@/entities/item'
 import { UpdateItemFields, updateItemSchema } from '../model/update-item.schema'
 import { updateItem } from '../api/update-item'
-import { CustomImage } from '@/shared/ui/image'
+import { Image as CustomImage } from '@/shared/ui/image'
 import { FormInputField } from '@/shared/ui/form-input-field'
 import HiddenInput from '@/shared/ui/hidden-input'
 

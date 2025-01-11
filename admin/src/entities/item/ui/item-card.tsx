@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/ui/card'
-import { CustomImage } from '@/shared/ui/image'
+import { Image } from '@/shared/ui/image'
 import { Button } from '@/shared/ui/button'
 import DeleteButton from './delete-button'
 import { Pencil } from 'lucide-react'
@@ -23,7 +23,7 @@ export function ItemCard({ item }: { item: Item }) {
         </CardDescription>
       </CardHeader>
       <CardContent className='grow flex'>
-        <CustomImage
+        <Image
           className='w-full object-cover rounded-md aspect-auto grow'
           src={item.image_id}
           width={500}

@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/shared/ui/card'
 import { Banner } from '../model/banner'
-import { CustomImage } from '@/shared/ui/image'
+import { Image } from '@/shared/ui/image'
 import DeleteButton from './delete-button'
 import { Collection } from '@/entities/collection'
 
@@ -26,7 +26,7 @@ export function BannerCard({ banner, collections }: { banner: Banner; collection
       </CardHeader>
       <CardContent className='flex flex-col gap-2 grow'>
         <CardDescription>Изображение:</CardDescription>
-        <CustomImage
+        <Image
           className='w-full object-cover rounded-md aspect-auto'
           src={banner.image_id}
           width={500}
@@ -34,7 +34,7 @@ export function BannerCard({ banner, collections }: { banner: Banner; collection
           alt={'Баннер десктоп'}
         />
         <CardDescription className='mt-2'>Изображение для мобильных устройств:</CardDescription>
-        <CustomImage
+        <Image
           className='w-full object-cover rounded-md aspect-auto'
           src={banner.mobile_image_id}
           width={500}

@@ -1,14 +1,18 @@
-import Image, { ImageProps } from 'next/image'
+'use client'
+import { default as NextImage, ImageProps } from 'next/image'
 import { IMAGE_URL } from '../constants'
+import { useState } from 'react'
 
-export function CustomImage({ src, alt, ...props }: ImageProps) {
+export function Image({ src, alt, ...props }: ImageProps) {
+  const [loaded, setLoaded] = useState(false)
   return (
-    <Image
+    <NextImage
       {...props}
       alt={alt}
-      src={`${IMAGE_URL}/${src}_high.jpg`}
-      blurDataURL={`${IMAGE_URL}/${src}_low.jpg`}
+      src={`${IMAGE_URL}/${src}${loaded ? '' : '_low'}.jpg`}
+      blurDataURL='/placeholder.jpg'
       placeholder='blur'
+      onLoadingComplete={() => setLoaded(true)}
     />
   )
 }
