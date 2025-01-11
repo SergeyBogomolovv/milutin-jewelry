@@ -1,4 +1,9 @@
 import { ItemCard, getItemsByCollection } from '@/entities/item'
+import { ItemForm } from '@/features/item-form'
+import { Button } from '@/shared/ui/button'
+import { Plus } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export default async function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -6,8 +11,14 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
 
   if (!items.length) {
     return (
-      <main className='flex flex-col items-center justify-center grow w-full'>
+      <main className='flex flex-col items-center justify-center grow w-full gap-6'>
         <h1 className='font-bold text-4xl'>Вы пока не добавили ни одного украшения в коллекцию</h1>
+        <ItemForm id={id}>
+          <Button variant={'outline'} size='lg'>
+            <Plus />
+            Добавить украшение
+          </Button>
+        </ItemForm>
       </main>
     )
   }

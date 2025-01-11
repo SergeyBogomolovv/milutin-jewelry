@@ -1,4 +1,5 @@
 import { getCollection, getCollections } from '@/entities/collection'
+import { notFound } from 'next/navigation'
 
 export const revalidate = 60
 
@@ -14,7 +15,11 @@ export async function generateStaticParams() {
 }
 
 export default async function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
-  const id = (await params).id
-  const collection = await getCollection(id)
-  return <div>{collection.title}</div>
+  try {
+    const id = (await params).id
+    const collection = await getCollection(id)
+    return <div>{collection.title}</div>
+  } catch (error) {
+    notFound()
+  }
 }

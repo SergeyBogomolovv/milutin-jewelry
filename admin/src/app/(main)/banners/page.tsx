@@ -1,20 +1,28 @@
 import { BannerCard, getBanners } from '@/entities/banner'
 import { getCollections } from '@/entities/collection'
+import { BannerForm } from '@/features/banner-form'
+import { Button } from '@/shared/ui/button'
+import { Plus } from 'lucide-react'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export default async function BannersPage() {
   const banners = await getBanners()
+  const collections = await getCollections()
 
-  if (banners.length === 0) {
+  if (!banners.length) {
     return (
-      <main className='flex flex-col items-center justify-center grow w-full'>
+      <main className='flex flex-col items-center justify-center grow w-full gap-6'>
         <h1 className='font-bold text-4xl'>Вы пока не добавили ни одного баннера</h1>
+        <BannerForm collections={collections}>
+          <Button variant={'outline'} size='lg'>
+            <Plus />
+            Добавить баннер
+          </Button>
+        </BannerForm>
       </main>
     )
   }
-
-  const collections = await getCollections()
 
   return (
     <main className='flex flex-col gap-4 px-6 py-2'>

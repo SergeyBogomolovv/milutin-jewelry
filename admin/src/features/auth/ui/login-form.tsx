@@ -27,22 +27,22 @@ export function LoginForm() {
     defaultValues: { code: '' },
   })
   const onSubmit = async (data: LoginFields) => {
-    const success = await login(data)
-    if (!success) {
+    try {
+      await login(data)
+      toast.success('Вы успешно вошли в админ панель')
+      router.refresh()
+    } catch (error) {
       toast.error('Неверный код')
-      return
     }
-    toast.success('Вы успешно вошли в админ панель')
-    router.refresh()
   }
 
   const handleSendCode = async () => {
-    const success = await sendCode()
-    if (!success) {
+    try {
+      await sendCode()
+      toast.success('Код отправлен')
+    } catch (error) {
       toast.error('Ошибка отправки кода')
-      return
     }
-    toast.success('Код отправлен')
   }
 
   return (
