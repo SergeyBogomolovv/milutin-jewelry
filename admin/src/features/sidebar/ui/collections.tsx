@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { use } from 'react'
 
 export default function CollectionsGroup() {
-  const collections = use(getCollections().catch(() => []))
+  const collections = use(getCollections())
 
   return (
     <SidebarMenu>
