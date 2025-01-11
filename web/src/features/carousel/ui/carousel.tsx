@@ -5,6 +5,7 @@ import S3Image from '@/shared/ui/s3-image'
 import { Carousel as AntCarousel } from 'antd'
 import Image from 'next/image'
 import Link from 'next/link'
+import placeholder from '@/assets/placeholder.jpg'
 
 export function Carousel({ banners }: { banners?: Banner[] }) {
   const isMobile = useIsMobile()
@@ -13,12 +14,12 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
     return (
       <AntCarousel autoplay autoplaySpeed={3000}>
         <Image
-          className='w-full object-cover sm:aspect-[16/7] aspect-square'
-          src='/placeholder.jpg'
-          width={1200}
-          height={700}
+          className='w-full object-cover sm:aspect-[16/7] aspect-[16/10]'
+          src={placeholder}
+          width={800}
+          height={350}
           alt='Banner'
-          priority={true}
+          priority
         />
       </AntCarousel>
     )
@@ -33,9 +34,9 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                 <S3Image
                   className='w-full object-cover aspect-auto'
                   src={banner.image_id}
-                  width={1200}
-                  height={700}
-                  alt={banner.id.toString()}
+                  width={1000}
+                  height={450}
+                  alt={banner.image_id}
                   priority
                 />
               </Link>
@@ -44,9 +45,9 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                 className='w-full object-cover aspect-auto'
                 key={banner.id}
                 src={banner.image_id}
-                width={1200}
-                height={700}
-                alt={banner.id.toString()}
+                width={1000}
+                height={450}
+                alt={banner.image_id}
                 priority
               />
             ),
@@ -59,7 +60,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                   src={banner.mobile_image_id}
                   width={700}
                   height={700}
-                  alt={banner.id.toString()}
+                  alt={banner.image_id}
                   priority
                 />
               </Link>
@@ -70,7 +71,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
                 src={banner.mobile_image_id}
                 width={700}
                 height={700}
-                alt={banner.id.toString()}
+                alt={banner.image_id}
                 priority
               />
             ),

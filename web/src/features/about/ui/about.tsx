@@ -3,6 +3,7 @@ import { Separator } from '@/shared/ui/separator'
 import { ExternalLinkIcon } from 'lucide-react'
 import Image from 'next/image'
 import mikhail from '@/assets/mikhail.jpg'
+import Link from 'next/link'
 
 export function About() {
   return (
@@ -19,10 +20,12 @@ export function About() {
               <br /> Произведения Михаила Милютина – синтез ювелирного <br /> мастерства и
               художественной фантазии.
             </p>
-            <Button variant='link' className='font-bold text-lg'>
-              Подробнее
-              <ExternalLinkIcon />
-            </Button>
+            <Link href='/about'>
+              <Button variant='link' className='font-bold text-lg'>
+                Подробнее
+                <ExternalLinkIcon />
+              </Button>
+            </Link>
           </div>
           <div />
         </div>
@@ -41,10 +44,12 @@ export function About() {
           Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного
           мастерства и художественной фантазии.
         </p>
-        <Button variant='link' className='font-bold text-lg'>
-          Подробнее
-          <ExternalLinkIcon />
-        </Button>
+        <Link href='/about'>
+          <Button variant='link' className='font-bold text-lg'>
+            Подробнее
+            <ExternalLinkIcon />
+          </Button>
+        </Link>
       </div>
       <Separator />
     </section>

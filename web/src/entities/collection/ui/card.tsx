@@ -12,6 +12,7 @@ export function CollectionCard({ collection }: { collection: Collection }) {
         width={500}
         height={500}
         className='rounded-lg aspect-auto object-cover grow'
+        priority
       />
       <Line className='w-full text-muted-foreground' />
       <p className='text-xl font-bold tracking-widest'>{collection.title}</p>

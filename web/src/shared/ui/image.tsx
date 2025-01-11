@@ -2,6 +2,8 @@
 import { ImageProps, Image as AntImage } from 'antd'
 import { Eye } from 'lucide-react'
 import { IMAGE_URL } from '../lib/constants'
+import { default as NextImage } from 'next/image'
+import placeholder from '@/assets/placeholder.jpg'
 
 interface Props extends ImageProps {
   title?: string
@@ -13,7 +15,15 @@ export function Image({ src, title, description, ...props }: Props) {
     <AntImage
       loading='lazy'
       src={`${IMAGE_URL}/${src}_high.jpg`}
-      placeholder={<AntImage preview={false} src={`${IMAGE_URL}/${src}_low.jpg`} {...props} />}
+      placeholder={
+        <NextImage
+          src={placeholder}
+          alt='placeholder'
+          width={500}
+          height={500}
+          className={props.className}
+        />
+      }
       preview={{
         mask: (
           <div className='flex items-center gap-1'>
