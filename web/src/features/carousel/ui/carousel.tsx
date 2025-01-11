@@ -5,7 +5,6 @@ import S3Image from '@/shared/ui/s3-image'
 import { Carousel as AntCarousel } from 'antd'
 import Image from 'next/image'
 import Link from 'next/link'
-import placeholder from '@/assets/placeholder.jpg'
 
 export function Carousel({ banners }: { banners?: Banner[] }) {
   const isMobile = useIsMobile()
@@ -15,7 +14,7 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
       <AntCarousel autoplay autoplaySpeed={3000}>
         <Image
           className='w-full object-cover sm:aspect-[16/7] aspect-[16/10]'
-          src={placeholder}
+          src='/placeholder.jpg'
           width={800}
           height={350}
           alt='Banner'
