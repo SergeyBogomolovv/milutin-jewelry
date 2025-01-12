@@ -1,4 +1,4 @@
-import { getCollection, getCollections } from '@/entities/collection'
+import { getCollection } from '@/entities/collection'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { Separator } from '@/shared/ui/separator'
@@ -23,18 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const revalidate = 60
-
-export const dynamicParams = true
-
-export async function generateStaticParams() {
-  try {
-    const collections = await getCollections()
-    return collections.map((collection) => ({ id: String(collection.id) }))
-  } catch (error) {
-    return []
-  }
-}
+export const dynamic = 'force-dynamic'
 
 export default async function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
   try {
@@ -43,7 +32,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
     const items = await getItems(id)
 
     return (
-      <main className='grow container w-11/12 mx-auto flex flex-col md:gap-10 gap-6 items-center md:py-10 py-6'>
+      <main className='grow xl:w-10/12 lg:w-11/12 sm:w-10/12 w-11/12 mx-auto flex flex-col md:gap-10 gap-6 items-center md:py-10 py-6'>
         <h1 className='sm:text-5xl text-4xl text-center tracking-wide'>{collection.title}</h1>
         {collection.description && (
           <p className='sm:text-xl md:w-10/12 lg:w-3/4 text-lg text-center tracking-wide'>

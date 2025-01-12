@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 export function About() {
   return (
-    <section className='md:container w-11/12 mx-auto lg:gap-20 md:gap-16 gap-8 lg:my-20 md:my-16 my-8 flex flex-col items-center'>
+    <section className='container w-11/12 mx-auto lg:gap-20 md:gap-16 gap-8 lg:my-20 md:my-16 my-8 flex flex-col items-center'>
       <Separator />
       {/* Desktop */}
       <div className='hidden md:flex justify-center lg:gap-20 gap-16'>

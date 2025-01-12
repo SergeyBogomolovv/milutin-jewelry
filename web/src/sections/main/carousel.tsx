@@ -13,10 +13,10 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
     return (
       <AntCarousel autoplay autoplaySpeed={3000}>
         <Image
-          className='w-full object-cover aspect-auto'
+          className='w-full object-cover md:aspect-[21/8] aspect-[4/3]'
           src='/placeholder.jpg'
-          width={800}
-          height={350}
+          width={1200}
+          height={800}
           alt='Banner'
           priority
         />
@@ -30,21 +30,21 @@ export function Carousel({ banners }: { banners?: Banner[] }) {
         banner.collection_id ? (
           <Link href={`/${banner.collection_id}`} key={banner.id}>
             <S3Image
-              className='w-full object-cover aspect-auto'
+              className='w-full object-cover md:aspect-[21/8] aspect-[4/3]'
               src={isMobile ? banner.mobile_image_id : banner.image_id}
-              width={1000}
-              height={450}
+              width={1200}
+              height={800}
               alt={banner.image_id}
               priority
             />
           </Link>
         ) : (
           <S3Image
-            className='w-full object-cover aspect-auto'
+            className='w-full object-cover md:aspect-[21/8] aspect-[4/3]'
             key={banner.id}
             src={isMobile ? banner.mobile_image_id : banner.image_id}
-            width={1000}
-            height={450}
+            width={1200}
+            height={800}
             alt={banner.image_id}
             priority
           />
