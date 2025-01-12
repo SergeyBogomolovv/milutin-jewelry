@@ -12,7 +12,7 @@ export function Image({ src, alt, ...props }: ImageProps) {
       src={`${IMAGE_URL}/${src}${loaded ? '' : '_low'}.jpg`}
       blurDataURL='/placeholder.jpg'
       placeholder='blur'
-      onLoadingComplete={() => setLoaded(true)}
+      onLoad={() => setLoaded(true)}
     />
   )
 }
