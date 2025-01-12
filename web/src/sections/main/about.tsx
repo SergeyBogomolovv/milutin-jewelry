@@ -10,15 +10,14 @@ export function About() {
     <section className='container w-11/12 mx-auto lg:gap-20 md:gap-16 gap-8 lg:my-20 md:my-16 my-8 flex flex-col items-center'>
       <Separator />
       {/* Desktop */}
-      <div className='hidden md:flex justify-center lg:gap-20 gap-16'>
-        <Image priority src={mikhail} alt='Михал Милютин' className='rounded-lg' />
-        <div className='flex flex-col justify-between items-center'>
+      <div className='hidden md:flex xl:w-8/12 justify-center lg:gap-20 gap-16'>
+        <Image priority src={mikhail} alt='Михал Милютин' className='rounded-lg flex-1' />
+        <div className='flex flex-col justify-between items-center flex-[1.5]'>
           <h1 className='text-4xl'>Об авторе</h1>
           <div className='flex flex-col gap-2 items-center'>
             <p className='text-center text-muted-foreground tracking-wider text-xl'>
-              Художник, создатель драгоценностей.
-              <br /> Произведения Михаила Милютина – синтез ювелирного <br /> мастерства и
-              художественной фантазии.
+              Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного
+              мастерства и художественной фантазии.
             </p>
             <Link href='/about'>
               <Button variant='link' className='font-bold text-lg'>

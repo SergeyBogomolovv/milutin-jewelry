@@ -6,7 +6,9 @@ import { getCollections } from '@/entities/collection'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Главная | Milutin Jewellery',
+  title: 'Главная',
+  description: 'Коллекции Михаила Милютина',
+  keywords: ['Коллекции Михаила Милютина', 'Контакты Михаила Милютина'],
 }
 
 export const dynamic = 'force-dynamic'

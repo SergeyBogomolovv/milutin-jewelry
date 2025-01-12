@@ -6,7 +6,7 @@ interface Props {
   description: string
 }
 
-export default function AchievmentCard({ src, description }: Props) {
+export function AwardCard({ src, description }: Props) {
   return (
     <div className='flex flex-col gap-4 items-center text-center'>
       <Image src={src} alt='Фотография' />

@@ -10,14 +10,17 @@ import { FaHome } from 'react-icons/fa'
 
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const id = (await params).id
     const collection = await getCollection(id)
-    return { title: `${collection.title} | Milutin Jewellery` }
+    return {
+      title: collection.title,
+      description: collection.description || `Коллекция ${collection.title} Михаила Милютина`,
+      keywords: [collection.title, 'Коллекции Михаила Милютина', 'Михаил Милютин'],
+    }
   } catch (error) {
     return { title: 'Страница не найдена' }
   }
