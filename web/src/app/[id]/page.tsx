@@ -18,14 +18,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const collection = await getCollection(id)
     return {
       title: collection.title,
-      description:
-        collection.description || `Коллекция ${collection.title} от мастерской Михаила Милютина`,
-      keywords: [
-        collection.title,
-        'Коллекции Михаила Милютина',
-        'Михаил Милютин',
-        'Ювелирная коллекция',
-      ],
     }
   } catch (error) {
     return { title: 'Страница не найдена' }

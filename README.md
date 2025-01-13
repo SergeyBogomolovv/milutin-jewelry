@@ -18,6 +18,7 @@ API разработан на golang, используются redis и postgres
 4. Установить nginx: `sudo apt update && sudo apt install nginx`
 5. Добавить конфиг из репозитория `vim /etc/nginx/sites-available/milutin-jewellery.conf`
 6. Добавить ссылку на конфиг `sudo ln -s /etc/nginx/sites-available/milutin-jewellery.conf /etc/nginx/sites-enabled/`
-7. Перезапустить nginx `sudo systemctl restart nginx`
-8. Установить certbot `sudo apt update && sudo apt install certbot python3-certbot-nginx`
-9. Создать сертификаты `sudo certbot --nginx -d milutin-jewellery.com -d api.milutin-jewellery.com -d admin.milutin-jewellery.com`
+7. Добавить поле `client_max_body_size 100M;` в http в `/etc/nginx/nginx.conf`
+8. Перезапустить nginx `sudo systemctl restart nginx`
+9. Установить certbot `sudo apt update && sudo apt install certbot python3-certbot-nginx`
+10. Создать сертификаты `sudo certbot --nginx -d milutin-jewellery.com -d api.milutin-jewellery.com -d admin.milutin-jewellery.com`
