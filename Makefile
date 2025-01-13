@@ -2,9 +2,6 @@ include .env
 
 BUILD_ARGS=--build-arg NEXT_PUBLIC_IMAGE_URL=$(NEXT_PUBLIC_IMAGE_URL)
 
-build-proxy:
-	@docker build -t grekas/jewellery-proxy ./nginx 
-
 build-migrate:
 	@docker build -f ./api/build/migrate.Dockerfile -t grekas/jewellery-migrate ./api 
 
@@ -16,9 +13,6 @@ build-admin:
 
 build-api:
 	@docker build -f ./api/build/Dockerfile -t grekas/jewellery-api ./api
-
-push-proxy:
-	@docker push grekas/jewellery-proxy
 
 push-web:
 	@docker push grekas/jewellery-web

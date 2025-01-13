@@ -2,14 +2,6 @@ version: '3.8'
 name: 'milutin-jewellery'
 
 services:
-  proxy:
-    image: grekas/jewellery-proxy
-    container_name: proxy
-    restart: unless-stopped
-    ports:
-      - '80:80'
-      - '443:443'
-
   migrate:
     image: grekas/jewellery-migrate
     container_name: migrate

@@ -5,12 +5,19 @@
 Сайт и админ панель разработаны на Next.js с использованием server actions.
 API разработан на golang, используются redis и postgresql.
 
-Сборка проекта:
+## Сборка
 
 - Скрипты для сборки и пуша контейнеров расположены в Makefile
 - Необходимо выполнить `make build` и `make push`, при этом в .env файле должна быть указана переменная NEXT_PUBLIC_IMAGE_URL, так как она понадобиться при сборке фронтенда
 
-Запуск проекта:
+## Деплой
 
-- Необходимо создать .env файл по примеру из .env.example
-- Запустить docker compose `docker compose up -d`
+1. Поставить docker, выполнить `docker login`
+2. Создать `docker-compose.yml`, вставить туда содержимое из репозитория, ПОМЕНЯТЬ СЕКРЕТЫ!
+3. Создать `.env` с необходимыми данными, запустить `docker compose up -d`
+4. Установить nginx: `sudo apt update && sudo apt install nginx`
+5. Добавить конфиг из репозитория `vim /etc/nginx/sites-available/milutin-jewellery.conf`
+6. Добавить ссылку на конфиг `sudo ln -s /etc/nginx/sites-available/milutin-jewellery.conf /etc/nginx/sites-enabled/`
+7. Перезапустить nginx `sudo systemctl restart nginx`
+8. Установить certbot `sudo apt update && sudo apt install certbot python3-certbot-nginx`
+9. Создать сертификаты `sudo certbot --nginx -d milutin-jewellery.com -d api.milutin-jewellery.com -d admin.milutin-jewellery.com`
