@@ -13,22 +13,9 @@ const poiretOne = Poiret_One({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://milutin-jewellery.com'),
-  title: {
-    default: 'Milutin Jewellery',
-    template: '%s | Milutin Jewellery',
-  },
+  title: 'Milutin Jewellery',
   description:
     'Михаил Милютин — Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного мастерства и художественной фантазии.',
-  openGraph: {
-    siteName: 'Milutin Jewellery',
-    title: 'Milutin Jewellery',
-    description:
-      'Михаил Милютин — Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного мастерства и художественной фантазии.',
-    url: 'https://milutin-jewellery.com',
-    locale: 'ru_RU',
-    type: 'website',
-  },
   keywords: [
     'Михаил Милютин',
     'Mikhail Milutin',

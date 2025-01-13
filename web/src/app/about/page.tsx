@@ -6,7 +6,12 @@ import { Awards } from '@/sections/about/awards'
 export const metadata: Metadata = {
   title: 'Об Авторе',
   description: 'История и достижения Михаила Милютина',
-  keywords: ['Достижения Михаила Милютина', 'История Михаила Милютина', 'Михаил Милютин'],
+  keywords: [
+    'Достижения Михаила Милютина',
+    'История Михаила Милютина',
+    'Михаил Милютин',
+    'О Михаиле Милютине',
+  ],
 }
 
 export default function AboutPage() {
