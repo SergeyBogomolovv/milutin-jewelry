@@ -29,7 +29,7 @@ func main() {
 
 	app := app.New(log, db, redis, cfg)
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
 	var wg sync.WaitGroup

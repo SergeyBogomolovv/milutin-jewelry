@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	Addr          string
+	Port          int
 	PostgresUrl   string
 	RedisUrl      string
 	CORSOrigin    string
@@ -39,7 +39,7 @@ type JwtConfig struct {
 
 func New() Config {
 	return Config{
-		Addr:        env.MustString("ADDR"),
+		Port:        env.MustInt("PORT"),
 		PostgresUrl: env.MustString("POSTGRES_URL"),
 		RedisUrl:    env.MustString("REDIS_URL"),
 		CORSOrigin:  env.MustString("CORS_ORIGIN"),

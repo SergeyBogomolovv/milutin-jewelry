@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -61,7 +62,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg config.Config) 
 	bannerUsecase := bannerUsecase.New(log, filesService, bannerStorage)
 	bannerController.Register(router, bannerUsecase, authMW)
 
-	srv := &http.Server{Addr: cfg.Addr, Handler: corsMW(logMW(router))}
+	srv := &http.Server{Addr: fmt.Sprintf("0.0.0.0:%d", cfg.Port), Handler: corsMW(logMW(router))}
 
 	return &application{
 		srv:   srv,

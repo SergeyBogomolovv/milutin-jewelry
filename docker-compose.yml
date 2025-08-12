@@ -1,13 +1,10 @@
-version: '3.8'
-name: 'milutin-jewellery'
-
 services:
   migrate:
     image: grekas/jewellery-migrate
     container_name: migrate
     command: ['-path', '/migrations', '-database', '${POSTGRES_URL}', 'up']
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_URL=${POSTGRES_URL}
     depends_on:
       - db
 
@@ -16,41 +13,55 @@ services:
     container_name: web
     restart: unless-stopped
     ports:
-      - '3000:3000'
-    env_file:
-      - .env
+      - 3000:3000
+    environment:
+      - API_URL=${API_URL}
 
   admin:
     image: grekas/jewellery-admin
     container_name: admin
     restart: unless-stopped
     ports:
-      - '4000:4000'
-    env_file:
-      - .env
+      - 4000:4000
+    environment:
+      - API_URL=${API_URL}
+      - JWT_SECRET=${JWT_SECRET}
 
   api:
     image: grekas/jewellery-api
     container_name: api
     restart: unless-stopped
     ports:
-      - '8080:8080'
-    env_file:
-      - .env
+      - 8080:8080
+    environment:
+      - PORT=${API_PORT}
+      - POSTGRES_URL=${POSTGRES_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASS=${MAIL_PASS}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - OBJECT_STORAGE_ACCESS=${OBJECT_STORAGE_ACCESS}
+      - OBJECT_STORAGE_SECRET=${OBJECT_STORAGE_SECRET}
+      - OBJECT_STORAGE_ENDPOINT=${OBJECT_STORAGE_ENDPOINT}
+      - OBJECT_STORAGE_BUCKET=${OBJECT_STORAGE_BUCKET}
+      - OBJECT_STORAGE_REGION=${OBJECT_STORAGE_REGION}
+      - JWT_TTL=${JWT_TTL}
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - db
       - redis
 
-  db:
+  postgres:
     image: postgres:alpine
-    container_name: db
+    container_name: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: postgres
-    ports:
-      - '5432:5432'
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -58,20 +69,21 @@ services:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
-    ports:
-      - '6379:6379'
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: unless-stopped
+  minio:
+    image: minio/minio
+    container_name: minio
     ports:
-      - '5050:80'
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio_data:/data
     environment:
-      PGADMIN_DEFAULT_EMAIL: 'admin@admin.com'
-      PGADMIN_DEFAULT_PASSWORD: 'admin'
-    depends_on:
-      - db
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_REGION_NAME=${MINIO_REGION_NAME}
+    command: server /data --console-address ":9001"
 
 volumes:
   pgdata:
+  minio_data:
