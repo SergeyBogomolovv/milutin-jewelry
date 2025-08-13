@@ -1,24 +1,30 @@
 services:
   migrate:
-    image: grekas/jewellery-migrate
+    build:
+      context: ./api
+      dockerfile: build/migrate.Dockerfile
     container_name: migrate
     command: ['-path', '/migrations', '-database', '${POSTGRES_URL}', 'up']
     environment:
       - POSTGRES_URL=${POSTGRES_URL}
     depends_on:
-      - db
+      postgres:
+        condition: service_healthy
 
   web:
-    image: grekas/jewellery-web
+    build:
+      context: ./web
     container_name: web
     restart: unless-stopped
     ports:
       - 3000:3000
     environment:
       - API_URL=${API_URL}
+      - NEXT_PUBLIC_IMAGE_URL=${NEXT_PUBLIC_IMAGE_URL}
 
   admin:
-    image: grekas/jewellery-admin
+    build:
+      context: ./admin
     container_name: admin
     restart: unless-stopped
     ports:
@@ -26,9 +32,12 @@ services:
     environment:
       - API_URL=${API_URL}
       - JWT_SECRET=${JWT_SECRET}
+      - NEXT_PUBLIC_IMAGE_URL=${NEXT_PUBLIC_IMAGE_URL}
 
   api:
-    image: grekas/jewellery-api
+    build:
+      context: ./api
+      dockerfile: build/Dockerfile
     container_name: api
     restart: unless-stopped
     ports:
@@ -51,8 +60,10 @@ services:
       - JWT_TTL=${JWT_TTL}
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - db
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
     image: postgres:alpine
@@ -64,11 +75,21 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} || exit 1']
+      interval: 1s
+      timeout: 5s
+      retries: 3
 
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 1s
+      timeout: 5s
+      retries: 3
 
   minio:
     image: minio/minio
@@ -81,8 +102,27 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_REGION_NAME=${MINIO_REGION_NAME}
+      - MINIO_REGION_NAME=${OBJECT_STORAGE_REGION}
     command: server /data --console-address ":9001"
+
+  minio-init:
+    image: minio/mc
+    container_name: minio-init
+    depends_on:
+      - minio
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}); do
+        echo 'Waiting for MinIO...'; sleep 2;
+      done;
+      /usr/bin/mc mb -p local/jewellery || true;
+      /usr/bin/mc anonymous set download local/jewellery;
+      echo 'Bucket jewellery ready with anonymous download';
+      exit 0;
+      "
 
 volumes:
   pgdata:

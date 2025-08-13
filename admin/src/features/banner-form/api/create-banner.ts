@@ -10,7 +10,11 @@ export async function createBanner(fields: NewBannerFields) {
   formData.append('image', fields.image)
   formData.append('mobile_image', fields.mobile_image)
 
-  await fetchWithAuth('/banners/create', { method: 'POST', body: formData })
+  const res = await fetchWithAuth('/banners/create', { method: 'POST', body: formData })
+
+  if (!res.ok) {
+    throw new Error('Failed to create banner')
+  }
 
   revalidateTag('banners')
 }

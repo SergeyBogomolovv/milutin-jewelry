@@ -11,7 +11,10 @@ export const createItem = async (fields: NewItemFields, collectionId: string) =>
   formData.append('image', fields.image)
   formData.append('collection_id', collectionId)
 
-  await fetchWithAuth('/items/create', { method: 'POST', body: formData })
+  const res = await fetchWithAuth('/items/create', { method: 'POST', body: formData })
 
+  if (!res.ok) {
+    throw new Error('Failed to create item')
+  }
   revalidateTag('items')
 }

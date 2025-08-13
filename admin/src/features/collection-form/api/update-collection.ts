@@ -9,7 +9,10 @@ export async function updateCollection(data: UpdateCollectionFields, id: number)
   formData.append('description', data.description || '')
   if (data.image) formData.append('image', data.image)
 
-  await fetchWithAuth(`/collections/update/${id}`, { method: 'PUT', body: formData })
+  const res = await fetchWithAuth(`/collections/update/${id}`, { method: 'PUT', body: formData })
 
+  if (!res.ok) {
+    throw new Error('Failed to update collection')
+  }
   revalidateTag('collections')
 }

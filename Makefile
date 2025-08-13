@@ -26,6 +26,6 @@ push-admin:
 push-migrate:
 	@docker push grekas/jewellery-migrate
 
-build: build-web build-api build-admin build-migrate build-proxy
+build: build-web build-api build-admin build-migrate
 
-push: push-web push-api push-admin push-migrate push-proxy
+push: push-web push-api push-admin push-migrate

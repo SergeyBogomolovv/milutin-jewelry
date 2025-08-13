@@ -9,7 +9,11 @@ export async function createCollection(fields: NewCollectionFields) {
   formData.append('title', fields.title)
   if (fields.description) formData.append('description', fields.description)
 
-  await fetchWithAuth('/collections/create', { method: 'POST', body: formData })
+  const res = await fetchWithAuth('/collections/create', { method: 'POST', body: formData })
+
+  if (!res.ok) {
+    throw new Error('Failed to create collection')
+  }
 
   revalidateTag('collections')
 }

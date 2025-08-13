@@ -9,7 +9,10 @@ export const updateItem = async (fields: UpdateItemFields, id: number) => {
   formData.append('description', fields.description || '')
   if (fields.image) formData.append('image', fields.image)
 
-  await fetchWithAuth(`/items/update/${id}`, { method: 'PUT', body: formData })
+  const res = await fetchWithAuth(`/items/update/${id}`, { method: 'PUT', body: formData })
 
+  if (!res.ok) {
+    throw new Error('Failed to update item')
+  }
   revalidateTag('items')
 }

@@ -2,13 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'storage.yandexcloud.net',
-        pathname: '/milutin-jewelry/**',
-      },
-    ],
+    unoptimized: true,
   },
   webpack(config) {
     const fileLoaderRule = config.module.rules.find((rule: any) => rule.test?.test?.('.svg'))

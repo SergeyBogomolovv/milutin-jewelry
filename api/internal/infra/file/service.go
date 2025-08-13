@@ -33,7 +33,9 @@ func New(log *slog.Logger, c cfg.ObjectStorageConfig) *filesService {
 	if err != nil {
 		panic(err)
 	}
-	client := s3.NewFromConfig(config)
+	client := s3.NewFromConfig(config, func(o *s3.Options) {
+		o.UsePathStyle = true
+	})
 
 	return &filesService{client: client, bucket: c.Bucket, log: log.With(slog.String("dest", dest))}
 }
