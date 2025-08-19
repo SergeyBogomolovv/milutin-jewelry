@@ -21,6 +21,9 @@ services:
     environment:
       - API_URL=${API_URL}
       - NEXT_PUBLIC_IMAGE_URL=${NEXT_PUBLIC_IMAGE_URL}
+    depends_on:
+      minio:
+        condition: service_healthy
 
   admin:
     build:
@@ -33,6 +36,9 @@ services:
       - API_URL=${API_URL}
       - JWT_SECRET=${JWT_SECRET}
       - NEXT_PUBLIC_IMAGE_URL=${NEXT_PUBLIC_IMAGE_URL}
+    depends_on:
+      minio:
+        condition: service_healthy
 
   api:
     build:
@@ -104,6 +110,12 @@ services:
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - MINIO_REGION_NAME=${OBJECT_STORAGE_REGION}
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   minio-init:
     image: minio/mc
