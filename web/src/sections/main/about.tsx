@@ -2,7 +2,6 @@ import { Button } from '@/shared/ui/button'
 import { Separator } from '@/shared/ui/separator'
 import { ExternalLinkIcon } from 'lucide-react'
 import Image from 'next/image'
-import mikhail from '@/assets/mikhail.jpg'
 import Link from 'next/link'
 
 export function About() {
@@ -11,7 +10,14 @@ export function About() {
       <Separator />
       {/* Desktop */}
       <div className='hidden md:flex xl:w-8/12 justify-center lg:gap-20 gap-16'>
-        <Image priority src={mikhail} alt='Михал Милютин' className='rounded-lg flex-1' />
+        <Image
+          priority
+          src='/mikhail.jpg'
+          width={330}
+          height={400}
+          alt='Михал Милютин'
+          className='rounded-lg flex-1'
+        />
         <div className='flex flex-col justify-between items-center flex-[1.5]'>
           <h1 className='text-4xl'>Об авторе</h1>
           <div className='flex flex-col gap-2 items-center'>
@@ -34,9 +40,11 @@ export function About() {
       <h1 className='text-4xl md:hidden'>Об авторе</h1>
       <Image
         priority
-        src={mikhail}
+        src='/mikhail.jpg'
         alt='Михал Милютин'
         className='rounded-lg w-9/12 sm:w-7/12 md:hidden'
+        width={400}
+        height={500}
       />
       <div className='flex flex-col gap-2 items-center md:hidden'>
         <p className='text-center text-muted-foreground tracking-wider text-lg sm:w-9/12'>

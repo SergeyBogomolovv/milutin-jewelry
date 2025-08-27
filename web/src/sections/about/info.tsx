@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import mikhail from '@/assets/mikhail.jpg'
 
 export function AboutInfo() {
   return (
@@ -8,7 +7,13 @@ export function AboutInfo() {
         Художник, создатель драгоценностей. Произведения Михаила Милютина – синтез ювелирного
         мастерства и художественной фантазии.
       </p>
-      <Image src={mikhail} alt='Михаил Милютин' className='rounded-lg m-auto' />
+      <Image
+        width={500}
+        height={500}
+        src='/mikhail.jpg'
+        alt='Михаил Милютин'
+        className='rounded-lg m-auto xl:w-2/3 lg:w-3/4 md:w-1/2 w-3/4'
+      />
       <div className='text-center tracking-wider flex flex-col justify-between text-lg gap-3'>
         <p>
           В основе профессиональной деятельности Михаила Милютина - скрупулезно изученное наследие
