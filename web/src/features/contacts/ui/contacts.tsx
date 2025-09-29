@@ -36,8 +36,9 @@ export function Contacts({ children }: PropsWithChildren) {
               <Linkable Icon={FaVk} text='ВКонтакте' url={content.vk} />
             </div>
             <Separator className='lg:hidden' />
-            <div className='space-y-2'>
+            <div className='lg:space-y-2 lg:block flex flex-col gap-y-3'>
               <Linkable Icon={FaMapMarkerAlt} text={content.address} url={content.addressLink} />
+              <Separator className='lg:hidden' />
               <Linkable
                 Icon={MdOutlinePrivacyTip}
                 text='Политика конфиденциальности'
