@@ -2,7 +2,8 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/ui/sheet'
 import { PropsWithChildren } from 'react'
 import { Separator } from '@/shared/ui/separator'
-import { FaMap, FaTelegram, FaVk, FaWhatsapp } from 'react-icons/fa6'
+import { FaTelegram, FaVk, FaWhatsapp } from 'react-icons/fa6'
+import { MdOutlinePrivacyTip } from 'react-icons/md'
 import { FaMapMarkerAlt, FaPhoneAlt } from 'react-icons/fa'
 import { IoMail } from 'react-icons/io5'
 import { Clickable } from './clickable'
@@ -36,11 +37,11 @@ export function Contacts({ children }: PropsWithChildren) {
             </div>
             <Separator className='lg:hidden' />
             <div className='space-y-2'>
-              <Clickable Icon={FaMap} text={content.addressFirst} value={content.addressFull} />
+              <Linkable Icon={FaMapMarkerAlt} text={content.address} url={content.addressLink} />
               <Linkable
-                Icon={FaMapMarkerAlt}
-                text={content.addressSecond}
-                url={content.addressLink}
+                Icon={MdOutlinePrivacyTip}
+                text='Политика конфиденциальности'
+                url='/privacy-policy'
               />
             </div>
           </div>
