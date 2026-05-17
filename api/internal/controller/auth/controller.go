@@ -25,20 +25,19 @@ func Register(router *http.ServeMux, usecase Usecase) {
 	}
 	r := http.NewServeMux()
 	r.HandleFunc("POST /login", controller.Login)
-	r.HandleFunc("POST /send-code", controller.SendVerificationCode)
 
 	router.Handle("/auth/", http.StripPrefix("/auth", r))
 }
 
 // @Summary      Вход
-// @Description  Нужен код с почты админа, отправляет jwt токен
+// @Description  Проверяет email и пароль администратора, отправляет jwt токен
 // @Tags         auth
 // @Accept       json
 // @Produce      json
 // @Param        input  body      LoginBody  true  "Данные для входа"
 // @Success      200    {object}  TokenResponse
 // @Failure      400    {object}  res.ErrorResponse  "Неверный запрос"
-// @Failure      403    {object}  res.ErrorResponse  "Неверный код"
+// @Failure      403    {object}  res.ErrorResponse  "Неверные учетные данные"
 // @Failure      500    {object}  res.ErrorResponse  "Внутренняя ошибка сервера"
 // @Router       /auth/login [post]
 func (c *controller) Login(w http.ResponseWriter, r *http.Request) {
@@ -53,28 +52,20 @@ func (c *controller) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := c.usecase.Login(r.Context(), payload.Code)
+	token, err := c.usecase.LoginByPassword(r.Context(), payload.Email, payload.Password)
 
 	if err != nil {
-		if errors.Is(err, usecase.ErrInvalidCode) {
-			res.WriteError(w, "invalid code", http.StatusForbidden)
+		if errors.Is(err, usecase.ErrInvalidCredentials) {
+			res.WriteError(w, "invalid credentials", http.StatusForbidden)
 			return
 		}
-		res.WriteError(w, "failed to check login code", http.StatusInternalServerError)
+		res.WriteError(w, "failed to login", http.StatusInternalServerError)
 		return
 	}
 
 	WriteToken(w, token, http.StatusOK)
 }
 
-// @Summary      Отправка кода
-// @Description  Отправляет код на почту админа
-// @Tags         auth
-// @Accept       json
-// @Produce      json
-// @Success      201    {object}  res.MessageResponse
-// @Failure      500    {object}  res.ErrorResponse  "Внутренняя ошибка сервера"
-// @Router       /auth/send-code [post]
 func (c *controller) SendVerificationCode(w http.ResponseWriter, r *http.Request) {
 	if err := c.usecase.SendCode(r.Context()); err != nil {
 		res.WriteError(w, "failed to send code", http.StatusInternalServerError)

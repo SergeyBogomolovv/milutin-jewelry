@@ -41,3 +41,10 @@ func newTestConfig() config.JwtConfig {
 		TTL:    1,
 	}
 }
+
+func newTestAdminConfig() config.AdminConfig {
+	return config.AdminConfig{
+		Email:    "admin@example.com",
+		Password: "password123",
+	}
+}

@@ -13,7 +13,7 @@ import (
 func TestAuthUsecase_Login(t *testing.T) {
 	ctx := context.Background()
 	mockStorage := new(mockStorage)
-	usecase := uc.New(tu.NewTestLogger(), mockStorage, nil, newTestConfig())
+	usecase := uc.New(tu.NewTestLogger(), mockStorage, nil, newTestAdminConfig(), newTestConfig())
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Check", ctx, "code").Return(nil).Once()
@@ -59,7 +59,7 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 	mockStorage := new(mockStorage)
 	mockMailService := new(mockMailService)
 
-	usecase := uc.New(tu.NewTestLogger(), mockStorage, mockMailService, newTestConfig())
+	usecase := uc.New(tu.NewTestLogger(), mockStorage, mockMailService, newTestAdminConfig(), newTestConfig())
 
 	t.Run("success", func(t *testing.T) {
 		mockStorage.On("Create", ctx).Return("code", nil).Once()
@@ -85,5 +85,28 @@ func TestAuthUsecase_SendCode(t *testing.T) {
 		assert.Error(t, err)
 		mockStorage.AssertExpectations(t)
 		mockMailService.AssertExpectations(t)
+	})
+}
+
+func TestAuthUsecase_LoginByPassword(t *testing.T) {
+	ctx := context.Background()
+	usecase := uc.New(tu.NewTestLogger(), nil, nil, newTestAdminConfig(), newTestConfig())
+
+	t.Run("success", func(t *testing.T) {
+		token, err := usecase.LoginByPassword(ctx, "admin@example.com", "password123")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, token)
+	})
+
+	t.Run("invalid email", func(t *testing.T) {
+		token, err := usecase.LoginByPassword(ctx, "other@example.com", "password123")
+		assert.ErrorIs(t, err, uc.ErrInvalidCredentials)
+		assert.Empty(t, token)
+	})
+
+	t.Run("invalid password", func(t *testing.T) {
+		token, err := usecase.LoginByPassword(ctx, "admin@example.com", "wrong-password")
+		assert.ErrorIs(t, err, uc.ErrInvalidCredentials)
+		assert.Empty(t, token)
 	})
 }

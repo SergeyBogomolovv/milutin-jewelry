@@ -16,5 +16,6 @@ type MailService interface {
 }
 
 var (
-	ErrInvalidCode = errors.New("invalid otp code")
+	ErrInvalidCode        = errors.New("invalid otp code")
+	ErrInvalidCredentials = errors.New("invalid credentials")
 )

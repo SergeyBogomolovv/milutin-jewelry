@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  code: z.string().length(6, { message: 'Код должен содержать строго 6 символов' }),
+  email: z.string().email({ message: 'Введите корректный email' }),
+  password: z.string().min(8, { message: 'Пароль должен содержать минимум 8 символов' }),
 })
 
 export type LoginFields = z.infer<typeof loginSchema>

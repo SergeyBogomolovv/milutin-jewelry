@@ -1,7 +1,7 @@
 'use server'
 import { fetchWithAuth } from '@/shared/lib/fetcher'
 import { UpdateCollectionFields } from '../model/update.schema'
-import { revalidateTag } from 'next/cache'
+import { updateTag } from 'next/cache'
 
 export async function updateCollection(data: UpdateCollectionFields, id: number) {
   const formData = new FormData()
@@ -14,5 +14,5 @@ export async function updateCollection(data: UpdateCollectionFields, id: number)
   if (!res.ok) {
     throw new Error('Failed to update collection')
   }
-  revalidateTag('collections')
+  updateTag('collections')
 }

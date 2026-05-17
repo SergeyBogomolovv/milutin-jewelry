@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/auth/login": {
             "post": {
-                "description": "Нужен код с почты админа, отправляет jwt токен",
+                "description": "Проверяет email и пароль администратора, отправляет jwt токен",
                 "consumes": [
                     "application/json"
                 ],
@@ -53,38 +53,9 @@ const docTemplate = `{
                         }
                     },
                     "403": {
-                        "description": "Неверный код",
+                        "description": "Неверные учетные данные",
                         "schema": {
                             "$ref": "#/definitions/res.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "$ref": "#/definitions/res.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/send-code": {
-            "post": {
-                "description": "Отправляет код на почту админа",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Отправка кода",
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/res.MessageResponse"
                         }
                     },
                     "500": {
@@ -834,9 +805,17 @@ const docTemplate = `{
     "definitions": {
         "auth.LoginBody": {
             "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
             "properties": {
-                "code": {
+                "email": {
                     "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
                 }
             }
         },
@@ -923,14 +902,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "res.MessageResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
                     "type": "string"
                 }
             }

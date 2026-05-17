@@ -9,11 +9,13 @@ import (
 
 type Usecase interface {
 	Login(ctx context.Context, code string) (string, error)
+	LoginByPassword(ctx context.Context, email, password string) (string, error)
 	SendCode(ctx context.Context) error
 }
 
 type LoginBody struct {
-	Code string `json:"code" validate:"len=6"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 type TokenResponse struct {

@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
@@ -14,16 +16,18 @@ type usecase struct {
 	log       *slog.Logger
 	codes     CodeStorage
 	mail      MailService
+	admin     config.AdminConfig
 	jwtSecret []byte
 	jwtTTL    time.Duration
 }
 
-func New(log *slog.Logger, codes CodeStorage, mail MailService, conf config.JwtConfig) *usecase {
+func New(log *slog.Logger, codes CodeStorage, mail MailService, admin config.AdminConfig, conf config.JwtConfig) *usecase {
 	const dest = "authUsecase"
 	return &usecase{
 		log:       log.With(slog.String("dest", dest)),
 		codes:     codes,
 		mail:      mail,
+		admin:     admin,
 		jwtSecret: conf.Secret,
 		jwtTTL:    conf.TTL,
 	}
@@ -72,4 +76,31 @@ func (u *usecase) Login(ctx context.Context, code string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (u *usecase) LoginByPassword(ctx context.Context, email, password string) (string, error) {
+	const op = "LoginByPassword"
+	log := u.log.With(slog.String("op", op))
+
+	if !u.checkCredentials(email, password) {
+		log.Info("invalid admin credentials")
+		return "", ErrInvalidCredentials
+	}
+
+	token, err := u.signToken()
+	if err != nil {
+		log.Error("can't sign token", "err", err)
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (u *usecase) checkCredentials(email, password string) bool {
+	email = strings.TrimSpace(email)
+	password = strings.TrimSpace(password)
+
+	emailMatch := subtle.ConstantTimeCompare([]byte(email), []byte(u.admin.Email)) == 1
+	passwordMatch := subtle.ConstantTimeCompare([]byte(password), []byte(u.admin.Password)) == 1
+	return emailMatch && passwordMatch
 }

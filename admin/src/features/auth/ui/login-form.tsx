@@ -9,22 +9,18 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/shared/ui/card'
-import { sendCode } from '../api/send-code'
 import { login } from '../api/login'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { useTransition } from 'react'
 
 export function LoginForm() {
-  const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const form = useForm<LoginFields>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { code: '' },
+    defaultValues: { email: '', password: '' },
   })
   const onSubmit = async (data: LoginFields) => {
     try {
@@ -32,16 +28,7 @@ export function LoginForm() {
       toast.success('Вы успешно вошли в админ панель')
       router.refresh()
     } catch (error) {
-      toast.error('Неверный код')
-    }
-  }
-
-  const handleSendCode = async () => {
-    try {
-      await sendCode()
-      toast.success('Код отправлен')
-    } catch (error) {
-      toast.error('Ошибка отправки кода')
+      toast.error('Неверный email или пароль')
     }
   }
 
@@ -51,36 +38,44 @@ export function LoginForm() {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader className='items-center'>
             <CardTitle className='text-2xl'>Вход в админ панель</CardTitle>
-            <CardDescription>Код придет на почту администратора</CardDescription>
+            <CardDescription>Введите email и пароль администратора</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className='space-y-4'>
             <FormField
               control={form.control}
-              name='code'
+              name='email'
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder='Введите шестизначный код' {...field} />
+                    <Input type='email' placeholder='Email' autoComplete='username' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='password'
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      type='password'
+                      placeholder='Пароль'
+                      autoComplete='current-password'
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </CardContent>
-          <CardFooter className='flex items-center gap-2'>
+          <div className='px-6 pb-6'>
             <Button disabled={form.formState.isSubmitting} type='submit' className='w-full'>
-              Подтвердить
+              Войти
             </Button>
-            <Button
-              onClick={() => startTransition(handleSendCode)}
-              variant='outline'
-              type='button'
-              className='w-full'
-              disabled={isPending}
-            >
-              {isPending ? 'Отправка...' : 'Получить код'}
-            </Button>
-          </CardFooter>
+          </div>
         </form>
       </Form>
     </Card>

@@ -1,8 +1,14 @@
 definitions:
   auth.LoginBody:
     properties:
-      code:
+      email:
         type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
     type: object
   auth.TokenResponse:
     properties:
@@ -64,11 +70,6 @@ definitions:
       error:
         type: string
     type: object
-  res.MessageResponse:
-    properties:
-      message:
-        type: string
-    type: object
 info:
   contact: {}
   description: Описание API для сервиса Milutin Jewelry
@@ -79,7 +80,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Нужен код с почты админа, отправляет jwt токен
+      description: Проверяет email и пароль администратора, отправляет jwt токен
       parameters:
       - description: Данные для входа
         in: body
@@ -99,7 +100,7 @@ paths:
           schema:
             $ref: '#/definitions/res.ErrorResponse'
         "403":
-          description: Неверный код
+          description: Неверные учетные данные
           schema:
             $ref: '#/definitions/res.ErrorResponse'
         "500":
@@ -107,25 +108,6 @@ paths:
           schema:
             $ref: '#/definitions/res.ErrorResponse'
       summary: Вход
-      tags:
-      - auth
-  /auth/send-code:
-    post:
-      consumes:
-      - application/json
-      description: Отправляет код на почту админа
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/res.MessageResponse'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/res.ErrorResponse'
-      summary: Отправка кода
       tags:
       - auth
   /banners/all:

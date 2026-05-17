@@ -12,6 +12,7 @@ type Config struct {
 	RedisUrl      string
 	CORSOrigin    string
 	Mail          MailConfig
+	Admin         AdminConfig
 	ObjectStorage ObjectStorageConfig
 	Jwt           JwtConfig
 }
@@ -22,6 +23,11 @@ type MailConfig struct {
 	User  string
 	Pass  string
 	Admin string
+}
+
+type AdminConfig struct {
+	Email    string
+	Password string
 }
 
 type ObjectStorageConfig struct {
@@ -38,17 +44,23 @@ type JwtConfig struct {
 }
 
 func New() Config {
+	adminEmail := env.MustString("ADMIN_EMAIL")
+
 	return Config{
 		Port:        env.MustInt("PORT"),
 		PostgresUrl: env.MustString("POSTGRES_URL"),
 		RedisUrl:    env.MustString("REDIS_URL"),
 		CORSOrigin:  env.MustString("CORS_ORIGIN"),
 		Mail: MailConfig{
-			Host:  env.MustString("MAIL_HOST"),
-			Port:  env.MustInt("MAIL_PORT"),
-			User:  env.MustString("MAIL_USER"),
-			Pass:  env.MustString("MAIL_PASS"),
-			Admin: env.MustString("ADMIN_EMAIL"),
+			Host:  env.String("MAIL_HOST", ""),
+			Port:  env.Int("MAIL_PORT", 0),
+			User:  env.String("MAIL_USER", ""),
+			Pass:  env.String("MAIL_PASS", ""),
+			Admin: adminEmail,
+		},
+		Admin: AdminConfig{
+			Email:    adminEmail,
+			Password: env.MustString("ADMIN_PASSWORD"),
 		},
 		ObjectStorage: ObjectStorageConfig{
 			AccessKey: env.MustString("OBJECT_STORAGE_ACCESS"),

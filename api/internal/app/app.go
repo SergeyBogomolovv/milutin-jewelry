@@ -55,7 +55,7 @@ func New(log *slog.Logger, db *sqlx.DB, redis *redis.Client, cfg config.Config) 
 	itemController.Register(router, itemUsecase, authMW)
 
 	codeStorage := codeStorage.New(redis)
-	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.Jwt)
+	authUsecase := authUsecase.New(log, codeStorage, mailService, cfg.Admin, cfg.Jwt)
 	authController.Register(router, authUsecase)
 
 	bannerStorage := bannerStorage.New(db)
