@@ -67,6 +67,18 @@ func (r *storage) GetAll(ctx context.Context) ([]Collection, error) {
 	return collections, nil
 }
 
+func (r *storage) GetItemImageIDs(ctx context.Context, collectionID int) ([]string, error) {
+	imageIDs := make([]string, 0)
+	query := `
+  SELECT image_id
+  FROM collection_items
+  WHERE collection_id = $1 AND image_id IS NOT NULL AND image_id <> ''`
+	if err := r.db.SelectContext(ctx, &imageIDs, query, collectionID); err != nil {
+		return nil, e.Wrap("can't get collection item image ids", err)
+	}
+	return imageIDs, nil
+}
+
 func (r *storage) Delete(ctx context.Context, id int) (err error) {
 	defer func() { err = e.WrapIfErr("can't delete collection", err) }()
 	query := `DELETE FROM collections WHERE collection_id = $1`

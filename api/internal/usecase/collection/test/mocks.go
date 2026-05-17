@@ -37,6 +37,11 @@ func (m *storageMock) GetAll(ctx context.Context) ([]storage.Collection, error) 
 	return args.Get(0).([]storage.Collection), args.Error(1)
 }
 
+func (m *storageMock) GetItemImageIDs(ctx context.Context, collectionID int) ([]string, error) {
+	args := m.Called(ctx, collectionID)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 type fileServiceMock struct {
 	mock.Mock
 }

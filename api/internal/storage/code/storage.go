@@ -17,7 +17,11 @@ func New(redis *redis.Client) *storage {
 }
 
 func (r *storage) Check(ctx context.Context, code string) error {
-	if err := r.redis.Get(ctx, codeKey).Err(); err != nil {
+	storedCode, err := r.redis.Get(ctx, codeKey).Result()
+	if err != nil {
+		return ErrInvalidCode
+	}
+	if storedCode != code {
 		return ErrInvalidCode
 	}
 	return nil
@@ -36,7 +40,16 @@ func (r *storage) Create(ctx context.Context) (code string, err error) {
 }
 
 func (r *storage) Delete(ctx context.Context, code string) error {
-	if err := r.redis.Del(ctx, codeKey).Err(); err != nil {
+	const deleteIfCodeMatches = `
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+	return redis.call("DEL", KEYS[1])
+end
+return 0`
+	deleted, err := r.redis.Eval(ctx, deleteIfCodeMatches, []string{codeKey}, code).Int()
+	if err != nil {
+		return ErrCodeNotFound
+	}
+	if deleted == 0 {
 		return ErrCodeNotFound
 	}
 	return nil

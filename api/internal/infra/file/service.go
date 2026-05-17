@@ -2,8 +2,10 @@ package file
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"image"
+	_ "image/jpeg"
 	_ "image/png"
 	"log/slog"
 	"mime/multipart"
@@ -67,6 +69,20 @@ func (s *filesService) UploadImage(ctx context.Context, file multipart.File, pat
 	const op = "UploadImage"
 	log := s.log.With(slog.String("op", op), slog.String("path", path))
 
+	cfg, _, err := image.DecodeConfig(file)
+	if err != nil {
+		log.Error("failed to decode image config", "err", err)
+		return "", err
+	}
+	if err := validateImageConfig(cfg); err != nil {
+		log.Error("invalid image", "err", err)
+		return "", err
+	}
+	if _, err := file.Seek(0, 0); err != nil {
+		log.Error("failed to rewind image", "err", err)
+		return "", err
+	}
+
 	img, _, err := image.Decode(file)
 	if err != nil {
 		log.Error("failed to decode image", "err", err)
@@ -102,4 +118,15 @@ func (s *filesService) UploadImage(ctx context.Context, file multipart.File, pat
 	key := fmt.Sprintf("%s/%s", path, imageID)
 	log.Info("image uploaded", "key", key)
 	return key, nil
+}
+
+func validateImageConfig(cfg image.Config) error {
+	const maxPixels = 24_000_000
+	if cfg.Width <= 0 || cfg.Height <= 0 {
+		return errors.New("image has invalid dimensions")
+	}
+	if cfg.Width > maxPixels/cfg.Height {
+		return fmt.Errorf("image is too large: %dx%d", cfg.Width, cfg.Height)
+	}
+	return nil
 }

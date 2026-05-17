@@ -12,6 +12,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const (
+	maxMultipartMemory = 10 << 20
+	maxMultipartBody   = 25 << 20
+)
+
 type controller struct {
 	usecase  Usecase
 	validate *validator.Validate
@@ -52,7 +57,8 @@ func Register(router *http.ServeMux, usecase Usecase, auth middleware.Middleware
 // @Failure      500  {object}  res.ErrorResponse  "Ошибка сервера"
 // @Router       /items/create [post]
 func (c *controller) CreateCollectionItem(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	r.Body = http.MaxBytesReader(w, r.Body, maxMultipartBody)
+	if err := r.ParseMultipartForm(maxMultipartMemory); err != nil {
 		res.WriteError(w, "invalid form", http.StatusBadRequest)
 		return
 	}
@@ -103,7 +109,8 @@ func (c *controller) CreateCollectionItem(w http.ResponseWriter, r *http.Request
 // @Failure      500  {object}  res.ErrorResponse    "Internal server error"
 // @Router       /items/update/{id} [put]
 func (c *controller) UpdateCollectionItem(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	r.Body = http.MaxBytesReader(w, r.Body, maxMultipartBody)
+	if err := r.ParseMultipartForm(maxMultipartMemory); err != nil {
 		res.WriteError(w, "invalid form", http.StatusBadRequest)
 		return
 	}

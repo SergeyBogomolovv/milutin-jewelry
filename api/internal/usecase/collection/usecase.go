@@ -36,6 +36,9 @@ func (u *usecase) Create(ctx context.Context, payload CreateCollectionPayload, i
 	}
 	if err := u.storage.Save(ctx, collection); err != nil {
 		log.Error("failed to create collection", "err", err)
+		if deleteErr := u.files.DeleteImage(ctx, imageID); deleteErr != nil {
+			log.Error("failed to delete uploaded image after save failure", "err", deleteErr, "imageID", imageID)
+		}
 		return nil, err
 	}
 	return collection, nil
@@ -70,12 +73,16 @@ func (u *usecase) Update(ctx context.Context, payload UpdateCollectionPayload, i
 	}
 	if err := u.storage.Update(ctx, collection); err != nil {
 		log.Error("failed to update collection", "err", err)
+		if oldImageID != collection.ImageID {
+			if deleteErr := u.files.DeleteImage(ctx, collection.ImageID); deleteErr != nil {
+				log.Error("failed to delete uploaded image after update failure", "err", deleteErr, "imageID", collection.ImageID)
+			}
+		}
 		return nil, err
 	}
 	if oldImageID != collection.ImageID {
 		if err := u.files.DeleteImage(ctx, oldImageID); err != nil {
-			log.Error("failed to delete image", "err", err)
-			return nil, err
+			log.Error("failed to delete old image", "err", err)
 		}
 	}
 	return collection, nil
@@ -120,13 +127,22 @@ func (u *usecase) Delete(ctx context.Context, id int) (*storage.Collection, erro
 		log.Error("failed to get collection", "err", err)
 		return nil, err
 	}
+	itemImageIDs, err := u.storage.GetItemImageIDs(ctx, id)
+	if err != nil {
+		log.Error("failed to get collection item image ids", "err", err)
+		return nil, err
+	}
 	if err := u.storage.Delete(ctx, id); err != nil {
 		log.Error("failed to delete collection", "err", err)
 		return nil, err
 	}
 	if err := u.files.DeleteImage(ctx, collection.ImageID); err != nil {
 		log.Error("failed to delete image", "err", err)
-		return nil, err
+	}
+	for _, imageID := range itemImageIDs {
+		if err := u.files.DeleteImage(ctx, imageID); err != nil {
+			log.Error("failed to delete collection item image", "err", err, "imageID", imageID)
+		}
 	}
 	return collection, nil
 }

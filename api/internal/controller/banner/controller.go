@@ -11,6 +11,11 @@ import (
 	"github.com/SergeyBogomolovv/milutin-jewelry/pkg/lib/res"
 )
 
+const (
+	maxMultipartMemory = 10 << 20
+	maxMultipartBody   = 50 << 20
+)
+
 type controller struct {
 	usecase Usecase
 }
@@ -66,7 +71,8 @@ func (c *controller) GetAll(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {object}  res.ErrorResponse  "Ошибка сервера"
 // @Router       /banners/create [post]
 func (c *controller) Create(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	r.Body = http.MaxBytesReader(w, r.Body, maxMultipartBody)
+	if err := r.ParseMultipartForm(maxMultipartMemory); err != nil {
 		res.WriteError(w, "invalid payload", http.StatusBadRequest)
 		return
 	}

@@ -2,6 +2,8 @@ package res
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 )
 
@@ -20,5 +22,13 @@ func WriteMessage(w http.ResponseWriter, msg string, status int) {
 }
 
 func DecodeBody(r *http.Request, v any) error {
-	return json.NewDecoder(r.Body).Decode(v)
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(v); err != nil {
+		return err
+	}
+	if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		return errors.New("body must contain a single JSON value")
+	}
+	return nil
 }

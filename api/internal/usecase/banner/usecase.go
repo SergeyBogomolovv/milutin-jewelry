@@ -64,12 +64,21 @@ func (u *usecase) Create(ctx context.Context, payload CreateBannerPayload) (*sto
 	mobileImageID, err := u.files.UploadImage(ctx, payload.MobileImage, bannersKey)
 	if err != nil {
 		log.Error("failed to upload image", "err", err)
+		if deleteErr := u.files.DeleteImage(ctx, imageID); deleteErr != nil {
+			log.Error("failed to delete uploaded image after mobile upload failure", "err", deleteErr, "imageID", imageID)
+		}
 		return nil, err
 	}
 	banner.MobileImageID = mobileImageID
 
 	if err := u.storage.Save(ctx, banner); err != nil {
 		log.Error("failed to save banner", "err", err)
+		if deleteErr := u.files.DeleteImage(ctx, imageID); deleteErr != nil {
+			log.Error("failed to delete uploaded image after save failure", "err", deleteErr, "imageID", imageID)
+		}
+		if deleteErr := u.files.DeleteImage(ctx, mobileImageID); deleteErr != nil {
+			log.Error("failed to delete uploaded mobile image after save failure", "err", deleteErr, "imageID", mobileImageID)
+		}
 		return nil, err
 	}
 	return banner, nil
@@ -87,17 +96,15 @@ func (u *usecase) Delete(ctx context.Context, id int) (*storage.Banner, error) {
 		log.Error("failed to get banner", "err", err)
 		return nil, err
 	}
-	if err := u.files.DeleteImage(ctx, banner.ImageID); err != nil {
-		log.Error("failed to delete image", "err", err, "imageID", banner.ImageID)
-		return nil, err
-	}
-	if err := u.files.DeleteImage(ctx, banner.MobileImageID); err != nil {
-		log.Error("failed to delete image", "err", err, "imageID", banner.MobileImageID)
-		return nil, err
-	}
 	if err := u.storage.Delete(ctx, id); err != nil {
 		log.Error("failed to delete banner", "err", err)
 		return nil, err
+	}
+	if err := u.files.DeleteImage(ctx, banner.ImageID); err != nil {
+		log.Error("failed to delete image", "err", err, "imageID", banner.ImageID)
+	}
+	if err := u.files.DeleteImage(ctx, banner.MobileImageID); err != nil {
+		log.Error("failed to delete image", "err", err, "imageID", banner.MobileImageID)
 	}
 	return banner, nil
 }

@@ -90,7 +90,9 @@ func TestCollectionUsecase_Delete(t *testing.T) {
 		const id = 1
 		stored := &storage.Collection{ID: id, ImageID: "image_id"}
 		mockStorage.On("GetByID", ctx, id).Return(stored, nil).Once()
+		mockStorage.On("GetItemImageIDs", ctx, id).Return([]string{"item_image_id"}, nil).Once()
 		mockFilesService.On("DeleteImage", ctx, stored.ImageID).Return(nil).Once()
+		mockFilesService.On("DeleteImage", ctx, "item_image_id").Return(nil).Once()
 		mockStorage.On("Delete", ctx, id).Return(nil).Once()
 
 		collection, err := usecase.Delete(ctx, id)
@@ -104,12 +106,13 @@ func TestCollectionUsecase_Delete(t *testing.T) {
 		const id = 1
 		stored := &storage.Collection{ID: id, ImageID: "image_id"}
 		mockStorage.On("GetByID", ctx, id).Return(stored, nil).Once()
+		mockStorage.On("GetItemImageIDs", ctx, id).Return([]string{}, nil).Once()
 		mockStorage.On("Delete", ctx, id).Return(nil).Once()
 		mockFilesService.On("DeleteImage", ctx, stored.ImageID).Return(assert.AnError).Once()
 
 		collection, err := usecase.Delete(ctx, id)
-		assert.Nil(t, collection)
-		assert.Error(t, err)
+		assert.NoError(t, err)
+		assert.Equal(t, stored, collection)
 		mockFilesService.AssertExpectations(t)
 	})
 }

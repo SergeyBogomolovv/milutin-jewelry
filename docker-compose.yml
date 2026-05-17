@@ -1,19 +1,18 @@
 services:
   migrate:
-    build:
-      context: ./api
-      dockerfile: build/migrate.Dockerfile
+    image: migrate/migrate
     container_name: migrate
     command: ['-path', '/migrations', '-database', '${POSTGRES_URL}', 'up']
     environment:
       - POSTGRES_URL=${POSTGRES_URL}
+    volumes:
+      - ./api/cmd/migrations:/migrations:ro
     depends_on:
       postgres:
         condition: service_healthy
 
   web:
-    build:
-      context: ./web
+    image: grekas/jewellery-web:latest
     container_name: web
     restart: unless-stopped
     ports:
@@ -26,8 +25,7 @@ services:
         condition: service_healthy
 
   admin:
-    build:
-      context: ./admin
+    image: grekas/jewellery-admin:latest
     container_name: admin
     restart: unless-stopped
     ports:
@@ -41,9 +39,7 @@ services:
         condition: service_healthy
 
   api:
-    build:
-      context: ./api
-      dockerfile: build/Dockerfile
+    image: grekas/jewellery-api:latest
     container_name: api
     restart: unless-stopped
     ports:

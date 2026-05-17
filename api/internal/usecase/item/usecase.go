@@ -48,6 +48,9 @@ func (u *usecase) Create(ctx context.Context, payload CreateItemPayload, image m
 	}
 	if err := u.storage.Save(ctx, item); err != nil {
 		log.Error("can't save item", "err", err)
+		if deleteErr := u.files.DeleteImage(ctx, imageID); deleteErr != nil {
+			log.Error("can't delete uploaded image after save failure", "err", deleteErr, "imageID", imageID)
+		}
 		return nil, err
 	}
 
@@ -83,13 +86,17 @@ func (u *usecase) Update(ctx context.Context, payload UpdateItemPayload, image m
 	}
 	if err := u.storage.Update(ctx, item); err != nil {
 		log.Error("can't update item", "err", err)
+		if oldImageID != item.ImageID {
+			if deleteErr := u.files.DeleteImage(ctx, item.ImageID); deleteErr != nil {
+				log.Error("can't delete uploaded image after update failure", "err", deleteErr, "imageID", item.ImageID)
+			}
+		}
 		return nil, err
 	}
 
 	if oldImageID != item.ImageID {
 		if err := u.files.DeleteImage(ctx, oldImageID); err != nil {
-			log.Error("can't delete image", "err", err)
-			return nil, err
+			log.Error("can't delete old image", "err", err)
 		}
 	}
 	return item, nil
@@ -118,7 +125,6 @@ func (u *usecase) Delete(ctx context.Context, id int) (*storage.Item, error) {
 	}
 	if err := u.files.DeleteImage(ctx, item.ImageID); err != nil {
 		log.Error("failed to delete image", "err", err)
-		return nil, err
 	}
 	return item, nil
 }

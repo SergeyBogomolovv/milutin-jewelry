@@ -57,6 +57,7 @@ func TestItemsUsecase_Create(t *testing.T) {
 		mockStorage.On("CollectionExists", ctx, payload.CollectionID).Return(true, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("image_id", nil).Once()
 		mockStorage.On("Save", ctx, mock.Anything).Return(assert.AnError).Once()
+		mockFilesService.On("DeleteImage", ctx, "image_id").Return(nil).Once()
 		item, err := usecase.Create(ctx, payload, image)
 		assert.Nil(t, item)
 		assert.Error(t, err)
@@ -122,8 +123,8 @@ func TestItemsUsecase_Update(t *testing.T) {
 		mockFilesService.On("DeleteImage", ctx, saved.ImageID).Return(assert.AnError).Once()
 
 		item, err := usecase.Update(ctx, payload, image)
-		assert.Nil(t, item)
-		assert.Error(t, err)
+		assert.Equal(t, "new_id", item.ImageID)
+		assert.NoError(t, err)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)
 	})
@@ -135,6 +136,7 @@ func TestItemsUsecase_Update(t *testing.T) {
 		mockStorage.On("GetById", ctx, payload.ID).Return(&storage.Item{}, nil).Once()
 		mockFilesService.On("UploadImage", ctx, image, mock.Anything).Return("image_id", nil).Once()
 		mockStorage.On("Update", ctx, mock.Anything).Return(assert.AnError).Once()
+		mockFilesService.On("DeleteImage", ctx, "image_id").Return(nil).Once()
 
 		item, err := usecase.Update(ctx, payload, image)
 		assert.Nil(t, item)
@@ -192,8 +194,8 @@ func TestItemsUsecase_Delete(t *testing.T) {
 		mockStorage.On("Delete", ctx, id).Return(nil).Once()
 
 		item, err := usecase.Delete(ctx, id)
-		assert.Error(t, err)
-		assert.Nil(t, item)
+		assert.NoError(t, err)
+		assert.Equal(t, saved, item)
 		mockFilesService.AssertExpectations(t)
 		mockStorage.AssertExpectations(t)
 	})

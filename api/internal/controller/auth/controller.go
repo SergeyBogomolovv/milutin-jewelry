@@ -10,6 +10,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const maxJSONBody = 1 << 20
+
 type controller struct {
 	validate *validator.Validate
 	usecase  Usecase
@@ -40,6 +42,7 @@ func Register(router *http.ServeMux, usecase Usecase) {
 // @Failure      500    {object}  res.ErrorResponse  "Внутренняя ошибка сервера"
 // @Router       /auth/login [post]
 func (c *controller) Login(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, maxJSONBody)
 	var payload LoginBody
 	if err := res.DecodeBody(r, &payload); err != nil {
 		res.WriteError(w, "invalid payload", http.StatusBadRequest)

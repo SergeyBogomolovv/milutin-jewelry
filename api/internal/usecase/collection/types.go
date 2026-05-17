@@ -14,6 +14,7 @@ type Storage interface {
 	Delete(ctx context.Context, id int) error
 	GetByID(ctx context.Context, id int) (*storage.Collection, error)
 	GetAll(ctx context.Context) ([]storage.Collection, error)
+	GetItemImageIDs(ctx context.Context, collectionID int) ([]string, error)
 }
 
 type FilesService interface {

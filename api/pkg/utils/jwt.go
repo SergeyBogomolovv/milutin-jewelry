@@ -3,14 +3,15 @@ package utils
 import "github.com/golang-jwt/jwt/v5"
 
 func VerifyToken(token string, secret []byte) error {
-	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
+	parser := jwt.NewParser(
+		jwt.WithExpirationRequired(),
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+	)
+	parsed, err := parser.ParseWithClaims(token, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
 	})
 	if err != nil || !parsed.Valid {
-		return jwt.ErrTokenNotValidYet
+		return jwt.ErrTokenSignatureInvalid
 	}
 	return nil
 }

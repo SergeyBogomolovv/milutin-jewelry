@@ -32,6 +32,9 @@ func compressHigh(img image.Image, quality int) ([]byte, error) {
 
 func compressLow(img image.Image, width int) ([]byte, error) {
 	bounds := img.Bounds()
+	if bounds.Dx() <= 0 || bounds.Dy() <= 0 {
+		return nil, fmt.Errorf("invalid image dimensions: %dx%d", bounds.Dx(), bounds.Dy())
+	}
 
 	dst := image.NewRGBA(image.Rect(0, 0, width, bounds.Dy()*width/bounds.Dx()))
 	draw.NearestNeighbor.Scale(dst, dst.Rect, img, bounds, draw.Over, nil)
