@@ -1,10 +1,20 @@
 package mail
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/mail"
+	"time"
 
 	"github.com/SergeyBogomolovv/milutin-jewelry/internal/config"
 	"gopkg.in/gomail.v2"
+)
+
+const (
+	senderName     = "Milutin Jewelry"
+	sendAttempts   = 3
+	sendRetryDelay = 500 * time.Millisecond
 )
 
 type mailService struct {
@@ -32,19 +42,61 @@ func (s *mailService) SendCodeToAdmin(code string) error {
 	const op = "SendCodeToAdmin"
 	log := s.log.With(slog.String("op", op))
 
-	m := gomail.NewMessage()
-	m.SetHeader("From", s.user)
-	m.SetHeader("To", s.to)
-
-	m.SetHeader("Subject", "Вход в админ панель milutin-jewelry")
-	m.SetBody("text/html", messageBody(code))
-
-	d := gomail.NewDialer(s.host, s.port, s.user, s.pass)
-
-	if err := d.DialAndSend(m); err != nil {
-		log.Error("failed to send email", "err", err)
+	if err := s.validate(); err != nil {
+		log.Error("invalid mail config", "err", err)
 		return err
 	}
-	log.Info("email sent")
+
+	var errs []error
+	for attempt := 1; attempt <= sendAttempts; attempt++ {
+		if err := s.send(code); err != nil {
+			errs = append(errs, err)
+			log.Warn("failed to send email", "attempt", attempt, "err", err)
+
+			if attempt < sendAttempts {
+				time.Sleep(time.Duration(attempt) * sendRetryDelay)
+			}
+			continue
+		}
+
+		log.Info("email sent", "attempt", attempt)
+		return nil
+	}
+
+	return fmt.Errorf("failed to send email after %d attempts: %w", sendAttempts, errors.Join(errs...))
+}
+
+func (s *mailService) send(code string) error {
+	m := gomail.NewMessage()
+	m.SetAddressHeader("From", s.user, senderName)
+	m.SetAddressHeader("To", s.to, "")
+	m.SetHeader("Subject", "Вход в админ панель milutin-jewelry")
+	m.SetBody("text/plain", plainMessageBody(code))
+	m.AddAlternative("text/html", htmlMessageBody(code))
+
+	d := gomail.NewDialer(s.host, s.port, s.user, s.pass)
+	return d.DialAndSend(m)
+}
+
+func (s *mailService) validate() error {
+	if s.host == "" {
+		return errors.New("mail host is empty")
+	}
+	if s.port <= 0 {
+		return fmt.Errorf("invalid mail port: %d", s.port)
+	}
+	if s.user == "" {
+		return errors.New("mail user is empty")
+	}
+	if s.pass == "" {
+		return errors.New("mail password is empty")
+	}
+	if _, err := mail.ParseAddress(s.user); err != nil {
+		return fmt.Errorf("invalid sender email: %w", err)
+	}
+	if _, err := mail.ParseAddress(s.to); err != nil {
+		return fmt.Errorf("invalid recipient email: %w", err)
+	}
+
 	return nil
 }

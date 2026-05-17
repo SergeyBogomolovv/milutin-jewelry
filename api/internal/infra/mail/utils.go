@@ -1,7 +1,17 @@
 package mail
 
-import "fmt"
+import (
+	"fmt"
+	"html"
+)
 
-func messageBody(code string) string {
-	return fmt.Sprintf("Код авторизации: <b>%s</b>. Код действителен в течении 5 минут", code)
+func plainMessageBody(code string) string {
+	return fmt.Sprintf("Код авторизации: %s. Код действителен в течение 5 минут.", code)
+}
+
+func htmlMessageBody(code string) string {
+	return fmt.Sprintf(
+		"Код авторизации: <b>%s</b>. Код действителен в течение 5 минут.",
+		html.EscapeString(code),
+	)
 }
