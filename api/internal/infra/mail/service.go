@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/mail"
 	"time"
 
@@ -15,6 +16,7 @@ const (
 	senderName     = "Milutin Jewelry"
 	sendAttempts   = 3
 	sendRetryDelay = 500 * time.Millisecond
+	dialTimeout    = 5 * time.Second
 )
 
 type mailService struct {
@@ -51,7 +53,11 @@ func (s *mailService) SendCodeToAdmin(code string) error {
 	for attempt := 1; attempt <= sendAttempts; attempt++ {
 		if err := s.send(code); err != nil {
 			errs = append(errs, err)
-			log.Warn("failed to send email", "attempt", attempt, "err", err)
+			log.Warn("failed to send email", "attempt", attempt, "host", s.host, "port", s.port, "err", err)
+
+			if isNetworkTimeout(err) {
+				break
+			}
 
 			if attempt < sendAttempts {
 				time.Sleep(time.Duration(attempt) * sendRetryDelay)
@@ -67,6 +73,10 @@ func (s *mailService) SendCodeToAdmin(code string) error {
 }
 
 func (s *mailService) send(code string) error {
+	if err := s.checkSMTPReachable(); err != nil {
+		return err
+	}
+
 	m := gomail.NewMessage()
 	m.SetAddressHeader("From", s.user, senderName)
 	m.SetAddressHeader("To", s.to, "")
@@ -76,6 +86,20 @@ func (s *mailService) send(code string) error {
 
 	d := gomail.NewDialer(s.host, s.port, s.user, s.pass)
 	return d.DialAndSend(m)
+}
+
+func (s *mailService) checkSMTPReachable() error {
+	address := net.JoinHostPort(s.host, fmt.Sprint(s.port))
+	conn, err := net.DialTimeout("tcp", address, dialTimeout)
+	if err != nil {
+		return fmt.Errorf("smtp endpoint %s is unreachable: %w", address, err)
+	}
+	return conn.Close()
+}
+
+func isNetworkTimeout(err error) bool {
+	var netErr net.Error
+	return errors.As(err, &netErr) && netErr.Timeout()
 }
 
 func (s *mailService) validate() error {
