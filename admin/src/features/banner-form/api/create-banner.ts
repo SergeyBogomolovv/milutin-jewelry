@@ -1,7 +1,7 @@
 'use server'
 import { fetchWithAuth } from '@/shared/lib/fetcher'
 import { NewBannerFields } from '../model/schema'
-import { updateTag } from 'next/cache'
+import { revalidateCacheTag } from '@/shared/lib/revalidate'
 
 export async function createBanner(fields: NewBannerFields) {
   const formData = new FormData()
@@ -16,5 +16,5 @@ export async function createBanner(fields: NewBannerFields) {
     throw new Error('Failed to create banner')
   }
 
-  updateTag('banners')
+  revalidateCacheTag('banners')
 }

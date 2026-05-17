@@ -1,6 +1,6 @@
 'use server'
 import { NewCollectionFields } from '../model/schema'
-import { updateTag } from 'next/cache'
+import { revalidateCacheTag } from '@/shared/lib/revalidate'
 import { fetchWithAuth } from '@/shared/lib/fetcher'
 
 export async function createCollection(fields: NewCollectionFields) {
@@ -15,5 +15,5 @@ export async function createCollection(fields: NewCollectionFields) {
     throw new Error('Failed to create collection')
   }
 
-  updateTag('collections')
+  revalidateCacheTag('collections')
 }

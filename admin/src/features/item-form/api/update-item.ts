@@ -1,6 +1,6 @@
 'use server'
 import { fetchWithAuth } from '@/shared/lib/fetcher'
-import { updateTag } from 'next/cache'
+import { revalidateCacheTag } from '@/shared/lib/revalidate'
 import { UpdateItemFields } from '../model/update-item.schema'
 
 export const updateItem = async (fields: UpdateItemFields, id: number) => {
@@ -14,5 +14,5 @@ export const updateItem = async (fields: UpdateItemFields, id: number) => {
   if (!res.ok) {
     throw new Error('Failed to update item')
   }
-  updateTag('items')
+  revalidateCacheTag('items')
 }

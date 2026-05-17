@@ -1,8 +1,8 @@
 'use server'
 import { fetchWithAuth } from '@/shared/lib/fetcher'
-import { updateTag } from 'next/cache'
+import { revalidateCacheTag } from '@/shared/lib/revalidate'
 
 export async function deleteCollection(id: number) {
   await fetchWithAuth(`/collections/delete/${id}`, { method: 'DELETE' })
-  updateTag('collections')
+  revalidateCacheTag('collections')
 }

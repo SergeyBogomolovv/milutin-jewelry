@@ -1,7 +1,7 @@
 'use server'
 import { fetchWithAuth } from '@/shared/lib/fetcher'
 import { NewItemFields } from '../model/new-item.schema'
-import { updateTag } from 'next/cache'
+import { revalidateCacheTag } from '@/shared/lib/revalidate'
 
 export const createItem = async (fields: NewItemFields, collectionId: string) => {
   const formData = new FormData()
@@ -16,5 +16,5 @@ export const createItem = async (fields: NewItemFields, collectionId: string) =>
   if (!res.ok) {
     throw new Error('Failed to create item')
   }
-  updateTag('items')
+  revalidateCacheTag('items')
 }
