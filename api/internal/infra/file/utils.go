@@ -58,9 +58,10 @@ func (s *filesService) delete(ctx context.Context, key string) error {
 
 func (f *filesService) upload(ctx context.Context, key string, data []byte) error {
 	_, err := f.client.PutObject(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(f.bucket),
-		Key:    aws.String(key),
-		Body:   bytes.NewReader(data),
+		Bucket:      aws.String(f.bucket),
+		Key:         aws.String(key),
+		Body:        bytes.NewReader(data),
+		ContentType: aws.String("image/jpeg"),
 	})
 	return err
 }

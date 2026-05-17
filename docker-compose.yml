@@ -118,18 +118,20 @@ services:
     image: minio/mc
     container_name: minio-init
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - OBJECT_STORAGE_BUCKET=${OBJECT_STORAGE_BUCKET}
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc alias set local http://minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}); do
         echo 'Waiting for MinIO...'; sleep 2;
       done;
-      /usr/bin/mc mb -p local/jewellery || true;
-      /usr/bin/mc anonymous set download local/jewellery;
-      echo 'Bucket jewellery ready with anonymous download';
+      /usr/bin/mc mb -p local/${OBJECT_STORAGE_BUCKET} || true;
+      /usr/bin/mc anonymous set download local/${OBJECT_STORAGE_BUCKET};
+      echo 'Bucket ${OBJECT_STORAGE_BUCKET} ready with anonymous download';
       exit 0;
       "
 
