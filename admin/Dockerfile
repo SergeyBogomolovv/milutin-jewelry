@@ -12,7 +12,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ARG NEXT_PUBLIC_IMAGE_URL
+ARG NEXT_PUBLIC_IMAGE_URL=https://s3.milutin-jewellery.com/jewellery
+ENV NEXT_PUBLIC_IMAGE_URL=$NEXT_PUBLIC_IMAGE_URL
 RUN npm run build
 
 FROM base AS runner
